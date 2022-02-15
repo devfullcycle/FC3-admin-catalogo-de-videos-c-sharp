@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FC.Codeflix.Catalog.Domain.Exceptions;
+using System;
 using Xunit;
 using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
 namespace FC.Codeflix.Catalog.UnitTests.Domain.Entity.Category;
@@ -55,4 +56,31 @@ public class CategoryTest
         Assert.True(category.CreatedAt < datetimeAfter);
         Assert.Equal(isActive, category.IsActive);
     }
+
+    [Theory(DisplayName = nameof(InstantiateErrorWhenNameIsEmpty))]
+    [Trait("Domain", "Category - Aggregates")]
+    [InlineData("")]
+    [InlineData(null)]
+    [InlineData("   ")]
+    public void InstantiateErrorWhenNameIsEmpty(string? name)
+    {
+        Action action =
+            () => new DomainEntity.Category(name!, "Category Description");
+        var exception = Assert.Throws<EntityValidationException>(action);
+        Assert.Equal("Name should not be empty or null", exception.Message);
+    }
+
+    [Fact(DisplayName = nameof(InstantiateErrorWhenDescriptionIsNull))]
+    [Trait("Domain", "Category - Aggregates")]
+    public void InstantiateErrorWhenDescriptionIsNull()
+    {
+        Action action =
+            () => new DomainEntity.Category("Category Name", null!);
+        var exception = Assert.Throws<EntityValidationException>(action);
+        Assert.Equal("Description should not be empty or null", exception.Message);
+    }
+
+    // nome deve ter no minimo 3 caracteres
+    // nome deve ter no máximo 255 caracteres
+    // descrição deve ter no máximo 10_000 caracteres
 }
