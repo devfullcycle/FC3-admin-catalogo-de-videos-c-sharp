@@ -1,5 +1,6 @@
 ﻿using FC.Codeflix.Catalog.Domain.Exceptions;
 using System;
+using System.Linq;
 using Xunit;
 using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
 namespace FC.Codeflix.Catalog.UnitTests.Domain.Entity.Category;
@@ -80,7 +81,40 @@ public class CategoryTest
         Assert.Equal("Description should not be empty or null", exception.Message);
     }
 
-    // nome deve ter no minimo 3 caracteres
-    // nome deve ter no máximo 255 caracteres
-    // descrição deve ter no máximo 10_000 caracteres
+    [Theory(DisplayName = nameof(InstantiateErrorWhenNameIsLessThan3Characters))]
+    [Trait("Domain", "Category - Aggregates")]
+    [InlineData("1")]
+    [InlineData("12")]
+    [InlineData("a")]
+    [InlineData("ca")]
+    public void InstantiateErrorWhenNameIsLessThan3Characters(string invalidName)
+    {
+        Action action =
+            () => new DomainEntity.Category(invalidName, "Category Ok Description");
+        var exception = Assert.Throws<EntityValidationException>(action);
+        Assert.Equal("Name should be at leats 3 characters long", exception.Message);
+    }
+
+    [Fact(DisplayName = nameof(InstantiateErrorWhenNameIsGreaterThan255Characters))]
+    [Trait("Domain", "Category - Aggregates")]
+    public void InstantiateErrorWhenNameIsGreaterThan255Characters()
+    {
+        var invalidName = String.Join(null,Enumerable.Range(1, 256).Select(_ => "a").ToArray());
+        Action action =
+            () => new DomainEntity.Category(invalidName, "Category Ok Description");
+        var exception = Assert.Throws<EntityValidationException>(action);
+        Assert.Equal("Name should be less or equal 255 characters long", exception.Message);
+    }
+
+
+    [Fact(DisplayName = nameof(InstantiateErrorWhenDescriptionIsGreaterThan10_000Characters))]
+    [Trait("Domain", "Category - Aggregates")]
+    public void InstantiateErrorWhenDescriptionIsGreaterThan10_000Characters()
+    {
+        var invalidDescription = String.Join(null, Enumerable.Range(1, 10_001).Select(_ => "a").ToArray());
+        Action action =
+            () => new DomainEntity.Category("Category Name", invalidDescription);
+        var exception = Assert.Throws<EntityValidationException>(action);
+        Assert.Equal("Description should be less or equal 10.000 characters long", exception.Message);
+    }
 }
