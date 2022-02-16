@@ -32,6 +32,14 @@ public class Category
         Validate();
     }
 
+    public void Update(string name, string? description = null)
+    {
+        Name = name;
+        Description = description ?? Description;
+
+        Validate();
+    }
+
     private void Validate()
     {
         if (String.IsNullOrWhiteSpace(Name))
