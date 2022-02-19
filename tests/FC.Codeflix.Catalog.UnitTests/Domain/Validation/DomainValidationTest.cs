@@ -11,7 +11,6 @@ public class DomainValidationTest
 {
     private Faker Faker { get; set; } = new Faker();
 
-    // nao ser null
     [Fact(DisplayName = nameof(NotNullOk))]
     [Trait("Domain", "DomainValidation - Validation")]
     public void NotNullOk()
@@ -26,16 +25,43 @@ public class DomainValidationTest
     [Trait("Domain", "DomainValidation - Validation")]
     public void NotNullThrowWhenNull()
     {
-        string value = null;
+        string? value = null;
+        
         Action action =
             () => DomainValidation.NotNull(value, "FieldName");
+        
         action.Should()
             .Throw<EntityValidationException>()
             .WithMessage("FieldName should not be null");
     }
 
 
-    // nao ser null ou vazio
+    [Theory(DisplayName = nameof(NotNullOrEmptyThrowWhenEmpty))]
+    [Trait("Domain", "DomainValidation - Validation")]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData(null)]
+    public void NotNullOrEmptyThrowWhenEmpty(string? target)
+    {
+        Action action = 
+            () => DomainValidation.NotNullOrEmpty(target, "fieldName");
+        
+        action.Should().Throw<EntityValidationException>()
+            .WithMessage("fieldName should not be null or empty");
+    }
+
+    [Fact(DisplayName = nameof(NotNullOrEmptyOk))]
+    [Trait("Domain", "DomainValidation - Validation")]
+    public void NotNullOrEmptyOk()
+    {
+        var target = Faker.Commerce.ProductName();
+
+        Action action =
+            () => DomainValidation.NotNullOrEmpty(target, "fieldName");
+
+        action.Should().NotThrow();
+    }
+
     // tamanho minimo
     // tamanho maximo
 }
