@@ -19,7 +19,7 @@ public class CategoryTestFixture : BaseFixture
         return categoryName;
     }
 
-    public string GetValidcategoryDescription()
+    public string GetValidCategoryDescription()
     {
         var categoryDescription = 
             Faker.Commerce.ProductDescription();
@@ -32,7 +32,7 @@ public class CategoryTestFixture : BaseFixture
     public DomainEntity.Category GetValidCategory()
         => new(
             GetValidCategoryName(),
-            GetValidcategoryDescription()
+            GetValidCategoryDescription()
         );
 }
 
