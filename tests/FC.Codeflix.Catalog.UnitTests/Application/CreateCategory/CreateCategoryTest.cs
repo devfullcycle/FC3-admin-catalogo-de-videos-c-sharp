@@ -121,10 +121,14 @@ public class CreateCategoryTest
         output.CreatedAt.Should().NotBeSameDateAs(default(DateTime));
     }
 
-    [Theory(DisplayName = nameof(ThrowWhenCantInstantiateAggregate))]
+    [Theory(DisplayName = nameof(ThrowWhenCantInstantiateCategory))]
     [Trait("Application", "CreateCategory - Use Cases")]
-    [MemberData(nameof(GetInvalidInputs))]
-    public async void ThrowWhenCantInstantiateAggregate(
+    [MemberData(
+        nameof(CreateCategoryTestDataGenerator.GetInvalidInputs),
+        parameters: 24,
+        MemberType = typeof(CreateCategoryTestDataGenerator)
+    )]
+    public async void ThrowWhenCantInstantiateCategory(
         CreateCategoryInput input,
         string exceptionMessage
     )
@@ -139,52 +143,5 @@ public class CreateCategoryTest
         await task.Should()
             .ThrowAsync<EntityValidationException>()
             .WithMessage(exceptionMessage);
-    }
-
-    private static IEnumerable<object[]> GetInvalidInputs()
-    {
-        var fixture = new CreateCategoryTestFixture();
-        var invalidInputsList = new List<object[]>();
-
-        // nome não pode ser menor que 3 caracteres
-        var invalidInputShortName = fixture.GetInput();
-        invalidInputShortName.Name = 
-            invalidInputShortName.Name.Substring(0, 2);
-        invalidInputsList.Add(new object[] {
-            invalidInputShortName,
-            "Name should be at leats 3 characters long"
-        });
-
-        // nome não pode ser maior do que 255 caracteres
-        var invalidInputTooLongName = fixture.GetInput();
-        var tooLongNameForCategory = fixture.Faker.Commerce.ProductName();
-        while (tooLongNameForCategory.Length <= 255)
-            tooLongNameForCategory = $"{tooLongNameForCategory} {fixture.Faker.Commerce.ProductName()}";
-        invalidInputTooLongName.Name = tooLongNameForCategory;
-        invalidInputsList.Add(new object[] {
-            invalidInputTooLongName,
-            "Name should be less or equal 255 characters long"
-        });
-
-        // description não pode ser nula
-        var invalidInputDescriptionNull = fixture.GetInput();
-        invalidInputDescriptionNull.Description = null!;
-        invalidInputsList.Add(new object[] {
-            invalidInputDescriptionNull,
-            "Description should not be null"
-        });
-
-        // description ser maior do que 10.000 caracteres
-        var invalidInputTooLongDescription = fixture.GetInput();
-        var tooLongDescriptionForCategory = fixture.Faker.Commerce.ProductDescription();
-        while (tooLongDescriptionForCategory.Length <= 10_000)
-            tooLongDescriptionForCategory = $"{tooLongDescriptionForCategory} {fixture.Faker.Commerce.ProductDescription()}";
-        invalidInputTooLongDescription.Description = tooLongDescriptionForCategory;
-        invalidInputsList.Add(new object[] {
-            invalidInputTooLongDescription,
-            "Description should be less or equal 10000 characters long"
-        });
-
-        return invalidInputsList;
     }
 }
