@@ -16,7 +16,7 @@ public class CreateCategoryTestDataGenerator
                 case 0:
                     invalidInputsList.Add(new object[] {
                         fixture.GetInvalidInputShortName(),
-                        "Name should be at leats 3 characters long"
+                        "Name should be at least 3 characters long"
                     });
                     break;
                 case 1:
