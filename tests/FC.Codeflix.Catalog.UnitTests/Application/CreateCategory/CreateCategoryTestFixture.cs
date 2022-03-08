@@ -47,7 +47,6 @@ public class CreateCategoryTestFixture : BaseFixture
 
     public CreateCategoryInput GetInvalidInputShortName()
     {
-        // nome não pode ser menor que 3 caracteres
         var invalidInputShortName = GetInput();
         invalidInputShortName.Name =
             invalidInputShortName.Name.Substring(0, 2);
