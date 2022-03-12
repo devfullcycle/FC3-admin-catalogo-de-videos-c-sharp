@@ -3,14 +3,14 @@ using System;
 using FluentAssertions;
 using Xunit;
 
-namespace FC.Codeflix.Catalog.UnitTests.Application.GetCategory;
+namespace FC.Codeflix.Catalog.UnitTests.Application.Category.GetCategory;
 
 [Collection(nameof(GetCategoryTestFixture))]
 public class GetCategoryInputValidatorTest
 {
     private readonly GetCategoryTestFixture _fixture;
 
-    public GetCategoryInputValidatorTest(GetCategoryTestFixture fixture) 
+    public GetCategoryInputValidatorTest(GetCategoryTestFixture fixture)
         => _fixture = fixture;
 
     [Fact(DisplayName = nameof(ValidationOk))]
