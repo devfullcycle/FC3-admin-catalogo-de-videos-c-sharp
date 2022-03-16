@@ -3,6 +3,8 @@ using FC.Codeflix.Catalog.Infra.Data.EF;
 using FC.Codeflix.Catalog.IntegrationTests.Base;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace FC.Codeflix.Catalog.IntegrationTests.Infra.Data.EF.Repositories.CategoryRepository;
@@ -37,13 +39,17 @@ public class CategoryRepositoryTestFixture
 
     public bool getRandomBoolean()
         => new Random().NextDouble() < 0.5;
-    
+
     public Category GetExampleCategory()
         => new(
             GetValidCategoryName(),
             GetValidCategoryDescription(),
             getRandomBoolean()
         );
+
+    public List<Category> GetExampleCategoriesList(int length = 10)
+        => Enumerable.Range(1, length)
+            .Select(_ => GetExampleCategory()).ToList();
 
     public CodeflixCatalogDbContext CreateDbContext()
         => new (
