@@ -23,7 +23,10 @@ public class CategoryRepository
 
     public async Task<Category> Get(Guid id, CancellationToken cancellationToken)
     {
-        var category = await _categories.FindAsync(new object[] { id },cancellationToken);
+        var category = await _categories.AsNoTracking().FirstOrDefaultAsync(
+            x => x.Id == id,
+            cancellationToken
+        );
         NotFoundException.ThrowIfNull(category, $"Catgory '{id}' not found.");
         return category!;
     }
