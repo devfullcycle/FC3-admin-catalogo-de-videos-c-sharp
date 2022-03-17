@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Xunit;
 using FC.Codeflix.Catalog.Infra.Data.EF;
 using Repository = FC.Codeflix.Catalog.Infra.Data.EF.Repositories;
+using System;
+using FC.Codeflix.Catalog.Application.Exceptions;
 
 namespace FC.Codeflix.Catalog.IntegrationTests.Infra.Data.EF.Repositories.CategoryRepository;
 
@@ -36,7 +38,6 @@ public class CategoryRepositoryTest
         dbCategory.CreatedAt.Should().Be(exampleCategory.CreatedAt);
     }
 
-
     [Fact(DisplayName = nameof(Get))]
     [Trait("Integration/Infra.Data", "CategoryRepository - Repositories")]
     public async Task Get()
@@ -59,5 +60,24 @@ public class CategoryRepositoryTest
         dbCategory.Description.Should().Be(exampleCategory.Description);
         dbCategory.IsActive.Should().Be(exampleCategory.IsActive);
         dbCategory.CreatedAt.Should().Be(exampleCategory.CreatedAt);
+    }
+
+
+    [Fact(DisplayName = nameof(GetThrowIfNotFound))]
+    [Trait("Integration/Infra.Data", "CategoryRepository - Repositories")]
+    public async Task GetThrowIfNotFound()
+    {
+        CodeflixCatalogDbContext dbContext = _fixture.CreateDbContext();
+        var exampleId = Guid.NewGuid();
+        await dbContext.AddRangeAsync(_fixture.GetExampleCategoriesList(15));
+        await dbContext.SaveChangesAsync(CancellationToken.None);
+        var categoryRepository = new Repository.CategoryRepository(dbContext);
+
+        var task = async () => await categoryRepository.Get(
+            exampleId,
+            CancellationToken.None);
+
+        await task.Should().ThrowAsync<NotFoundException>()
+            .WithMessage($"Catgory '{exampleId}' not found.");
     }
 }
