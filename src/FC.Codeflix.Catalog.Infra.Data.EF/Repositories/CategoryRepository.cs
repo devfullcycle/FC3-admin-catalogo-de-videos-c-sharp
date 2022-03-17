@@ -31,9 +31,11 @@ public class CategoryRepository
         return category!;
     }
 
-    public Task Update(Category aggregate, CancellationToken cancellationToken)
+    public Task Update(Category aggregate, CancellationToken _)
         => Task.FromResult(_categories.Update(aggregate));
 
-    public Task Delete(Category aggregate, CancellationToken cancellationToken) => throw new NotImplementedException();
+    public Task Delete(Category aggregate, CancellationToken _)
+        => Task.FromResult(_categories.Remove(aggregate));
+
     public Task<SearchOutput<Category>> Search(SearchInput input, CancellationToken cancellationToken) => throw new NotImplementedException();
 }
