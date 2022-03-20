@@ -51,6 +51,14 @@ public class CategoryRepositoryTestFixture
         => Enumerable.Range(1, length)
             .Select(_ => GetExampleCategory()).ToList();
 
+    public List<Category> GetExampleCategoriesListWithNames(List<string> names)
+        => names.Select(name =>
+        {
+            var category = GetExampleCategory();
+            category.Update(name);
+            return category;
+        }).ToList();
+
     public CodeflixCatalogDbContext CreateDbContext(bool preserveData = false)
     {
         var context = new CodeflixCatalogDbContext(
