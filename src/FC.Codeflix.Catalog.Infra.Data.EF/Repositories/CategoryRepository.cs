@@ -27,7 +27,7 @@ public class CategoryRepository
             x => x.Id == id,
             cancellationToken
         );
-        NotFoundException.ThrowIfNull(category, $"Catgory '{id}' not found.");
+        NotFoundException.ThrowIfNull(category, $"Category '{id}' not found.");
         return category!;
     }
 
