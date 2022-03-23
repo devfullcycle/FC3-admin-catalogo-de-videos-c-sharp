@@ -183,7 +183,7 @@ public class CategoryRepositoryTest
         output.Items.Should().HaveCount(0);
     }
 
-    [Theory(DisplayName = nameof(SearchRetursListAndTotal))]
+    [Theory(DisplayName = nameof(SearchRetursPaginated))]
     [Trait("Integration/Infra.Data", "CategoryRepository - Repositories")]
     [InlineData(10, 1, 5, 5)]
     [InlineData(10, 2, 5, 5)]
@@ -307,7 +307,7 @@ public class CategoryRepositoryTest
 
         var output = await categoryRepository.Search(searchInput, CancellationToken.None);
 
-        var expectedOrderedList = _fixture.ClonecategoriesListOrdered(
+        var expectedOrderedList = _fixture.CloneCategoriesListOrdered(
             exampleCategoriesList,
             orderBy,
             searchOrder

@@ -58,7 +58,7 @@ public class CategoryRepositoryTestFixture
             return category;
         }).ToList();
 
-    public List<Category> ClonecategoriesListOrdered(
+    public List<Category> CloneCategoriesListOrdered(
         List<Category> categoriesList, 
         string orderBy, 
         SearchOrder order)
