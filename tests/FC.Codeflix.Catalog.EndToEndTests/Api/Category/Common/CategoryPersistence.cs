@@ -1,6 +1,7 @@
 ﻿using FC.Codeflix.Catalog.Infra.Data.EF;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
 
@@ -16,4 +17,10 @@ public class CategoryPersistence
         => await _context
             .Categories.AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
+
+    public async Task InsertList(List<DomainEntity.Category> categories)
+    {
+        await _context.Categories.AddRangeAsync(categories);
+        await _context.SaveChangesAsync();
+    }
 }
