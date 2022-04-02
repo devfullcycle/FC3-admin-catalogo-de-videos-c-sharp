@@ -38,4 +38,22 @@ public class CategoryBaseFixture
     public bool getRandomBoolean()
         => new Random().NextDouble() < 0.5;
 
+    public string GetInvalidNameTooShort()
+        => Faker.Commerce.ProductName().Substring(0, 2);
+
+    public string GetInvalidNameTooLong()
+    {
+        var tooLongNameForCategory = Faker.Commerce.ProductName();
+        while (tooLongNameForCategory.Length <= 255)
+            tooLongNameForCategory = $"{tooLongNameForCategory} {Faker.Commerce.ProductName()}";
+        return tooLongNameForCategory;
+    }
+
+    public string GetInvalidDescriptionTooLong()
+    {
+        var tooLongDescriptionForCategory = Faker.Commerce.ProductDescription();
+        while (tooLongDescriptionForCategory.Length <= 10_000)
+            tooLongDescriptionForCategory = $"{tooLongDescriptionForCategory} {Faker.Commerce.ProductDescription()}";
+        return tooLongDescriptionForCategory;
+    }
 }
