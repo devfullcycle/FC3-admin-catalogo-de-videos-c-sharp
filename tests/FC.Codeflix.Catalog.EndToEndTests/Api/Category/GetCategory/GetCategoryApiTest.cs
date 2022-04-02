@@ -15,9 +15,9 @@ public class GetCategoryApiTest
     public GetCategoryApiTest(GetCategoryApiTestFixture fixture) 
         => _fixture = fixture;
 
-    [Fact(DisplayName = nameof(Getcategory))]
+    [Fact(DisplayName = nameof(GetCategory))]
     [Trait("EndToEnd/API", "Category/Get - Endpoints")]
-    public async Task Getcategory()
+    public async Task GetCategory()
     {
         var exampleCategoriesList = _fixture.GetExampleCategoriesList(20);
         await _fixture.Persistence.InsertList(exampleCategoriesList);
