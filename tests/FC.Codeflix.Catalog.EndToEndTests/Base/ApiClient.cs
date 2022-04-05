@@ -14,8 +14,7 @@ public class ApiClient
     public async Task<(HttpResponseMessage?, TOutput?)> Post<TOutput>(
         string route,
         object payload
-    )
-        where TOutput : class
+    ) where TOutput : class
     {
         var response = await _httpClient.PostAsync(
             route,
@@ -25,40 +24,46 @@ public class ApiClient
                 "application/json"
             )
         );
-        var outputString = await response.Content.ReadAsStringAsync();
-        TOutput? output = null;
-        if (!string.IsNullOrWhiteSpace(outputString))
-            output = JsonSerializer.Deserialize<TOutput>(outputString,
-                new JsonSerializerOptions { 
-                    PropertyNameCaseInsensitive = true
-                }
-            );
+        var output = await GetOutput<TOutput>(response);
+        return (response, output);
+    }
+    public async Task<(HttpResponseMessage?, TOutput?)> Put<TOutput>(
+        string route,
+        object payload
+    ) where TOutput : class
+    {
+        var response = await _httpClient.PutAsync(
+            route,
+            new StringContent(
+                JsonSerializer.Serialize(payload),
+                Encoding.UTF8,
+                "application/json"
+            )
+        );
+        var output = await GetOutput<TOutput>(response);
         return (response, output);
     }
 
     public async Task<(HttpResponseMessage?, TOutput?)> Get<TOutput>(
         string route
-    )
-        where TOutput : class
+    ) where TOutput : class
     {
         var response = await _httpClient.GetAsync(route);
-        var outputString = await response.Content.ReadAsStringAsync();
-        TOutput? output = null;
-        if (!string.IsNullOrWhiteSpace(outputString))
-            output = JsonSerializer.Deserialize<TOutput>(outputString,
-                new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                }
-            );
+        var output = await GetOutput<TOutput>(response);
         return (response, output);
     }
     public async Task<(HttpResponseMessage?, TOutput?)> Delete<TOutput>(
         string route
-    )
-        where TOutput : class
+    ) where TOutput : class
     {
         var response = await _httpClient.DeleteAsync(route);
+        var output = await GetOutput<TOutput>(response);
+        return (response, output);
+    }
+
+    private async Task<TOutput?> GetOutput<TOutput>(HttpResponseMessage response)
+        where TOutput : class
+    {
         var outputString = await response.Content.ReadAsStringAsync();
         TOutput? output = null;
         if (!string.IsNullOrWhiteSpace(outputString))
@@ -68,6 +73,6 @@ public class ApiClient
                     PropertyNameCaseInsensitive = true
                 }
             );
-        return (response, output);
+        return output;
     }
 }
