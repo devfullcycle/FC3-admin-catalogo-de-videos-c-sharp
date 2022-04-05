@@ -51,13 +51,13 @@ public class CreateCategoryApiTest
             .NotBeSameDateAs(default);
     }
 
-    [Theory(DisplayName = nameof(ThrowWhenCantInstantiateAggregate))]
+    [Theory(DisplayName = nameof(ErrorWhenCantInstantiateAggregate))]
     [Trait("EndToEnd/API", "Category/Create - Endpoints")]
     [MemberData(
         nameof(CreateCategoryApiTestDataGenerator.GetInvalidInputs),
         MemberType = typeof(CreateCategoryApiTestDataGenerator)
     )]
-    public async Task ThrowWhenCantInstantiateAggregate(
+    public async Task ErrorWhenCantInstantiateAggregate(
         CreateCategoryInput input,
         string expectedDetail
     ){
