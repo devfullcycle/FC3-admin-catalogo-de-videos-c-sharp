@@ -11,6 +11,7 @@ namespace FC.Codeflix.Catalog.EndToEndTests.Api.Category.GetCategoryById;
 
 [Collection(nameof(GetCategoryApiTestFixture))]
 public class GetCategoryApiTest
+    : IDisposable
 {
     private readonly GetCategoryApiTestFixture _fixture;
 
@@ -60,4 +61,7 @@ public class GetCategoryApiTest
         output.Title.Should().Be("Not Found");
         output.Detail.Should().Be($"Category '{randomGuid}' not found.");
     }
+    public void Dispose()
+        => _fixture.CleanPersistence();
+
 }
