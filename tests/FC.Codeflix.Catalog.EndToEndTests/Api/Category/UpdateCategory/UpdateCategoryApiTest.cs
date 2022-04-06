@@ -111,7 +111,6 @@ public class UpdateCategoryApiTest
         dbCategory.IsActive.Should().Be(exampleCategory.IsActive);
     }
 
-
     [Fact(DisplayName = nameof(ErrorWhenNotFound))]
     [Trait("EndToEnd/API", "Category/Update - Endpoints")]
     public async void ErrorWhenNotFound()
@@ -133,5 +132,35 @@ public class UpdateCategoryApiTest
         output.Type.Should().Be("NotFound");
         output.Status.Should().Be((int) StatusCodes.Status404NotFound);
         output.Detail.Should().Be($"Category '{randomGuid}' not found.");
+    }
+
+    [Theory(DisplayName = nameof(ErrorWhenCantInstantiateAggregate))]
+    [Trait("EndToEnd/API", "Category/Update - Endpoints")]
+    [MemberData(
+        nameof(UpdateCategoryApiTestDataGenerator.GetInvalidInputs),
+        MemberType = typeof(UpdateCategoryApiTestDataGenerator)
+    )]
+    public async void ErrorWhenCantInstantiateAggregate(
+        UpdateCategoryInput input,
+        string expectedDetail
+    )
+    {
+        var exampleCategoriesList = _fixture.GetExampleCategoriesList(20);
+        await _fixture.Persistence.InsertList(exampleCategoriesList);
+        var exampleCategory = exampleCategoriesList[10];
+        input.Id = exampleCategory.Id;
+
+        var (response, output) = await _fixture.ApiClient.Put<ProblemDetails>(
+            $"/categories/{exampleCategory.Id}",
+            input
+        );
+
+        response.Should().NotBeNull();
+        response!.StatusCode.Should().Be((HttpStatusCode)StatusCodes.Status422UnprocessableEntity);
+        output.Should().NotBeNull();
+        output!.Title.Should().Be("One or more validation errors ocurred");
+        output.Type.Should().Be("UnprocessableEntity");
+        output.Status.Should().Be((int)StatusCodes.Status422UnprocessableEntity);
+        output.Detail.Should().Be(expectedDetail);
     }
 }
