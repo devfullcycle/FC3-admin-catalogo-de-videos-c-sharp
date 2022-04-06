@@ -1,4 +1,6 @@
-﻿using System.Net.Http;
+﻿using Microsoft.AspNetCore.WebUtilities;
+using System.Collections.Generic;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -45,10 +47,12 @@ public class ApiClient
     }
 
     public async Task<(HttpResponseMessage?, TOutput?)> Get<TOutput>(
-        string route
+        string route,
+        object? queryStringParametersObject = null 
     ) where TOutput : class
     {
-        var response = await _httpClient.GetAsync(route);
+        var url = PrepareGetRoute(route, queryStringParametersObject);
+        var response = await _httpClient.GetAsync(url);
         var output = await GetOutput<TOutput>(response);
         return (response, output);
     }
@@ -74,5 +78,18 @@ public class ApiClient
                 }
             );
         return output;
+    }
+
+    private string PrepareGetRoute(
+        string route, 
+        object? queryStringParametersObject
+    )
+    {
+        if(queryStringParametersObject is null)
+            return route;
+        var parametersJson = JsonSerializer.Serialize(queryStringParametersObject);
+        var parametersDictionary = Newtonsoft.Json.JsonConvert
+            .DeserializeObject<Dictionary<string, string>>(parametersJson);
+        return QueryHelpers.AddQueryString(route, parametersDictionary!);
     }
 }
