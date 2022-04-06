@@ -16,7 +16,7 @@
 
 - Basta clonar o Repositório:
 ```sh
-git clone fc3-catalogo-de-videos-dotnet
+git clone https://github.com/codeedu/fc3-catalogo-de-videos-dotnet.git
 ```
 
 - Então executar o arquivo da solution com Visual Studio 2022
