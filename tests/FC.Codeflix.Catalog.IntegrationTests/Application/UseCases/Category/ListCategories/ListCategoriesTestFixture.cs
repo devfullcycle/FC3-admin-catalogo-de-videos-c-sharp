@@ -40,6 +40,7 @@ public class ListCategoriesTestFixture
             ("createdat", SearchOrder.Desc) => listClone.OrderByDescending(x => x.CreatedAt),
             _ => listClone.OrderBy(x => x.Name),
         };
-        return orderedEnumerable.ToList();
+        return orderedEnumerable
+            .ThenBy(x => x.CreatedAt).ToList();
     }
 }
