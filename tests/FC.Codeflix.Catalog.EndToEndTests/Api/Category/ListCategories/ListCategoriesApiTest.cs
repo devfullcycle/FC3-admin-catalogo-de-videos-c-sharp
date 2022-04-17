@@ -15,6 +15,32 @@ using Xunit.Abstractions;
 
 namespace FC.Codeflix.Catalog.EndToEndTests.Api.Category.ListCategories;
 
+class CategoryListOutput
+{
+    public CategoryListOutput(Meta meta, IReadOnlyList<CategoryModelOutput> data)
+    {
+        Meta = meta;
+        Data = data;
+    }
+
+    public Meta Meta { get; set; }
+    public IReadOnlyList<CategoryModelOutput> Data { get; set; }
+}
+
+class Meta
+{
+    public Meta(int currentPage, int perPage, int total)
+    {
+        CurrentPage = currentPage;
+        PerPage = perPage;
+        Total = total;
+    }
+
+    public int CurrentPage { get; set; }
+    public int PerPage { get; set; }
+    public int Total { get; set; }
+}
+
 [Collection(nameof(ListCategoriesApiTestFixture))]
 public class ListCategoriesApiTest
     : IDisposable
@@ -37,16 +63,18 @@ public class ListCategoriesApiTest
         await _fixture.Persistence.InsertList(exampleCategoriesList);
 
         var (response, output) = await _fixture.ApiClient
-            .Get<ListCategoriesOutput>("/categories");
+            .Get<CategoryListOutput>("/categories");
 
         response.Should().NotBeNull();
         response!.StatusCode.Should().Be((HttpStatusCode)StatusCodes.Status200OK);
         output.Should().NotBeNull();
-        output!.Total.Should().Be(exampleCategoriesList.Count);
-        output.Page.Should().Be(1);
-        output.PerPage.Should().Be(defaultPerPage);
-        output.Items.Should().HaveCount(defaultPerPage);
-        foreach (CategoryModelOutput outputItem in output.Items)
+        output!.Data.Should().NotBeNull();
+        output.Meta.Should().NotBeNull();
+        output.Meta.Total.Should().Be(exampleCategoriesList.Count);
+        output.Meta.CurrentPage.Should().Be(1);
+        output.Meta.PerPage.Should().Be(defaultPerPage);
+        output.Data.Should().HaveCount(defaultPerPage);
+        foreach (CategoryModelOutput outputItem in output.Data)
         {
             var exampleItem = exampleCategoriesList
                 .FirstOrDefault(x => x.Id == outputItem.Id);
