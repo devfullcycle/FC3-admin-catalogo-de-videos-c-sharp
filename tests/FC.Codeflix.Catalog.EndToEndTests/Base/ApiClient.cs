@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.WebUtilities;
+﻿using FC.Codeflix.Catalog.EndToEndTests.Extensions.String;
+using Microsoft.AspNetCore.WebUtilities;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
@@ -6,22 +7,41 @@ using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace FC.Codeflix.Catalog.EndToEndTests.Base;
+
+class SnakeCaseNamingPolicy: JsonNamingPolicy
+{
+    public override string ConvertName(string name)
+        => name.ToSnakeCase();
+}
+
 public class ApiClient
 {
     private readonly HttpClient _httpClient;
+    private readonly JsonSerializerOptions _defaultSerializeOptions;
 
     public ApiClient(HttpClient httpClient)
-        => _httpClient = httpClient;
+    {
+        _httpClient = httpClient;
+        _defaultSerializeOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = new SnakeCaseNamingPolicy(),
+            PropertyNameCaseInsensitive = true
+        };
+    }
 
     public async Task<(HttpResponseMessage?, TOutput?)> Post<TOutput>(
         string route,
         object payload
     ) where TOutput : class
     {
+        var payloadJson = JsonSerializer.Serialize(
+            payload,
+            _defaultSerializeOptions
+        );
         var response = await _httpClient.PostAsync(
             route,
             new StringContent(
-                JsonSerializer.Serialize(payload),
+                payloadJson,
                 Encoding.UTF8,
                 "application/json"
             )
@@ -37,7 +57,10 @@ public class ApiClient
         var response = await _httpClient.PutAsync(
             route,
             new StringContent(
-                JsonSerializer.Serialize(payload),
+                JsonSerializer.Serialize(
+                    payload,
+                    _defaultSerializeOptions
+                ),
                 Encoding.UTF8,
                 "application/json"
             )
@@ -71,11 +94,9 @@ public class ApiClient
         var outputString = await response.Content.ReadAsStringAsync();
         TOutput? output = null;
         if (!string.IsNullOrWhiteSpace(outputString))
-            output = JsonSerializer.Deserialize<TOutput>(outputString,
-                new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                }
+            output = JsonSerializer.Deserialize<TOutput>(
+                outputString,
+                _defaultSerializeOptions
             );
         return output;
     }
