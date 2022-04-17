@@ -85,7 +85,7 @@ public class CategoriesController : ControllerBase
     public async Task<IActionResult> List(
         CancellationToken cancellationToken,        
         [FromQuery] int? page = null,
-        [FromQuery] int? perPage = null,
+        [FromQuery(Name = "per_page")] int? perPage = null,
         [FromQuery] string? search = null,
         [FromQuery] string? sort = null,
         [FromQuery] SearchOrder? dir = null
