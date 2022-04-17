@@ -1,4 +1,5 @@
-﻿using FC.Codeflix.Catalog.Application.UseCases.Category.Common;
+﻿using FC.Codeflix.Catalog.Api.ApiModels.Response;
+using FC.Codeflix.Catalog.Application.UseCases.Category.Common;
 using FC.Codeflix.Catalog.EndToEndTests.Extensions.DateTime;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
@@ -9,16 +10,6 @@ using System.Threading.Tasks;
 using Xunit;
 
 namespace FC.Codeflix.Catalog.EndToEndTests.Api.Category.GetCategoryById;
-
-class GetCategoryResponse
-{
-    public GetCategoryResponse(CategoryModelOutput data)
-    {
-        Data = data;
-    }
-
-    public CategoryModelOutput Data { get; set; }
-}
 
 [Collection(nameof(GetCategoryApiTestFixture))]
 public class GetCategoryApiTest
@@ -37,9 +28,10 @@ public class GetCategoryApiTest
         await _fixture.Persistence.InsertList(exampleCategoriesList);
         var exampleCategory = exampleCategoriesList[10];
 
-        var (response, output) = await _fixture.ApiClient.Get<GetCategoryResponse>(
-            $"/categories/{exampleCategory.Id}"
-        );
+        var (response, output) = await _fixture.ApiClient
+            .Get<ApiResponse<CategoryModelOutput>>(
+                $"/categories/{exampleCategory.Id}"
+            );
 
         response.Should().NotBeNull();
         response!.StatusCode.Should().Be((HttpStatusCode) StatusCodes.Status200OK);
@@ -53,7 +45,6 @@ public class GetCategoryApiTest
             exampleCategory.CreatedAt.TrimMillisseconds()
         );
     }
-
 
     [Fact(DisplayName = nameof(ErrorWhenNotFound))]
     [Trait("EndToEnd/API", "Category/Get - Endpoints")]
