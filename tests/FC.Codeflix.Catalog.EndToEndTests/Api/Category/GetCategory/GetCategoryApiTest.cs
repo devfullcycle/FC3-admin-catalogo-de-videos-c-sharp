@@ -12,7 +12,12 @@ namespace FC.Codeflix.Catalog.EndToEndTests.Api.Category.GetCategoryById;
 
 class GetCategoryResponse
 {
-    public CategoryModelOutput Data { get; }
+    public GetCategoryResponse(CategoryModelOutput data)
+    {
+        Data = data;
+    }
+
+    public CategoryModelOutput Data { get; set; }
 }
 
 [Collection(nameof(GetCategoryApiTestFixture))]
