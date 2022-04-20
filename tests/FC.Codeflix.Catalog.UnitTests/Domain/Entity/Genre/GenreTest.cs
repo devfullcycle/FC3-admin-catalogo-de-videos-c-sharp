@@ -57,13 +57,13 @@ public class GenreTest
     [InlineData(false)]
     public void Activate(bool isActive)
     {
-        var genreName = _fixture.GetValidName();
-        var genre = new DomainEntity.Genre(genreName, isActive);
+        var genre = _fixture.GetExampleGenre(isActive);
+        var oldName = genre.Name;
 
         genre.Activate();
 
         genre.Should().NotBeNull();
-        genre.Name.Should().Be(genreName);
+        genre.Name.Should().Be(oldName);
         genre.IsActive.Should().BeTrue();
         genre.CreatedAt.Should().NotBeSameDateAs(default);
     }
@@ -74,14 +74,30 @@ public class GenreTest
     [InlineData(false)]
     public void Deactivate(bool isActive)
     {
-        var genreName = _fixture.GetValidName();
-        var genre = new DomainEntity.Genre(genreName, isActive);
+        var genre = _fixture.GetExampleGenre(isActive);
+        var oldName = genre.Name;
 
         genre.Deactivate();
 
         genre.Should().NotBeNull();
-        genre.Name.Should().Be(genreName);
         genre.IsActive.Should().BeFalse();
+        genre.Name.Should().Be(oldName);
+        genre.CreatedAt.Should().NotBeSameDateAs(default);
+    }
+
+    [Fact(DisplayName = nameof(Update))]
+    [Trait("Domain", "Genre - Aggregates")]
+    public void Update()
+    {
+        var genre = _fixture.GetExampleGenre();
+        var newName = _fixture.GetValidName();
+        var oldIsActive = genre.IsActive;
+
+        genre.Update(newName);
+
+        genre.Should().NotBeNull();
+        genre.Name.Should().Be(newName);
+        genre.IsActive.Should().Be(oldIsActive);
         genre.CreatedAt.Should().NotBeSameDateAs(default);
     }
 }
