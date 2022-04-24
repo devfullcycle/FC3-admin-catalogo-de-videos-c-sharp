@@ -117,7 +117,6 @@ public class GenreTest
         genre.CreatedAt.Should().NotBeSameDateAs(default);
     }
 
-
     [Theory(DisplayName = nameof(UpdateThrowWhenNameIsEmpty))]
     [Trait("Domain", "Genre - Aggregates")]
     [InlineData("")]
@@ -132,5 +131,34 @@ public class GenreTest
 
         action.Should().Throw<EntityValidationException>()
             .WithMessage("Name should not be empty or null");
+    }
+
+    [Fact(DisplayName = nameof(AddCategory))]
+    [Trait("Domain", "Genre - Aggregates")]
+    public void AddCategory()
+    {
+        var genre = _fixture.GetExampleGenre();
+        var categoryGuid = Guid.NewGuid();
+
+        genre.AddCategory(categoryGuid);
+
+        genre.Categories.Should().HaveCount(1);
+        genre.Categories.Should().Contain(categoryGuid);
+    }
+
+    [Fact(DisplayName = nameof(AddTwoCategories))]
+    [Trait("Domain", "Genre - Aggregates")]
+    public void AddTwoCategories()
+    {
+        var genre = _fixture.GetExampleGenre();
+        var categoryGuid1 = Guid.NewGuid();
+        var categoryGuid2 = Guid.NewGuid();
+
+        genre.AddCategory(categoryGuid1);
+        genre.AddCategory(categoryGuid2);
+
+        genre.Categories.Should().HaveCount(2);
+        genre.Categories.Should().Contain(categoryGuid1);
+        genre.Categories.Should().Contain(categoryGuid2);
     }
 }
