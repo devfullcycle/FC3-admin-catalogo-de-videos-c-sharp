@@ -6,6 +6,8 @@ using Moq;
 using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
 using UseCase = FC.Codeflix.Catalog.Application.UseCases.Genre.CreateGenre;
 using System;
+using System.Collections.Generic;
+using FC.Codeflix.Catalog.Application.Exceptions;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Genre.CreateGenre;
 
@@ -23,9 +25,11 @@ public class CreateGenreTest
     {
         var genreRepositoryMock = _fixture.GetGenreRepositoryMock();
         var unitOfWorkMock = _fixture.GetUnitOfWorkMock();
+        var categoryRepositoryMock = _fixture.GetCategoryRepositoryMock();
         var useCase = new UseCase.CreateGenre(
             genreRepositoryMock.Object,
-            unitOfWorkMock.Object
+            unitOfWorkMock.Object,
+            categoryRepositoryMock.Object
         );
         var input = _fixture.GetExampleInput();
 
@@ -56,13 +60,20 @@ public class CreateGenreTest
     [Trait("Application", "CreateGenre - Use Cases")]
     public async Task CreateWithRelatedCategories()
     {
+        var input = _fixture.GetExampleInputWithCategories();
         var genreRepositoryMock = _fixture.GetGenreRepositoryMock();
         var unitOfWorkMock = _fixture.GetUnitOfWorkMock();
+        var categoryRepositoryMock = _fixture.GetCategoryRepositoryMock();
+        categoryRepositoryMock.Setup(
+            x => x.GetIdsListByIds(
+                It.IsAny<List<Guid>>(), It.IsAny<CancellationToken>()
+            ))
+            .ReturnsAsync((IReadOnlyList<Guid>) input.CategoriesIds!);
         var useCase = new UseCase.CreateGenre(
             genreRepositoryMock.Object,
-            unitOfWorkMock.Object
+            unitOfWorkMock.Object,
+            categoryRepositoryMock.Object
         );
-        var input = _fixture.GetExampleInputWithCategories();
 
         var output = await useCase
             .Handle(input, CancellationToken.None);
@@ -84,5 +95,43 @@ public class CreateGenreTest
             output.Categories.Should().Contain(id)
         );
         output.CreatedAt.Should().NotBeSameDateAs(default);
+    }
+
+    [Fact(DisplayName = nameof(CreateThrowWhenRelatedCategoryNotFound))]
+    [Trait("Application", "CreateGenre - Use Cases")]
+    public async Task CreateThrowWhenRelatedCategoryNotFound()
+    {
+        var input = _fixture.GetExampleInputWithCategories();
+        var exampleGuid = input.CategoriesIds![^1];
+        var genreRepositoryMock = _fixture.GetGenreRepositoryMock();
+        var categoryRepositoryMock = _fixture.GetCategoryRepositoryMock();
+        var unitOfWorkMock = _fixture.GetUnitOfWorkMock();
+        categoryRepositoryMock.Setup(
+            x => x.GetIdsListByIds(
+                It.IsAny<List<Guid>>(),
+                It.IsAny<CancellationToken>()
+            )
+        ).ReturnsAsync(
+            (IReadOnlyList<Guid>) input.CategoriesIds
+                .FindAll(x => x != exampleGuid)
+        );
+        var useCase = new UseCase.CreateGenre(
+            genreRepositoryMock.Object,
+            unitOfWorkMock.Object,
+            categoryRepositoryMock.Object
+        );
+
+        var action = async () 
+            => await useCase.Handle(input, CancellationToken.None);
+
+        await action.Should().ThrowAsync<RelatedAggregateException>()
+            .WithMessage($"Related category id (or ids) not found: {exampleGuid}");
+        categoryRepositoryMock.Verify(x =>
+            x.GetIdsListByIds(
+                It.IsAny<List<Guid>>(),
+                It.IsAny<CancellationToken>()
+            ),
+            Times.Once
+        );
     }
 }
