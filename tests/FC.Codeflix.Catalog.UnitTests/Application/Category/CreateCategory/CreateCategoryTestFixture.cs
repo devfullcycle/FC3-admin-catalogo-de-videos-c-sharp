@@ -16,7 +16,7 @@ public class CreateCategoryTestFixture
         => new(
             GetValidCategoryName(),
             GetValidCategoryDescription(),
-            getRandomBoolean()
+            GetRandomBoolean()
         );
 
     public CreateCategoryInput GetInvalidInputShortName()
