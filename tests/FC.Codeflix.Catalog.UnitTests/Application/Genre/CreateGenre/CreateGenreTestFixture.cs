@@ -1,8 +1,5 @@
-﻿using FC.Codeflix.Catalog.Application.Interfaces;
-using FC.Codeflix.Catalog.Application.UseCases.Genre.CreateGenre;
-using FC.Codeflix.Catalog.Domain.Repository;
+﻿using FC.Codeflix.Catalog.Application.UseCases.Genre.CreateGenre;
 using FC.Codeflix.Catalog.UnitTests.Application.Genre.Common;
-using Moq;
 using System;
 using System.Linq;
 using Xunit;
@@ -40,13 +37,4 @@ public class CreateGenreTestFixture
             categoriesIds
         );
     }
-
-    public Mock<IGenreRepository> GetGenreRepositoryMock()
-        => new();
-
-    public Mock<IUnitOfWork> GetUnitOfWorkMock()
-        => new();
-
-    public Mock<ICategoryRepository> GetCategoryRepositoryMock()
-        => new();
 }
