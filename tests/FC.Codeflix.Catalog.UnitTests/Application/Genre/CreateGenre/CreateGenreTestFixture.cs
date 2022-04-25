@@ -22,6 +22,11 @@ public class CreateGenreTestFixture
             GetValidGenreName(),
             GetRandomBoolean()
         );
+    public CreateGenreInput GetExampleInput(string? name)
+        => new CreateGenreInput(
+            name!,
+            GetRandomBoolean()
+        );
 
     public CreateGenreInput GetExampleInputWithCategories()
     {
