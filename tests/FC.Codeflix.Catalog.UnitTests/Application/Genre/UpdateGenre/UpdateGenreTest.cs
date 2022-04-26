@@ -37,6 +37,7 @@ public class UpdateGenreTest
             _fixture.GetCategoryRepositoryMock().Object
         );
         var input = new UseCase.UpdateGenreInput(
+            exampleGenre.Id,
             newNameExample,
             newIsActive
         );
