@@ -282,4 +282,59 @@ public class UpdateGenreTest
             Times.Once
         );
     }
+
+    [Fact(DisplayName = nameof(ThrowWhenCategoryNotFound))]
+    [Trait("Application", "UpdateGenre - Use Cases")]
+    public async Task ThrowWhenCategoryNotFound()
+    {
+        var genreRepositoryMock = _fixture.GetGenreRepositoryMock();
+        var categoryRepositoryMock = _fixture.GetCategoryRepositoryMock();
+        var unitOfWorkMock = _fixture.GetUnitOfWorkMock();
+        var exampleGenre = _fixture.GetExampleGenre(
+            categoriesIds: _fixture.GetRandomIdsList()
+        );
+        var exampleNewCategoriesIdsList = _fixture.GetRandomIdsList(10);
+        
+        var listReturnedByCategoryRepository =
+            exampleNewCategoriesIdsList
+                .GetRange(0, exampleNewCategoriesIdsList.Count - 2);
+        
+        var IdsNotReturnedByCategoryRepository = 
+            exampleNewCategoriesIdsList
+                .GetRange(exampleNewCategoriesIdsList.Count - 2, 2);
+        
+        var newNameExample = _fixture.GetValidGenreName();
+        var newIsActive = !exampleGenre.IsActive;
+        genreRepositoryMock.Setup(x => x.Get(
+            It.Is<Guid>(x => x == exampleGenre.Id),
+            It.IsAny<CancellationToken>()
+        )).ReturnsAsync(exampleGenre);
+        categoryRepositoryMock.Setup(x => x.GetIdsListByIds(
+            It.IsAny<List<Guid>>(),
+            It.IsAny<CancellationToken>()
+        )).ReturnsAsync(listReturnedByCategoryRepository);
+        var useCase = new UseCase.UpdateGenre(
+            genreRepositoryMock.Object,
+            unitOfWorkMock.Object,
+            categoryRepositoryMock.Object
+        );
+        var input = new UseCase.UpdateGenreInput(
+            exampleGenre.Id,
+            newNameExample,
+            newIsActive,
+            exampleNewCategoriesIdsList
+        );
+
+        var action = async () 
+            => await useCase.Handle(input, CancellationToken.None);
+
+        var notFoundIdsAsString = String.Join(
+            ", ", 
+            IdsNotReturnedByCategoryRepository
+        );
+        await action.Should().ThrowAsync<RelatedAggregateException>()
+            .WithMessage(
+            $"Related category id (or ids) not found: {notFoundIdsAsString}"
+        );
+    }
 }
