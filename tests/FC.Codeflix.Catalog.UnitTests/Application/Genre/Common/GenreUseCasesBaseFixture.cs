@@ -13,6 +13,7 @@ public class GenreUseCasesBaseFixture
 {
     public string GetValidGenreName()
         => Faker.Commerce.Categories(1)[0];
+    
     public DomainEntity.Genre GetExampleGenre(
         bool? isActive = null,
         List<Guid>? categoriesIds = null 
@@ -25,6 +26,20 @@ public class GenreUseCasesBaseFixture
         categoriesIds?.ForEach(genre.AddCategory);
         return genre;
     }
+
+    public List<DomainEntity.Genre> GetExampleGenresList(
+        int count = 10
+    )
+        => Enumerable.Range(1, count).Select(_ =>
+        {
+            var genre = new DomainEntity.Genre(
+                GetValidGenreName(),
+                GetRandomBoolean()
+            );
+            GetRandomIdsList()
+                .ForEach(genre.AddCategory);
+            return genre;
+        }).ToList();        
 
     public List<Guid> GetRandomIdsList(int? count = null)
         => Enumerable
