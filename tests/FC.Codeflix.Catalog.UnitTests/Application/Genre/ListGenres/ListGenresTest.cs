@@ -1,4 +1,5 @@
-﻿using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
+﻿using FC.Codeflix.Catalog.Application.UseCases.Genre.Common;
+using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using FluentAssertions;
 using Moq;
 using System;
@@ -8,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
+using UseCase = FC.Codeflix.Catalog.Application.UseCases.Genre.ListGenres;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Genre.ListGenres;
 
@@ -39,14 +41,14 @@ public class ListGenresTest
         var useCase = new UseCase
             .ListGenres(genreRepositoryMock.Object);
 
-        ListGenresOutput output =
+        UseCase.ListGenresOutput output =
             await useCase.Handle(input, CancellationToken.None);
 
         output.Page.Should().Be(outputRepositorySearch.CurrentPage);
         output.PerPage.Should().Be(outputRepositorySearch.PerPage);
         output.Total.Should().Be(outputRepositorySearch.Total);
         output.Items.Should().HaveCount(outputRepositorySearch.Items.Count);
-        ((List<DomainEntity.Genre>)output.Items).ForEach(outputItem =>
+        ((List<GenreModelOutput>)output.Items).ForEach(outputItem =>
         {
             var repositoryGenre = outputRepositorySearch.Items
                 .FirstOrDefault(x => x.Id == outputItem.Id);
