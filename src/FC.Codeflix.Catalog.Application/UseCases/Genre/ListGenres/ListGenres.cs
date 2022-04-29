@@ -16,24 +16,9 @@ public class ListGenres
         CancellationToken cancellationToken
     )
     {
-        var searchInput = new SearchInput(
-            input.Page,
-            input.PerPage,
-            input.Search,
-            input.Sort,
-            input.Dir
-        );
         var searchOutput = await _genreRepository.Search(
-            searchInput, 
-            cancellationToken
+            input.ToSearchInput(), cancellationToken
         );
-        return new ListGenresOutput(
-            searchOutput.CurrentPage,
-            searchOutput.PerPage,
-            searchOutput.Total,
-            searchOutput.Items
-                .Select(GenreModelOutput.FromGenre)
-                .ToList()
-        );
+        return ListGenresOutput.FromSearchOutput(searchOutput);
     }
 }
