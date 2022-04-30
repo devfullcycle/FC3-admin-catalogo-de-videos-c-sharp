@@ -86,7 +86,7 @@ public class ListGenresTest
         var outputRepositorySearch = new SearchOutput<DomainEntity.Genre>(
             currentPage: input.Page,
             perPage: input.PerPage,
-            items: (IReadOnlyList<DomainEntity.Genre>) new List<DomainEntity.Genre>(),
+            items: (IReadOnlyList<DomainEntity.Genre>)new List<DomainEntity.Genre>(),
             total: new Random().Next(50, 200)
         );
         genreRepositoryMock.Setup(x => x.Search(
@@ -111,6 +111,42 @@ public class ListGenresTest
                     && searchInput.Search == input.Search
                     && searchInput.OrderBy == input.Sort
                     && searchInput.Order == input.Dir
+                ),
+                It.IsAny<CancellationToken>()
+            ),
+            Times.Once
+        );
+    }
+
+    [Fact(DisplayName = nameof(ListUsingDefaultInputValues))]
+    [Trait("Application", "ListGenres - Use Cases")]
+    public async Task ListUsingDefaultInputValues()
+    {
+        var genreRepositoryMock = _fixture.GetGenreRepositoryMock();
+        var outputRepositorySearch = new SearchOutput<DomainEntity.Genre>(
+            currentPage: 1,
+            perPage: 15,
+            items: (IReadOnlyList<DomainEntity.Genre>)new List<DomainEntity.Genre>(),
+            total: 0
+        );
+        genreRepositoryMock.Setup(x => x.Search(
+            It.IsAny<SearchInput>(),
+            It.IsAny<CancellationToken>()
+        )).ReturnsAsync(outputRepositorySearch);
+        var useCase = new UseCase
+            .ListGenres(genreRepositoryMock.Object);
+
+        UseCase.ListGenresOutput output =
+            await useCase.Handle(new UseCase.ListGenresInput(), CancellationToken.None);
+
+        genreRepositoryMock.Verify(
+            x => x.Search(
+                It.Is<SearchInput>(searchInput =>
+                    searchInput.Page == 1
+                    && searchInput.PerPage == 15
+                    && searchInput.Search == ""
+                    && searchInput.OrderBy == ""
+                    && searchInput.Order == SearchOrder.Asc
                 ),
                 It.IsAny<CancellationToken>()
             ),
