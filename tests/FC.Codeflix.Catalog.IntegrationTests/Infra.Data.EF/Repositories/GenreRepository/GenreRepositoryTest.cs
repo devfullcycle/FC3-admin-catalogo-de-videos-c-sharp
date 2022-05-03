@@ -1,9 +1,11 @@
 ﻿using FC.Codeflix.Catalog.Infra.Data.EF;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using Repository = FC.Codeflix.Catalog.Infra.Data.EF.Repositories.GenreRepository;
+using Repository = FC.Codeflix.Catalog.Infra.Data.EF.Repositories;
 
 namespace FC.Codeflix.Catalog.IntegrationTests.Infra.Data.EF.Repositories.GenreRepository;
 
@@ -34,16 +36,17 @@ public class GenreRepositoryTest
         await dbContext.SaveChangesAsync(CancellationToken.None);
 
         var assertsDbContext = _fixture.CreateDbContext(true);
-        var dbCategory = await assertsDbContext
-            .Categories.FindAsync(exampleGenre.Id);
-        dbCategory.Should().NotBeNull();
-        dbCategory!.Name.Should().Be(exampleGenre.Name);
-        dbCategory.IsActive.Should().Be(exampleGenre.IsActive);
-        dbCategory.CreatedAt.Should().Be(exampleGenre.CreatedAt);
+        var dbGenre = await assertsDbContext
+            .Genres.FindAsync(exampleGenre.Id);
+        dbGenre.Should().NotBeNull();
+        dbGenre!.Name.Should().Be(exampleGenre.Name);
+        dbGenre.IsActive.Should().Be(exampleGenre.IsActive);
+        dbGenre.CreatedAt.Should().Be(exampleGenre.CreatedAt);
         var genreCategoriesRelations = await assertsDbContext
             .GenresCategories.Where(r => r.GenreId == exampleGenre.Id)
-            .ToList();
-        GenresCategories.Shoud().HaveCount(categoriesListExample.Count);
+            .ToListAsync();
+        genreCategoriesRelations.Should()
+            .HaveCount(categoriesListExample.Count);
         genreCategoriesRelations.ForEach(relation => {
             var expectedCategory = categoriesListExample
                 .FirstOrDefault(x => x.Id == relation.CategoryId);
