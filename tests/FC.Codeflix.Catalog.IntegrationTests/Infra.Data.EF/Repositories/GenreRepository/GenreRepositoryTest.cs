@@ -1,7 +1,9 @@
-﻿using FC.Codeflix.Catalog.Infra.Data.EF;
+﻿using FC.Codeflix.Catalog.Application.Exceptions;
+using FC.Codeflix.Catalog.Infra.Data.EF;
 using FC.Codeflix.Catalog.Infra.Data.EF.Models;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -90,5 +92,38 @@ public class GenreRepositoryTest
                 .FirstOrDefault(x => x.Id == categoryId);
             expectedCategory.Should().NotBeNull();
         };
+    }
+
+
+    [Fact(DisplayName = nameof(GetThrowWhenNotFound))]
+    [Trait("Integration/Infra.Data", "GenreRepository - Repositories")]
+    public async Task GetThrowWhenNotFound()
+    {
+        var exampleNotFoundGuid = Guid.NewGuid();
+        CodeflixCatalogDbContext dbContext = _fixture.CreateDbContext();
+        var exampleGenre = _fixture.GetExampleGenre();
+        var categoriesListExample = _fixture.GetExampleCategoriesList(3);
+        categoriesListExample.ForEach(
+            category => exampleGenre.AddCategory(category.Id)
+        );
+        await dbContext.Categories.AddRangeAsync(categoriesListExample);
+        await dbContext.Genres.AddAsync(exampleGenre);
+        foreach (var categoryId in exampleGenre.Categories)
+        {
+            var relation = new GenresCategories(categoryId, exampleGenre.Id);
+            await dbContext.GenresCategories.AddAsync(relation);
+        }
+        dbContext.SaveChanges();
+        var genreRepository = new Repository.GenreRepository(
+            _fixture.CreateDbContext(true)
+        );
+
+        var action = async () => await genreRepository.Get(
+            exampleNotFoundGuid, 
+            CancellationToken.None
+        );
+
+        await action.Should().ThrowAsync<NotFoundException>()
+            .WithMessage($"Genre '{exampleNotFoundGuid}' not found.");
     }
 }
