@@ -185,8 +185,9 @@ public class GenreRepositoryTest
             await dbContext.GenresCategories.AddAsync(relation);
         }
         dbContext.SaveChanges();
+        var actDbContext = _fixture.CreateDbContext(true);
         var genreRepository = new Repository.GenreRepository(
-            _fixture.CreateDbContext(true)
+            actDbContext
         );
 
         exampleGenre.Update(_fixture.GetValidGenreName());
@@ -198,6 +199,7 @@ public class GenreRepositoryTest
             exampleGenre, 
             CancellationToken.None
         );
+        await actDbContext.SaveChangesAsync();
 
         var assertsDbContext = _fixture.CreateDbContext(true);
         var dbGenre = await assertsDbContext
