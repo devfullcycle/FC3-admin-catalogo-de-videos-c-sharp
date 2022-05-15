@@ -25,11 +25,12 @@ public class GenreRepositoryTestFixture
 
     public DomainEntity.Genre GetExampleGenre(
         bool? isActive = null,
-        List<Guid>? categoriesIds = null
+        List<Guid>? categoriesIds = null,
+        string? name = null
     )
     {
         var genre = new DomainEntity.Genre(
-            GetValidGenreName(),
+            name ?? GetValidGenreName(),
             isActive ?? GetRandomBoolean()
         );
         categoriesIds?.ForEach(genre.AddCategory);
@@ -42,6 +43,10 @@ public class GenreRepositoryTestFixture
             .Select(_ => GetExampleGenre())
             .ToList();
 
+    public List<DomainEntity.Genre> GetExampleListGenresByNames(List<string> names)
+        => names
+            .Select(name => GetExampleGenre(name: name))
+            .ToList();
 
     public string GetValidCategoryName()
     {
