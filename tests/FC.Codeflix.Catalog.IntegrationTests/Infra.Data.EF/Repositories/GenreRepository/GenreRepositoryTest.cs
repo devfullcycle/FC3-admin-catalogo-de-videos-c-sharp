@@ -368,7 +368,7 @@ public class GenreRepositoryTest
     [Trait("Integration/Infra.Data", "GenreRepository - Repositories")]
     public async Task SearchReturnsEmptyWhenPersistenceIsEmpty()
     {
-        var actDbContext = _fixture.CreateDbContext(true);
+        var actDbContext = _fixture.CreateDbContext();
         var genreRepository = new Repository.GenreRepository(
             actDbContext
         );
