@@ -1,6 +1,7 @@
 ﻿using FC.Codeflix.Catalog.Domain.Entity;
 using FC.Codeflix.Catalog.IntegrationTests.Base;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -34,6 +35,13 @@ public class GenreRepositoryTestFixture
         categoriesIds?.ForEach(genre.AddCategory);
         return genre;
     }
+
+    public List<DomainEntity.Genre> GetExampleListGenres(int count = 10)
+        => Enumerable
+            .Range(1, count)
+            .Select(_ => GetExampleGenre())
+            .ToList();
+
 
     public string GetValidCategoryName()
     {
