@@ -2,6 +2,7 @@
 using System;
 using FluentAssertions;
 using Xunit;
+using FluentValidation;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Category.GetCategory;
 
@@ -31,6 +32,7 @@ public class GetCategoryInputValidatorTest
     [Trait("Application", "GetCategoryInputValidation - UseCases")]
     public void InvalidWhenEmptyGuidId()
     {
+        ValidatorOptions.Global.LanguageManager.Enabled = false;
         var invalidInput = new GetCategoryInput(Guid.Empty);
         var validator = new GetCategoryInputValidator();
 
