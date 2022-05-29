@@ -41,6 +41,7 @@ public class ListGenresTest
         output.Should().NotBeNull();
         output.Page.Should().Be(input.Page);
         output.PerPage.Should().Be(input.PerPage);
+        output.Total.Should().Be(exampleGenres.Count);
         output.Items.Should().HaveCount(exampleGenres.Count);
         output.Items.ToList().ForEach(outputItem => {
             DomainEntity.Genre? exampleItem = 
@@ -49,5 +50,26 @@ public class ListGenresTest
             outputItem.Name.Should().Be(exampleItem!.Name);
             outputItem.IsActive.Should().Be(exampleItem.IsActive);
         });
+    }
+
+    [Fact(DisplayName = nameof(ListGenresReturnsEmptyWhenPersistenceIsEmpty))]
+    [Trait("Integration/Application", "ListGenres - UseCases")]
+    public async Task ListGenresReturnsEmptyWhenPersistenceIsEmpty()
+    {
+        UseCase.ListGenres useCase = new UseCase.ListGenres(
+            new GenreRepository(_fixture.CreateDbContext())
+        );
+        UseCase.ListGenresInput input = new UseCase.ListGenresInput(1, 20);
+
+        ListGenresOutput output = await useCase.Handle(
+            input,
+            CancellationToken.None
+        );
+
+        output.Should().NotBeNull();
+        output.Page.Should().Be(input.Page);
+        output.PerPage.Should().Be(input.PerPage);
+        output.Total.Should().Be(0);
+        output.Items.Should().HaveCount(0);
     }
 }
