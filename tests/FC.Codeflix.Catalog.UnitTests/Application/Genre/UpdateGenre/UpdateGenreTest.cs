@@ -220,7 +220,7 @@ public class UpdateGenreTest
         output.CreatedAt.Should().BeSameDateAs(exampleGenre.CreatedAt);
         output.Categories.Should().HaveCount(exampleCategoriesIdsList.Count);
         exampleCategoriesIdsList.ForEach(
-            expectedId => output.Categories.Should().Contain(expectedId)
+            expectedId => output.Categories.Should().Contain(relation => relation.Id == expectedId)
         );
         genreRepositoryMock.Verify(
             x => x.Update(
@@ -278,7 +278,7 @@ public class UpdateGenreTest
         output.CreatedAt.Should().BeSameDateAs(exampleGenre.CreatedAt);
         output.Categories.Should().HaveCount(exampleCategoriesIdsList.Count);
         exampleCategoriesIdsList.ForEach(
-            expectedId => output.Categories.Should().Contain(expectedId)
+            expectedId => output.Categories.Should().Contain(relation => relation.Id == expectedId)
         );
         genreRepositoryMock.Verify(
             x => x.Update(
@@ -384,7 +384,7 @@ public class UpdateGenreTest
         output.CreatedAt.Should().BeSameDateAs(exampleGenre.CreatedAt);
         output.Categories.Should().HaveCount(exampleCategoriesIdsList.Count);
         exampleCategoriesIdsList.ForEach(
-            expectedId => output.Categories.Should().Contain(expectedId)
+            expectedId => output.Categories.Should().Contain(relation => relation.Id == expectedId)
         );
         genreRepositoryMock.Verify(
             x => x.Update(

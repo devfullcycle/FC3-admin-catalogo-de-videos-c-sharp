@@ -60,7 +60,7 @@ public class ListGenresTest
             outputItem.Categories.Should()
                 .HaveCount(repositoryGenre.Categories.Count);
             foreach (var expectedId in repositoryGenre.Categories)
-                outputItem.Categories.Should().Contain(expectedId);
+                outputItem.Categories.Should().Contain(relation => relation.Id == expectedId);
         });
         genreRepositoryMock.Verify(
             x => x.Search(
