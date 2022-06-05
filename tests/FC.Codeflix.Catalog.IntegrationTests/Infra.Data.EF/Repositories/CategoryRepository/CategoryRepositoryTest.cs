@@ -11,6 +11,7 @@ using FC.Codeflix.Catalog.Application.Exceptions;
 using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using FC.Codeflix.Catalog.Domain.Entity;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FC.Codeflix.Catalog.IntegrationTests.Infra.Data.EF.Repositories.CategoryRepository;
 
@@ -131,6 +132,36 @@ public class CategoryRepositoryTest
         var dbCategory = await (_fixture.CreateDbContext(true))
             .Categories.FindAsync(exampleCategory.Id);
         dbCategory.Should().BeNull();
+    }
+
+    [Fact(DisplayName = nameof(ListByIds))]
+    [Trait("Integration/Infra.Data", "CategoryRepository - Repositories")]
+    public async Task ListByIds()
+    {
+        CodeflixCatalogDbContext dbContext = _fixture.CreateDbContext();
+        var exampleCategoriesList = _fixture.GetExampleCategoriesList(15);
+        List<Guid> categoriesIdsToGet = Enumerable.Range(1, 3).Select(_ => {
+            int indexToGet = (new Random()).Next(0, exampleCategoriesList.Count - 1);
+            return exampleCategoriesList[indexToGet].Id;
+        }).Distinct().ToList();
+        await dbContext.AddRangeAsync(exampleCategoriesList);
+        await dbContext.SaveChangesAsync(CancellationToken.None);
+        var categoryRepository = new Repository.CategoryRepository(dbContext);
+        IReadOnlyList<Category> categoriesList = await categoryRepository.ListByIds(categoryIdsToGet);
+
+        categoriesList.Should().NotBeNull();
+        categoriesList.Should().HaveCount(categoriesIdsToGet.Count);
+        foreach (Category outputItem in categoriesList)
+        {
+            var exampleItem = exampleCategoriesList.Find(
+                category => category.Id == outputItem.Id
+            );
+            exampleItem.Should().NotBeNull();
+            outputItem.Name.Should().Be(exampleItem!.Name);
+            outputItem.Description.Should().Be(exampleItem.Description);
+            outputItem.IsActive.Should().Be(exampleItem.IsActive);
+            outputItem.CreatedAt.Should().Be(exampleItem.CreatedAt);
+        }
     }
 
     [Fact(DisplayName = nameof(SearchRetursListAndTotal))]
