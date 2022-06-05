@@ -1,4 +1,5 @@
 ﻿using FC.Codeflix.Catalog.Application.UseCases.Genre.ListGenres;
+using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using FC.Codeflix.Catalog.Infra.Data.EF;
 using FC.Codeflix.Catalog.Infra.Data.EF.Models;
 using FC.Codeflix.Catalog.Infra.Data.EF.Repositories;
@@ -220,8 +221,6 @@ public class ListGenresTest
         });
     }
 
-
-
     [Theory(DisplayName = nameof(SearchByText))]
     [Trait("Integration/Application", "ListGenres - UseCases")]
     [InlineData("Action", 1, 5, 1, 1)]
@@ -313,5 +312,88 @@ public class ListGenresTest
                 outputCategory.Name.Should().Be(exampleCategory!.Name);
             });
         });
+    }
+
+    [Theory(DisplayName = nameof(Ordered))]
+    [Trait("Integration/Application", "ListGenres - UseCases")]
+    [InlineData("name", "asc")]
+    [InlineData("name", "desc")]
+    [InlineData("id", "asc")]
+    [InlineData("id", "desc")]
+    [InlineData("createdAt", "asc")]
+    [InlineData("createdAt", "desc")]
+    [InlineData("", "asc")]
+    public async Task Ordered(
+        string orderBy,
+        string order
+    )
+    {
+        List<DomainEntity.Genre> exampleGenres = _fixture.GetExampleListGenres(10);
+        List<DomainEntity.Category> exampleCategories = _fixture.GetExampleCategoriesList(10);
+        Random random = new Random();
+        exampleGenres.ForEach(genre =>
+        {
+            int relationsCount = random.Next(0, 3);
+            for (int i = 0; i < relationsCount; i++)
+            {
+                int selectedCategoryIndex = random.Next(0, exampleCategories.Count - 1);
+                DomainEntity.Category selected = exampleCategories[selectedCategoryIndex];
+                if (!genre.Categories.Contains(selected.Id))
+                    genre.AddCategory(selected.Id);
+            }
+        });
+        List<GenresCategories> genresCategories = new List<GenresCategories>();
+        exampleGenres.ForEach(
+            genre => genre.Categories.ToList().ForEach(
+                categoryId => genresCategories.Add(
+                    new GenresCategories(categoryId, genre.Id)
+                )
+            )
+        );
+        CodeflixCatalogDbContext arrangeDbContext = _fixture.CreateDbContext();
+        await arrangeDbContext.AddRangeAsync(exampleGenres);
+        await arrangeDbContext.AddRangeAsync(exampleCategories);
+        await arrangeDbContext.AddRangeAsync(genresCategories);
+        await arrangeDbContext.SaveChangesAsync();
+        CodeflixCatalogDbContext actDbContext = _fixture.CreateDbContext(true);
+        UseCase.ListGenres useCase = new UseCase.ListGenres(
+            new GenreRepository(actDbContext),
+            new CategoryRepository(actDbContext)
+        );
+        var orderEnum = order == "asc" ? SearchOrder.Asc : SearchOrder.Desc;
+        UseCase.ListGenresInput input = new UseCase.ListGenresInput(
+            1, 20, sort: orderBy, dir: orderEnum
+        );
+
+        ListGenresOutput output = await useCase.Handle(
+            input,
+            CancellationToken.None
+        );
+
+        output.Should().NotBeNull();
+        output.Page.Should().Be(input.Page);
+        output.PerPage.Should().Be(input.PerPage);
+        output.Total.Should().Be(exampleGenres.Count);
+        output.Items.Should().HaveCount(exampleGenres.Count);
+        var expectedOrderedList = _fixture.CloneGenreListOrdered(
+            exampleGenres, orderBy, orderEnum
+        );
+        for (int indice = 0; indice < expectedOrderedList.Count; indice++)
+        {
+            var expectedItem = expectedOrderedList[indice];
+            var outputItem = output.Items[indice];
+            expectedItem.Should().NotBeNull();
+            outputItem.Name.Should().Be(expectedItem!.Name);
+            outputItem.IsActive.Should().Be(expectedItem.IsActive);
+            List<Guid> outputItemCategoryIds = outputItem.Categories.Select(x => x.Id).ToList();
+            outputItemCategoryIds.Should().BeEquivalentTo(expectedItem.Categories);
+            outputItem.Categories.ToList().ForEach(outputCategory =>
+            {
+                DomainEntity.Category? exampleCategory =
+                    exampleCategories.Find(x => x.Id == outputCategory.Id);
+                exampleCategory.Should().NotBeNull();
+                outputCategory.Name.Should().Be(exampleCategory!.Name);
+            });
+        }
     }
 }
