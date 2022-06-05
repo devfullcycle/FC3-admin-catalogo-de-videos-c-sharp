@@ -147,7 +147,8 @@ public class CategoryRepositoryTest
         await dbContext.AddRangeAsync(exampleCategoriesList);
         await dbContext.SaveChangesAsync(CancellationToken.None);
         var categoryRepository = new Repository.CategoryRepository(dbContext);
-        IReadOnlyList<Category> categoriesList = await categoryRepository.ListByIds(categoryIdsToGet);
+        IReadOnlyList<Category> categoriesList = await categoryRepository
+            .GetListByIds(categoriesIdsToGet, CancellationToken.None);
 
         categoriesList.Should().NotBeNull();
         categoriesList.Should().HaveCount(categoriesIdsToGet.Count);
