@@ -34,6 +34,11 @@ public class GenreUseCasesBaseFixture
             .Select(_ => GetExampleGenre())
             .ToList();
 
+    public List<DomainEntity.Genre> GetExampleListGenresByNames(List<string> names)
+        => names
+            .Select(name => GetExampleGenre(name: name))
+            .ToList();
+
     public string GetValidCategoryName()
     {
         var categoryName = "";
