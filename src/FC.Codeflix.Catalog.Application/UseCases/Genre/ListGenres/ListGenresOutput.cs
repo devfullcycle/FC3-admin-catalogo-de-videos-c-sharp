@@ -31,7 +31,7 @@ public class ListGenresOutput
     {
         foreach(GenreModelOutput item in Items)
             foreach(GenreModelOutputCategory categoryOutput in item.Categories)
-                categoryOutput.Name = categories.FirstOrDefault(
+                categoryOutput.Name = categories?.FirstOrDefault(
                     category => category.Id == categoryOutput.Id
                 )?.Name;
     }

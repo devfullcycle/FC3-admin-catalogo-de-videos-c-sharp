@@ -22,14 +22,16 @@ public class ListGenres
         var searchOutput = await _genreRepository.Search(
             input.ToSearchInput(), cancellationToken
         );
-        List<Guid> relatedCategoriesIds = searchOutput.Items
-            .SelectMany(item => item.Categories)
-            .Distinct()
-            .ToList();
-        IReadOnlyList<DomainEntity.Category> categories = 
-            await _categoryRepository.GetListByIds(relatedCategoriesIds, cancellationToken);
         ListGenresOutput output = ListGenresOutput.FromSearchOutput(searchOutput);
-        output.FillWithCategoryNames(categories);
+
+        List<Guid> relatedCategoriesIds = searchOutput.Items
+            .SelectMany(item => item.Categories).Distinct().ToList();
+        if (relatedCategoriesIds.Count > 0)
+        {
+            IReadOnlyList<DomainEntity.Category> categories =
+                await _categoryRepository.GetListByIds(relatedCategoriesIds, cancellationToken);
+            output.FillWithCategoryNames(categories);
+        }
         return output;
     }
 }
