@@ -30,8 +30,10 @@ public class ListGenresTest
         CodeflixCatalogDbContext arrangeDbContext = _fixture.CreateDbContext();
         await arrangeDbContext.AddRangeAsync(exampleGenres);
         await arrangeDbContext.SaveChangesAsync();
+        CodeflixCatalogDbContext actDbContext = _fixture.CreateDbContext(true);
         UseCase.ListGenres useCase = new UseCase.ListGenres(
-            new GenreRepository(_fixture.CreateDbContext(true))
+            new GenreRepository(actDbContext),
+            new CategoryRepository(actDbContext)
         );
         UseCase.ListGenresInput input = new UseCase.ListGenresInput(1, 20);
 
@@ -58,8 +60,10 @@ public class ListGenresTest
     [Trait("Integration/Application", "ListGenres - UseCases")]
     public async Task ListGenresReturnsEmptyWhenPersistenceIsEmpty()
     {
+        CodeflixCatalogDbContext actDbContext = _fixture.CreateDbContext();
         UseCase.ListGenres useCase = new UseCase.ListGenres(
-            new GenreRepository(_fixture.CreateDbContext())
+            new GenreRepository(actDbContext),
+            new CategoryRepository(actDbContext)
         );
         UseCase.ListGenresInput input = new UseCase.ListGenresInput(1, 20);
 
@@ -106,8 +110,10 @@ public class ListGenresTest
         await arrangeDbContext.AddRangeAsync(exampleCategories);
         await arrangeDbContext.AddRangeAsync(genresCategories);
         await arrangeDbContext.SaveChangesAsync();
+        CodeflixCatalogDbContext actDbContext = _fixture.CreateDbContext(true);
         UseCase.ListGenres useCase = new UseCase.ListGenres(
-            new GenreRepository(_fixture.CreateDbContext(true))
+            new GenreRepository(actDbContext),
+            new CategoryRepository(actDbContext)
         );
         UseCase.ListGenresInput input = new UseCase.ListGenresInput(1, 20);
 
