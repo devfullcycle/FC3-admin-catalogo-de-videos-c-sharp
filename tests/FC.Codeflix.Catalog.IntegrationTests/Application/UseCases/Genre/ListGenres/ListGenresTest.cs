@@ -129,6 +129,13 @@ public class ListGenresTest
             outputItem.IsActive.Should().Be(exampleItem.IsActive);
             List<Guid> outputItemCategoryIds = outputItem.Categories.Select(x => x.Id).ToList();
             outputItemCategoryIds.Should().BeEquivalentTo(exampleItem.Categories);
+            outputItem.Categories.ToList().ForEach(outputCategory =>
+            {
+                DomainEntity.Category? exampleCategory = 
+                    exampleCategories.Find(x => x.Id == outputCategory.Id);
+                exampleCategory.Should().NotBeNull();
+                outputCategory.Name.Should().Be(exampleCategory!.Name);
+            });
         });
     }
 }
