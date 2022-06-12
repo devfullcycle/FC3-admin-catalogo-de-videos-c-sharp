@@ -7,6 +7,7 @@ using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
 using FC.Codeflix.Catalog.Api.ApiModels.Genre;
 using System.Net;
 using Microsoft.AspNetCore.Http;
+using FluentAssertions;
 
 namespace FC.Codeflix.Catalog.EndToEndTests.Api.Genre.UpdateGenre;
 
@@ -41,10 +42,10 @@ public class UpdateGenreApiTest
         output.Should().NotBeNull();
         output!.Data.Id.Should().Be(targetGenre.Id);
         output.Data.Name.Should().Be(input.Name);
-        output.Data.IsActive.Should().Be(input.IsActive);
+        output.Data.IsActive.Should().Be((bool)input.IsActive!);
         var genreFromDb = await _fixture.Persistence.GetById(output.Data.Id);
         genreFromDb.Should().NotBeNull();
         genreFromDb!.Name.Should().Be(input.Name);
-        genreFromDb.IsActive.Should().Be(input.IsActive);
+        genreFromDb.IsActive.Should().Be((bool)input.IsActive!);
     }
 }
