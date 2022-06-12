@@ -104,5 +104,4 @@ public class GetGenreApiTest
             output.Data.Categories.Select(relation => relation.Id).ToList();
         relatedCategoriesIds.Should().BeEquivalentTo(targetGenre.Categories);
     }
-
 }

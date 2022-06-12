@@ -4,6 +4,8 @@ using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using FC.Codeflix.Catalog.Infra.Data.EF.Models;
+using System;
+using Microsoft.EntityFrameworkCore;
 
 namespace FC.Codeflix.Catalog.EndToEndTests.Api.Genre.Common;
 public class GenrePersistence
@@ -18,9 +20,14 @@ public class GenrePersistence
         await _context.AddRangeAsync(genres);
         await _context.SaveChangesAsync();
     }
+
     public async Task InsertGenresCategoriesRelationsList(List<GenresCategories> relations)
     {
         await _context.AddRangeAsync(relations);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<DomainEntity.Genre?> GetById(Guid id)
+        => await _context.Genres.AsNoTracking()
+            .FirstOrDefaultAsync(genre => genre.Id == id);
 }
