@@ -1,5 +1,6 @@
 using FC.Codeflix.Catalog.Api.ApiModels.Response;
 using FC.Codeflix.Catalog.Application.UseCases.Genre.Common;
+using FC.Codeflix.Catalog.Application.UseCases.Genre.DeleteGenre;
 using FC.Codeflix.Catalog.Application.UseCases.Genre.GetGenre;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -25,5 +26,17 @@ public class GenresController : ControllerBase
     {
         var output = await _mediator.Send(new GetGenreInput(id), cancellationToken);
         return Ok(new ApiResponse<GenreModelOutput>(output));
+    }
+
+    [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteById(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken
+    )
+    {
+        await _mediator.Send(new DeleteGenreInput(id), cancellationToken);
+        return NoContent();
     }
 }
