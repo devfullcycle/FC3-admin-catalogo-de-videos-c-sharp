@@ -1,5 +1,7 @@
 ﻿using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
@@ -32,5 +34,23 @@ public class DeleteGenreTestApi
         output.Should().BeNull();
         DomainEntity.Genre? genreDb = await _fixture.Persistence.GetById(targetGenre.Id);
         genreDb.Should().BeNull();
+    }
+
+    [Fact(DisplayName = nameof(WhenNotFound404))]
+    [Trait("EndToEnd/Api", "Genre/DeleteGenre - Endpoints")]
+    public async Task WhenNotFound404()
+    {
+        List<DomainEntity.Genre> exampleGenres = _fixture.GetExampleListGenres(10);
+        var randomGuid = Guid.NewGuid();
+        await _fixture.Persistence.InsertList(exampleGenres);
+
+        var (response, output) = await _fixture.ApiClient
+            .Delete<ProblemDetails>($"/genres/{randomGuid}");
+
+        response.Should().NotBeNull();
+        output.Should().NotBeNull();
+        response!.StatusCode.Should().Be((HttpStatusCode)StatusCodes.Status404NotFound);
+        output!.Type.Should().Be("NotFound");
+        output.Detail.Should().Be($"Genre '{randomGuid}' not found.");
     }
 }
