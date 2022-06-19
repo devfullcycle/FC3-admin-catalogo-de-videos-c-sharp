@@ -8,6 +8,8 @@ using FC.Codeflix.Catalog.Api.ApiModels.Genre;
 using System.Net;
 using Microsoft.AspNetCore.Http;
 using FluentAssertions;
+using System;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FC.Codeflix.Catalog.EndToEndTests.Api.Genre.UpdateGenre;
 
@@ -27,7 +29,7 @@ public class UpdateGenreApiTest
         var targetGenre = exampleGenres[5];
         await _fixture.Persistence.InsertList(exampleGenres);
         var input = new UpdateGenreApiInput(
-            _fixture.GetValidGenreName(), 
+            _fixture.GetValidGenreName(),
             _fixture.GetRandomBoolean()
         );
 
@@ -47,5 +49,32 @@ public class UpdateGenreApiTest
         genreFromDb.Should().NotBeNull();
         genreFromDb!.Name.Should().Be(input.Name);
         genreFromDb.IsActive.Should().Be((bool)input.IsActive!);
+    }
+
+    [Fact(DisplayName = nameof(ProblemDetailsWhenNotFound))]
+    [Trait("EndToEnd/Api", "Genre/UpdateGenre - Endpoints")]
+    public async Task ProblemDetailsWhenNotFound()
+    {
+        List<DomainEntity.Genre> exampleGenres = _fixture.GetExampleListGenres(10);
+        var randomGuid = Guid.NewGuid();
+        await _fixture.Persistence.InsertList(exampleGenres);
+        var input = new UpdateGenreApiInput(
+            _fixture.GetValidGenreName(),
+            _fixture.GetRandomBoolean()
+        );
+
+        var (response, output) = await _fixture.ApiClient
+            .Put<ProblemDetails>(
+                $"/genres/{randomGuid}",
+                input
+            );
+
+        response.Should().NotBeNull();
+        response!.StatusCode.Should().Be((HttpStatusCode)StatusCodes.Status404NotFound);
+        output.Should().NotBeNull();
+        output!.Title.Should().Be("Not Found");
+        output!.Detail.Should().Be($"Genre '{randomGuid}' not found.");
+        output!.Type.Should().Be("NotFound");
+        output!.Status.Should().Be((int)StatusCodes.Status404NotFound);
     }
 }
