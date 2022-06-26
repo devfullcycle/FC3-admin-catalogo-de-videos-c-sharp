@@ -15,7 +15,7 @@ using FC.Codeflix.Catalog.Infra.Data.EF.Models;
 namespace FC.Codeflix.Catalog.EndToEndTests.Api.Genre.GetGenre;
 
 [Collection(nameof(GetGenreApiTestFixture))]
-public class GetGenreApiTest
+public class GetGenreApiTest : IDisposable
 {
     private GetGenreApiTestFixture _fixture;
 
@@ -104,4 +104,5 @@ public class GetGenreApiTest
             output.Data.Categories.Select(relation => relation.Id).ToList();
         relatedCategoriesIds.Should().BeEquivalentTo(targetGenre.Categories);
     }
+    public void Dispose() => _fixture.CleanPersistence();
 }

@@ -13,7 +13,7 @@ using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
 namespace FC.Codeflix.Catalog.EndToEndTests.Api.Genre.DeleteGenre;
 
 [Collection(nameof(DeleteGenreTestApiFixture))]
-public class DeleteGenreTestApi
+public class DeleteGenreTestApi : IDisposable
 {
     private readonly DeleteGenreTestApiFixture _fixture;
 
@@ -99,4 +99,5 @@ public class DeleteGenreTestApi
         List<GenresCategories> relations = await _fixture.Persistence.GetGenresCategoriesRelationsByGenreId(targetGenre.Id);
         relations.Should().HaveCount(0);
     }
+    public void Dispose() => _fixture.CleanPersistence();
 }

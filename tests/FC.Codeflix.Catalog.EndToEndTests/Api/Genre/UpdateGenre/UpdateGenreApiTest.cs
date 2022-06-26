@@ -16,7 +16,7 @@ using System.Linq;
 namespace FC.Codeflix.Catalog.EndToEndTests.Api.Genre.UpdateGenre;
 
 [Collection(nameof(UpdateGenreApiTestFixture))]
-public class UpdateGenreApiTest
+public class UpdateGenreApiTest : IDisposable
 {
     private readonly UpdateGenreApiTestFixture _fixture;
 
@@ -246,4 +246,6 @@ public class UpdateGenreApiTest
         output!.Type.Should().Be("RelatedAggregate");
         output.Detail.Should().Be($"Related category id (or ids) not found: {randomGuid}");
     }
+
+    public void Dispose() => _fixture.CleanPersistence();
 }
