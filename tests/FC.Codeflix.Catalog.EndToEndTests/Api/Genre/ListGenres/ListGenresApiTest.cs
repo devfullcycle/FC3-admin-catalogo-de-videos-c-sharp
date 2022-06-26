@@ -5,6 +5,7 @@ using FC.Codeflix.Catalog.EndToEndTests.Extensions.DateTime;
 using FC.Codeflix.Catalog.EndToEndTests.Models;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -15,7 +16,7 @@ using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
 namespace FC.Codeflix.Catalog.EndToEndTests.Api.Genre.ListGenres;
 
 [Collection(nameof(ListGenresApiTestFixture))]
-public class ListGenresApiTest
+public class ListGenresApiTest : IDisposable
 {
     private readonly ListGenresApiTestFixture _fixture;
 
@@ -55,7 +56,6 @@ public class ListGenresApiTest
         });
     }
 
-
     [Fact(DisplayName = nameof(EmptyWhenThereAreNoItems))]
     [Trait("EndToEnd/Api", "Genre/ListGenres - Endpoints")]
     public async Task EmptyWhenThereAreNoItems()
@@ -75,4 +75,48 @@ public class ListGenresApiTest
         output.Meta!.Total.Should().Be(0);
         output.Data!.Count.Should().Be(0);
     }
+
+    [Theory(DisplayName = nameof(ListPaginated))]
+    [Trait("EndToEnd/Api", "Genre/ListGenres - Endpoints")]
+    [InlineData(10, 1, 5, 5)]
+    [InlineData(10, 2, 5, 5)]
+    [InlineData(7, 2, 5, 2)]
+    [InlineData(7, 3, 5, 0)]
+    public async Task ListPaginated(
+        int quantityToGenerate,
+        int page,
+        int perPage,
+        int expectedQuantityItems
+    ) 
+    {
+        List<DomainEntity.Genre> exampleGenres = _fixture.GetExampleListGenres(quantityToGenerate);
+        await _fixture.Persistence.InsertList(exampleGenres);
+        var input = new ListGenresInput();
+        input.Page = page;
+        input.PerPage = perPage;
+
+        var (response, output) = await _fixture.ApiClient
+            .Get<TestApiResponseList<GenreModelOutput>>("/genres", input);
+
+        response.Should().NotBeNull();
+        response!.StatusCode.Should().Be((HttpStatusCode)StatusCodes.Status200OK);
+        output.Should().NotBeNull();
+        output!.Meta.Should().NotBeNull();
+        output.Data.Should().NotBeNull();
+        output.Meta!.Total.Should().Be(quantityToGenerate);
+        output.Meta.CurrentPage.Should().Be(input.Page);
+        output.Meta.PerPage.Should().Be(input.PerPage);
+        output.Data!.Count.Should().Be(expectedQuantityItems);
+        output.Data.ToList().ForEach(outputItem =>
+        {
+            var exampleItem = exampleGenres.Find(x => x.Id == outputItem.Id);
+            exampleItem.Should().NotBeNull();
+            outputItem.Name.Should().Be(exampleItem!.Name);
+            outputItem.IsActive.Should().Be(exampleItem.IsActive);
+            outputItem.CreatedAt.TrimMillisseconds()
+                .Should().Be(exampleItem.CreatedAt.TrimMillisseconds());
+        });
+    }
+
+    public void Dispose() => _fixture.CleanPersistence();
 }
