@@ -59,7 +59,6 @@ public class GetGenreApiTest : IDisposable
         output.Detail.Should().Be($"Genre '{randomGuid}' not found.");
     }
 
-
     [Fact(DisplayName = nameof(GetGenreWithRelations))]
     [Trait("EndToEnd/API", "Genre/GetGenre - Endpoints")]
     public async Task GetGenreWithRelations()
@@ -104,5 +103,6 @@ public class GetGenreApiTest : IDisposable
             output.Data.Categories.Select(relation => relation.Id).ToList();
         relatedCategoriesIds.Should().BeEquivalentTo(targetGenre.Categories);
     }
+
     public void Dispose() => _fixture.CleanPersistence();
 }
