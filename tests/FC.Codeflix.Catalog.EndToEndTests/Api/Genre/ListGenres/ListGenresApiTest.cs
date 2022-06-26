@@ -4,6 +4,7 @@ using FC.Codeflix.Catalog.Application.UseCases.Genre.ListGenres;
 using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using FC.Codeflix.Catalog.EndToEndTests.Extensions.DateTime;
 using FC.Codeflix.Catalog.EndToEndTests.Models;
+using FC.Codeflix.Catalog.Infra.Data.EF.Models;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -56,6 +57,73 @@ public class ListGenresApiTest : IDisposable
                 .Should().Be(exampleItem.CreatedAt.TrimMillisseconds());
         });
     }
+
+    [Fact(DisplayName = nameof(ListWithRelations))]
+    [Trait("EndToEnd/Api", "Genre/ListGenres - Endpoints")]
+    public async Task ListWithRelations()
+    {
+        List<DomainEntity.Genre> exampleGenres = _fixture.GetExampleListGenres(15);
+        List<DomainEntity.Category> exampleCategories = _fixture.GetExampleCategoriesList(10);
+        Random random = new Random();
+        exampleGenres.ForEach(genre =>
+        {
+            int relationsCount = random.Next(2, exampleCategories.Count - 1);
+            for (int i = 0; i < relationsCount; i++)
+            {
+                int selectedCategoryIndex = random.Next(0, exampleCategories.Count - 1);
+                DomainEntity.Category selected = exampleCategories[selectedCategoryIndex];
+                if (!genre.Categories.Contains(selected.Id))
+                    genre.AddCategory(selected.Id);
+            }
+        });
+        List<GenresCategories> genresCategories = new List<GenresCategories>();
+        exampleGenres.ForEach(
+            genre => genre.Categories.ToList().ForEach(
+                categoryId => genresCategories.Add(
+                    new GenresCategories(categoryId, genre.Id)
+                )
+            )
+        );
+        await _fixture.Persistence.InsertList(exampleGenres);
+        await _fixture.CategoryPersistence.InsertList(exampleCategories);
+        await _fixture.Persistence.InsertGenresCategoriesRelationsList(genresCategories);
+        var input = new ListGenresInput();
+        input.Page = 1;
+        input.PerPage = exampleGenres.Count;
+
+        var (response, output) = await _fixture.ApiClient
+            .Get<TestApiResponseList<GenreModelOutput>>("/genres", input);
+
+        response.Should().NotBeNull();
+        response!.StatusCode.Should().Be((HttpStatusCode)StatusCodes.Status200OK);
+        output.Should().NotBeNull();
+        output!.Meta.Should().NotBeNull();
+        output.Data.Should().NotBeNull();
+        output.Meta!.Total.Should().Be(exampleGenres.Count);
+        output.Meta.CurrentPage.Should().Be(input.Page);
+        output.Meta.PerPage.Should().Be(input.PerPage);
+        output.Data!.Count.Should().Be(exampleGenres.Count);
+        output.Data.ToList().ForEach(outputItem =>
+        {
+            var exampleItem = exampleGenres.Find(x => x.Id == outputItem.Id);
+            exampleItem.Should().NotBeNull();
+            outputItem.Name.Should().Be(exampleItem!.Name);
+            outputItem.IsActive.Should().Be(exampleItem.IsActive);
+            outputItem.CreatedAt.TrimMillisseconds()
+                .Should().Be(exampleItem.CreatedAt.TrimMillisseconds());
+            var relatedCategoriesIds = outputItem.Categories
+                .Select(x => x.Id).ToList();
+            relatedCategoriesIds.Should().BeEquivalentTo(exampleItem.Categories);
+            outputItem.Categories.ToList().ForEach(outputRelatedCategory =>
+            {
+                var exampleCategory = exampleCategories
+                    .Find(x => x.Id == outputRelatedCategory.Id);
+                exampleCategory.Should().NotBeNull();
+                outputRelatedCategory.Name.Should().Be(exampleCategory!.Name);
+            });
+        });
+    }
+
 
     [Fact(DisplayName = nameof(EmptyWhenThereAreNoItems))]
     [Trait("EndToEnd/Api", "Genre/ListGenres - Endpoints")]
