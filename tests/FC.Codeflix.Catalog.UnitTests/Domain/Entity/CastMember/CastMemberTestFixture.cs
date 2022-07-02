@@ -1,4 +1,5 @@
 ﻿using FC.Codeflix.Catalog.UnitTests.Common;
+using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
 using FC.Codeflix.Catalog.Domain.Enum;
 using System;
 using Xunit;
@@ -13,6 +14,12 @@ public class CastMemberTestFixtureCollection
 public class CastMemberTestFixture
     : BaseFixture
 {
+    public DomainEntity.CastMember GetExampleCastMember()
+        => new DomainEntity.CastMember(
+            GetValidName(),
+            GetRandomCastMemberType()
+        );
+
     public string GetValidName()
         => Faker.Name.FullName();
 
