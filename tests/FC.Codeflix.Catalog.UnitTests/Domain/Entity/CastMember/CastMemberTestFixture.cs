@@ -17,5 +17,5 @@ public class CastMemberTestFixture
         => Faker.Name.FullName();
 
     public CastMemberType GetRandomCastMemberType()
-        => (new Random()).Next(1, 2) as CastMemberType;
+        => (CastMemberType)(new Random()).Next(1, 2);
 }
