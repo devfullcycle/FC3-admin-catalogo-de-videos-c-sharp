@@ -24,8 +24,8 @@ public class CreateCastMemberTest
     public async Task Create()
     {
         var input = new UseCase.CreateCastMemberInput(
-            "Jorge Lucas", 
-            CastMemberType.Director
+            _fixture.GetValidName(), 
+            _fixture.GetRandomCastMemberType()
         );
         var repositoryMock = new Mock<ICastMemberRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();

@@ -1,4 +1,5 @@
 ﻿using FC.Codeflix.Catalog.Domain.Enum;
+using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
 
 namespace FC.Codeflix.Catalog.Application.UseCases.CastMember.Common;
 public class CastMemberModelOutput
@@ -20,4 +21,12 @@ public class CastMemberModelOutput
     public string Name { get; private set; }
     public CastMemberType Type { get; private set; }
     public DateTime CreatedAt { get; private set; }
+
+    public static CastMemberModelOutput FromCastMember(DomainEntity.CastMember castMember)
+        => new(
+            castMember.Id,
+            castMember.Name,
+            castMember.Type,
+            castMember.CreatedAt
+        );
 }
