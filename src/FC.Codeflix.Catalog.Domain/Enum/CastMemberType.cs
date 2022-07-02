@@ -1,6 +1,6 @@
 ﻿namespace FC.Codeflix.Catalog.Domain.Enum;
 public enum CastMemberType
 {
-    Actor = 1,
-    Director = 2
+    Director = 1,
+    Actor = 2
 }

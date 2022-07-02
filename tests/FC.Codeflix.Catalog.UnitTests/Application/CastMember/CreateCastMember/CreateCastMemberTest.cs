@@ -29,7 +29,10 @@ public class CreateCastMemberTest
         );
         var repositoryMock = new Mock<ICastMemberRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-        var useCase = new UseCase.CreateCastMember(repositoryMock, unitOfWorkMock);
+        var useCase = new UseCase.CreateCastMember(
+            repositoryMock.Object, 
+            unitOfWorkMock.Object
+        );
 
         var output = await useCase.Handle(input, CancellationToken.None);
 
@@ -37,7 +40,7 @@ public class CreateCastMemberTest
         output.Id.Should().NotBeEmpty();
         output.Name.Should().Be(input.Name);
         output.Type.Should().Be(input.Type);
-        output.CreateAt.Should().NotBeSameDateAs(default);
+        output.CreatedAt.Should().NotBeSameDateAs(default);
         unitOfWorkMock.Verify(
             x => x.Commit(It.IsAny<CancellationToken>()),
             Times.Once
