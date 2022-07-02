@@ -22,9 +22,9 @@ public class CastMember : AggregateRoot
     {
         Name = name;
         Type = type;
+        Validate();
     }
 
     private void Validate()
         => DomainValidation.NotNullOrEmpty(Name, nameof(Name));
-
 }
