@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Xunit;
 using FC.Codeflix.Catalog.Application.UseCases.CastMember.Common;
 using FluentAssertions;
+using FC.Codeflix.Catalog.Application.Exceptions;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.CastMember.GetCastMember;
 
@@ -39,5 +40,22 @@ public class GetCastMemberTest
             It.Is<Guid>(x => x == input.Id),
             It.IsAny<CancellationToken>()
         ), Times.Once);
+    }
+
+    [Fact(DisplayName = nameof(ThrowIfNotFound))]
+    [Trait("Application", "GetCastMember - Use Cases")]
+    public async Task ThrowIfNotFound()
+    {
+        var repositoryMock = new Mock<ICastMemberRepository>();
+        repositoryMock
+            .Setup(x => x.Get(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new NotFoundException("notfound"));
+        var input = new UseCase.GetCastMemberInput(Guid.NewGuid());
+        var useCase = new UseCase.GetCastMember(repositoryMock.Object);
+
+        var action = async () 
+            => await useCase.Handle(input, CancellationToken.None);
+
+        await action.Should().ThrowAsync<NotFoundException>();
     }
 }
