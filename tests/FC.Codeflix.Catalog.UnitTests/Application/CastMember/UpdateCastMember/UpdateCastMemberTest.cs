@@ -9,6 +9,7 @@ using UseCase = FC.Codeflix.Catalog.Application.UseCases.CastMember.UpdateCastMe
 using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
 using Moq;
 using Xunit;
+using FC.Codeflix.Catalog.Application.Exceptions;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.CastMember.UpdateCastMember;
 
@@ -74,6 +75,33 @@ public class UpdateCastMemberTest
             x => x.Commit(It.IsAny<CancellationToken>())
             , Times.Once
         );
+    }
 
+
+    [Fact(DisplayName = nameof(ThrowWhenNotFound))]
+    [Trait("Application", "UpdateCastMember - UseCases")]
+    public async Task ThrowWhenNotFound()
+    {
+        var repositoryMock = new Mock<ICastMemberRepository>();
+        var unitOfWorkMock = new Mock<IUnitOfWork>();
+        repositoryMock
+            .Setup(x => x.Get(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()
+            ))
+            .ThrowsAsync(new NotFoundException("error"));
+        var input = new UseCase.UpdateCastMemberInput(
+            Guid.NewGuid(),
+            _fixture.GetValidName(),
+            _fixture.GetRandomCastMemberType()
+        );
+        var useCase = new UseCase.UpdateCastMember(
+            repositoryMock.Object,
+            unitOfWorkMock.Object
+        );
+
+        var action = async () => await useCase.Handle(input, CancellationToken.None);
+
+        await action.Should().ThrowAsync<NotFoundException>();
     }
 }
