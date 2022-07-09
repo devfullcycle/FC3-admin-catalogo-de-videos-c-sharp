@@ -10,6 +10,7 @@ using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
 using Moq;
 using Xunit;
 using FC.Codeflix.Catalog.Application.Exceptions;
+using FC.Codeflix.Catalog.Domain.Exceptions;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.CastMember.UpdateCastMember;
 
@@ -77,7 +78,6 @@ public class UpdateCastMemberTest
         );
     }
 
-
     [Fact(DisplayName = nameof(ThrowWhenNotFound))]
     [Trait("Application", "UpdateCastMember - UseCases")]
     public async Task ThrowWhenNotFound()
@@ -103,5 +103,35 @@ public class UpdateCastMemberTest
         var action = async () => await useCase.Handle(input, CancellationToken.None);
 
         await action.Should().ThrowAsync<NotFoundException>();
+    }
+
+
+    [Fact(DisplayName = nameof(ThrowWhenInvalidName))]
+    [Trait("Application", "UpdateCastMember - UseCases")]
+    public async Task ThrowWhenInvalidName()
+    {
+        var repositoryMock = new Mock<ICastMemberRepository>();
+        var unitOfWorkMock = new Mock<IUnitOfWork>();
+        var castMemberExample = _fixture.GetExampleCastMember();
+        repositoryMock
+            .Setup(x => x.Get(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()
+            ))
+            .ReturnsAsync(castMemberExample);
+        var input = new UseCase.UpdateCastMemberInput(
+            Guid.NewGuid(),
+            null!,
+            _fixture.GetRandomCastMemberType()
+        );
+        var useCase = new UseCase.UpdateCastMember(
+            repositoryMock.Object,
+            unitOfWorkMock.Object
+        );
+
+        var action = async () => await useCase.Handle(input, CancellationToken.None);
+
+        await action.Should().ThrowAsync<EntityValidationException>()
+            .WithMessage("Name should not be empty or null");
     }
 }
