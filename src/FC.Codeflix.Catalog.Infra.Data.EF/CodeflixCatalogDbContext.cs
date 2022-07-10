@@ -9,6 +9,7 @@ public class CodeflixCatalogDbContext
 {
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Genre> Genres => Set<Genre>();
+    public DbSet<CastMember> CastMembers => Set<CastMember>();
 
     public DbSet<GenresCategories> GenresCategories => 
         Set<GenresCategories>();
