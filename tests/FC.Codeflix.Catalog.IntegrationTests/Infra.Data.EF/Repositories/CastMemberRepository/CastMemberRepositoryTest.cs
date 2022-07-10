@@ -31,7 +31,29 @@ public class CastMemberRepositoryTest
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == castMemberExample.Id);
         castMemberFromDb.Should().NotBeNull();
-        castMemberFromDb.Name.Should().Be(castMemberExample.Name);
+        castMemberFromDb!.Name.Should().Be(castMemberExample.Name);
         castMemberFromDb.Type.Should().Be(castMemberExample.Type);
+    }
+
+    [Fact(DisplayName = nameof(Get))]
+    [Trait("Integration/Infra.Data", "CastMemberRepository - Repositories")]
+    public async Task Get()
+    {
+        var castMemberExampleList = _fixture.GetExampleCastMembersList(5);
+        var castMemberExample = castMemberExampleList[3];
+        var arrangeContext = _fixture.CreateDbContext();
+        await arrangeContext.AddRangeAsync(castMemberExampleList);
+        await arrangeContext.SaveChangesAsync();
+        var repository = new Repository
+            .CastMemberRepository(_fixture.CreateDbContext(true));
+
+        var itemFromRepository = await repository.Get(
+            castMemberExample.Id, 
+            CancellationToken.None
+        );
+
+        itemFromRepository.Should().NotBeNull();
+        itemFromRepository!.Name.Should().Be(castMemberExample.Name);
+        itemFromRepository.Type.Should().Be(castMemberExample.Type);
     }
 }
