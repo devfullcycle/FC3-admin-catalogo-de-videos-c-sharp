@@ -1,4 +1,5 @@
 ﻿using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
+using UseCase = FC.Codeflix.Catalog.Application.UseCases.CastMember.ListCastMembers;
 using FC.Codeflix.Catalog.Domain.Repository;
 using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using Moq;
@@ -6,6 +7,8 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using FluentAssertions;
+using System.Linq;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.CastMember.ListCastMembers;
 
@@ -29,8 +32,8 @@ public class ListCastMembersTest
         repositoryMock.Setup(x => x.Search(
             It.IsAny<SearchInput>(), It.IsAny<CancellationToken>()
         )).ReturnsAsync(repositorySearchOutput);
-        var input = new ListCastMembersInput(1,10,"","", SearchOrder.Asc);
-        var useCase = new ListCastMembers(repositoryMock);
+        var input = new UseCase.ListCastMembersInput(1,10,"","", SearchOrder.Asc);
+        var useCase = new UseCase.ListCastMembers(repositoryMock.Object);
 
         var output = await useCase.Handle(input, CancellationToken.None);
         
@@ -51,7 +54,7 @@ public class ListCastMembersTest
                 && x.PerPage == input.PerPage
                 && x.Search == input.Search
                 && x.Order == input.Dir
-                && x.OrderBy == input.Order
+                && x.OrderBy == input.Sort
             )),
             It.IsAny<CancellationToken>()
         ), Times.Once);
