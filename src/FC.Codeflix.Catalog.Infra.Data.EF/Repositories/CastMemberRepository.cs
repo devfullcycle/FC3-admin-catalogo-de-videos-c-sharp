@@ -1,4 +1,5 @@
-﻿using FC.Codeflix.Catalog.Domain.Entity;
+﻿using FC.Codeflix.Catalog.Application.Exceptions;
+using FC.Codeflix.Catalog.Domain.Entity;
 using FC.Codeflix.Catalog.Domain.Repository;
 using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using Microsoft.EntityFrameworkCore;
@@ -20,9 +21,14 @@ public class CastMemberRepository : ICastMemberRepository
         throw new NotImplementedException();
     }
 
-    public Task<CastMember> Get(Guid id, CancellationToken cancellationToken)
+    public async Task<CastMember> Get(Guid id, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var castmember = await _castMembers.AsNoTracking().FirstOrDefaultAsync(
+            x => x.Id == id,
+            cancellationToken
+        );
+        NotFoundException.ThrowIfNull(castmember, $"CastMember '{id}' not found.");
+        return castmember!;
     }
 
     public Task<SearchOutput<CastMember>> Search(SearchInput input, CancellationToken cancellationToken)

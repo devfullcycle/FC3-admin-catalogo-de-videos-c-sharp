@@ -4,6 +4,8 @@ using Repository = FC.Codeflix.Catalog.Infra.Data.EF.Repositories;
 using Xunit;
 using Microsoft.EntityFrameworkCore;
 using FluentAssertions;
+using System;
+using FC.Codeflix.Catalog.Application.Exceptions;
 
 namespace FC.Codeflix.Catalog.IntegrationTests.Infra.Data.EF.Repositories.CastMemberRepository;
 
@@ -48,12 +50,29 @@ public class CastMemberRepositoryTest
             .CastMemberRepository(_fixture.CreateDbContext(true));
 
         var itemFromRepository = await repository.Get(
-            castMemberExample.Id, 
+            castMemberExample.Id,
             CancellationToken.None
         );
 
         itemFromRepository.Should().NotBeNull();
         itemFromRepository!.Name.Should().Be(castMemberExample.Name);
         itemFromRepository.Type.Should().Be(castMemberExample.Type);
+    }
+
+    [Fact(DisplayName = nameof(GetThrowsWhenNotFound))]
+    [Trait("Integration/Infra.Data", "CastMemberRepository - Repositories")]
+    public async Task GetThrowsWhenNotFound()
+    {
+        var randomGuid = Guid.NewGuid();
+        var repository = new Repository
+            .CastMemberRepository(_fixture.CreateDbContext());
+
+        var action = async () => await repository.Get(
+            randomGuid,
+            CancellationToken.None
+        );
+
+        await action.Should().ThrowAsync<NotFoundException>()
+            .WithMessage($"CastMember '{randomGuid}' not found.");
     }
 }
