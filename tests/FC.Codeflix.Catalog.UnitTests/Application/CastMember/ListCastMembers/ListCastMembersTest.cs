@@ -59,6 +59,7 @@ public class ListCastMembersTest
             It.IsAny<CancellationToken>()
         ), Times.Once);
     }
+
     [Fact(DisplayName = nameof(RetursEmptyWhenIsEmpty))]
     [Trait("Application", "ListCastMembers - Use Cases")]
     public async Task RetursEmptyWhenIsEmpty()

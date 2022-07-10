@@ -15,25 +15,7 @@ public class ListCastMembers : IListCastMembers
         CancellationToken cancellationToken
     )
     {
-        var searchOutput = await _repository.Search(
-            new SearchInput(
-                request.Page, 
-                request.PerPage, 
-                request.Search, 
-                request.Sort, 
-                request.Dir
-            ), 
-            cancellationToken
-        );
-        return new ListCastMembersOutput(
-            searchOutput.CurrentPage, 
-            searchOutput.PerPage, 
-            searchOutput.Total, 
-            searchOutput.Items
-                .Select(castmember 
-                    => CastMemberModelOutput.FromCastMember(castmember))
-                .ToList()
-                .AsReadOnly()
-        );
+        var searchOutput = await _repository.Search(request.ToSearchInput(), cancellationToken);
+        return ListCastMembersOutput.FromSearchOutput(searchOutput);
     }
 }
