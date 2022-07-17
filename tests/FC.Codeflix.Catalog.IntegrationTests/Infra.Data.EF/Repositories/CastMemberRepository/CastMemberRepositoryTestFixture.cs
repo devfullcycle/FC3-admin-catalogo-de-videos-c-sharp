@@ -30,4 +30,14 @@ public class CastMemberRepositoryTestFixture
             .Range(1, quantity)
             .Select(_ => GetExampleCastMember())
             .ToList();
+    
+    public List<DomainEntity.CastMember> GetExampleCastMembersListByNames(List<string> names)
+        => names
+            .Select(name =>
+            {
+                var example = GetExampleCastMember();
+                example.Update(name, example.Type);
+                return example;
+            })
+            .ToList();
 }

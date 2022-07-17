@@ -5,6 +5,7 @@ using Xunit;
 using Microsoft.EntityFrameworkCore;
 using FluentAssertions;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using FC.Codeflix.Catalog.Application.Exceptions;
 using FC.Codeflix.Catalog.Domain.Enum;
@@ -214,6 +215,62 @@ public class CastMemberRepositoryTest
         searchResult.PerPage.Should().Be(perPage);
         searchResult.Total.Should().Be(quantityToGenerate);
         searchResult.Items.Should().HaveCount(expectedQuantityItems);
+        searchResult.Items.ToList().ForEach(resultItem =>
+        {
+            var example = exampleList.Find(x => x.Id == resultItem.Id);
+            example.Should().NotBeNull();
+            resultItem.Name.Should().Be(example!.Name);
+            resultItem.Type.Should().Be(example.Type);
+        });
+    }
+    
+    [Theory(DisplayName = nameof(SearchByText))]
+    [Trait("Integration/Infra.Data", "CastMemberRepository - Repositories")]
+    [InlineData("Action", 1, 5, 1, 1)]
+    [InlineData("Horror", 1, 5, 3, 3)]
+    [InlineData("Horror", 2, 5, 0, 3)]
+    [InlineData("Sci-fi", 1, 5, 4, 4)]
+    [InlineData("Sci-fi", 1, 2, 2, 4)]
+    [InlineData("Sci-fi", 2, 3, 1, 4)]
+    [InlineData("Sci-fi Other", 1, 3, 0, 0)]
+    [InlineData("Robots", 1, 5, 2, 2)]
+    public async Task SearchByText(
+        string search,
+        int page,
+        int perPage,
+        int expectedQuantityItemsReturned,
+        int expectedQuantityTotalItems
+    )
+    {
+        var namesToGenerate = new List<string>()
+        {
+            "Action",
+            "Horror",
+            "Horror - Robots",
+            "Horror - Based on Real Facts",
+            "Drama",
+            "Sci-fi IA",
+            "Sci-fi Space",
+            "Sci-fi Robots",
+            "Sci-fi Future"
+        };
+        var exampleList = _fixture.GetExampleCastMembersListByNames(namesToGenerate);
+        var arrangeDbContext = _fixture.CreateDbContext();
+        await arrangeDbContext.AddRangeAsync(exampleList);
+        await arrangeDbContext.SaveChangesAsync();
+        var castMembersRepository = new Repository
+            .CastMemberRepository(_fixture.CreateDbContext(true));
+
+        var searchResult = await castMembersRepository.Search(
+            new SearchInput(page, perPage, search, "", SearchOrder.Asc),
+            CancellationToken.None
+        );
+
+        searchResult.Should().NotBeNull();
+        searchResult.CurrentPage.Should().Be(page);
+        searchResult.PerPage.Should().Be(perPage);
+        searchResult.Total.Should().Be(expectedQuantityTotalItems);
+        searchResult.Items.Should().HaveCount(expectedQuantityItemsReturned);
         searchResult.Items.ToList().ForEach(resultItem =>
         {
             var example = exampleList.Find(x => x.Id == resultItem.Id);
