@@ -165,9 +165,9 @@ public class CastMemberRepositoryTest
         });
     }
     
-    [Fact(DisplayName = nameof(SearchReturnsEmptyWhenEpty))]
+    [Fact(DisplayName = nameof(SearchReturnsEmptyWhenEmpty))]
     [Trait("Integration/Infra.Data", "CastMemberRepository - Repositories")]
-    public async Task SearchReturnsEmptyWhenEpty()
+    public async Task SearchReturnsEmptyWhenEmpty()
     {
         var castMembersRepository = new Repository
             .CastMemberRepository(_fixture.CreateDbContext());
@@ -182,5 +182,44 @@ public class CastMemberRepositoryTest
         searchResult.PerPage.Should().Be(20);
         searchResult.Total.Should().Be(0);
         searchResult.Items.Should().HaveCount(0);
+    }
+
+    [Theory(DisplayName = nameof(SearchWithPagination))]
+    [Trait("Integration/Infra.Data", "CastMemberRepository - Repositories")]
+    [InlineData(10, 1, 5, 5)]
+    [InlineData(10, 2, 5, 5)]
+    [InlineData(7, 2, 5, 2)]
+    [InlineData(7, 3, 5, 0)]
+    public async Task SearchWithPagination(
+        int quantityToGenerate,
+        int page,
+        int perPage,
+        int expectedQuantityItems
+    )
+    {
+        var exampleList = _fixture.GetExampleCastMembersList(quantityToGenerate);
+        var arrangeDbContext = _fixture.CreateDbContext();
+        await arrangeDbContext.AddRangeAsync(exampleList);
+        await arrangeDbContext.SaveChangesAsync();
+        var castMembersRepository = new Repository
+            .CastMemberRepository(_fixture.CreateDbContext(true));
+
+        var searchResult = await castMembersRepository.Search(
+            new SearchInput(page, perPage, "", "", SearchOrder.Asc),
+            CancellationToken.None
+        );
+
+        searchResult.Should().NotBeNull();
+        searchResult.CurrentPage.Should().Be(page);
+        searchResult.PerPage.Should().Be(perPage);
+        searchResult.Total.Should().Be(quantityToGenerate);
+        searchResult.Items.Should().HaveCount(expectedQuantityItems);
+        searchResult.Items.ToList().ForEach(resultItem =>
+        {
+            var example = exampleList.Find(x => x.Id == resultItem.Id);
+            example.Should().NotBeNull();
+            resultItem.Name.Should().Be(example!.Name);
+            resultItem.Type.Should().Be(example.Type);
+        });
     }
 }

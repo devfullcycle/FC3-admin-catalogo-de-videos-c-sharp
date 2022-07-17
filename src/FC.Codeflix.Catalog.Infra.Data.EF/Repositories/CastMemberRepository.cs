@@ -31,11 +31,16 @@ public class CastMemberRepository : ICastMemberRepository
 
     public async Task<SearchOutput<CastMember>> Search(SearchInput input, CancellationToken cancellationToken)
     {
-        var items = await _castMembers.AsNoTracking().ToListAsync();
+        var toSkip = (input.Page - 1) * input.PerPage;
+        var count = _castMembers.AsNoTracking().Count();
+        var items = await _castMembers.AsNoTracking()
+            .Skip(toSkip)
+            .Take(input.PerPage)
+            .ToListAsync();
         return new SearchOutput<CastMember>(
             input.Page,
             input.PerPage,
-            items.Count,
+            count,
             items.AsReadOnly()
         );
     }
