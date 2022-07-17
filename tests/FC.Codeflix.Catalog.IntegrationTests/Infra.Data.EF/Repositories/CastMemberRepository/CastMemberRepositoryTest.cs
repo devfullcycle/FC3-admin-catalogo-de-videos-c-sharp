@@ -7,6 +7,8 @@ using FluentAssertions;
 using System;
 using System.Linq;
 using FC.Codeflix.Catalog.Application.Exceptions;
+using FC.Codeflix.Catalog.Domain.Enum;
+using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 
 namespace FC.Codeflix.Catalog.IntegrationTests.Infra.Data.EF.Repositories.CastMemberRepository;
 
@@ -131,5 +133,35 @@ public class CastMemberRepositoryTest
         castMemberDb.Should().NotBeNull();
         castMemberDb!.Name.Should().Be(newName);
         castMemberDb.Type.Should().Be(newType);
+    }
+
+    [Fact(DisplayName = nameof(Search))]
+    [Trait("Integration/Infra.Data", "CastMemberRepository - Repositories")]
+    public async Task Search()
+    {
+        var exampleList = _fixture.GetExampleCastMembersList(10);
+        var arrangeDbContext = _fixture.CreateDbContext();
+        await arrangeDbContext.AddRangeAsync(exampleList);
+        await arrangeDbContext.SaveChangesAsync();
+        var castMembersRepository = new Repository
+            .CastMemberRepository(_fixture.CreateDbContext(true));
+
+        var searchResult = await castMembersRepository.Search(
+            new SearchInput(1, 20, "", "", SearchOrder.Asc),
+            CancellationToken.None
+        );
+
+        searchResult.Should().NotBeNull();
+        searchResult.CurrentPage.Should().Be(1);
+        searchResult.PerPage.Should().Be(20);
+        searchResult.Total.Should().Be(10);
+        searchResult.Items.Should().HaveCount(10);
+        searchResult.Items.ToList().ForEach(resultItem =>
+        {
+            var example = exampleList.Find(x => x.Id == resultItem.Id);
+            example.Should().NotBeNull();
+            resultItem.Name.Should().Be(example!.Name);
+            resultItem.Type.Should().Be(example.Type);
+        });
     }
 }
