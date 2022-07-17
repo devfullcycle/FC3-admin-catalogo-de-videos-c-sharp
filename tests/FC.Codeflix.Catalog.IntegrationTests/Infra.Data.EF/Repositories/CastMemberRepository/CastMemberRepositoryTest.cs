@@ -86,12 +86,14 @@ public class CastMemberRepositoryTest
         var arrangeContext = _fixture.CreateDbContext();
         await arrangeContext.AddRangeAsync(castMemberExampleList);
         await arrangeContext.SaveChangesAsync();
+        var actDbContext = _fixture.CreateDbContext(true);
         var repository = new Repository
-            .CastMemberRepository(_fixture.CreateDbContext(true));
+            .CastMemberRepository(actDbContext);
 
         await repository.Delete(
             castMemberExample, CancellationToken.None
         );
+        await actDbContext.SaveChangesAsync();
 
         var assertionContext = _fixture.CreateDbContext(true);
         var itemsInDatabase = assertionContext.CastMembers

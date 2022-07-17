@@ -16,10 +16,8 @@ public class CastMemberRepository : ICastMemberRepository
     public async Task Insert(CastMember aggregate, CancellationToken cancellationToken) 
         => await _castMembers.AddAsync(aggregate, cancellationToken);
 
-    public Task Delete(CastMember aggregate, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
+    public Task Delete(CastMember aggregate, CancellationToken _)
+        => Task.FromResult(_castMembers.Remove(aggregate));
 
     public async Task<CastMember> Get(Guid id, CancellationToken cancellationToken)
     {
