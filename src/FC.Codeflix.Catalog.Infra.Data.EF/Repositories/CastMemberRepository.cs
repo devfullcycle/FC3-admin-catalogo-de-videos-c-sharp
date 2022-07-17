@@ -29,9 +29,15 @@ public class CastMemberRepository : ICastMemberRepository
         return castmember!;
     }
 
-    public Task<SearchOutput<CastMember>> Search(SearchInput input, CancellationToken cancellationToken)
+    public async Task<SearchOutput<CastMember>> Search(SearchInput input, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var items = await _castMembers.AsNoTracking().ToListAsync();
+        return new SearchOutput<CastMember>(
+            input.Page,
+            input.PerPage,
+            items.Count,
+            items.AsReadOnly()
+        );
     }
 
     public Task Update(CastMember aggregate, CancellationToken _) 
