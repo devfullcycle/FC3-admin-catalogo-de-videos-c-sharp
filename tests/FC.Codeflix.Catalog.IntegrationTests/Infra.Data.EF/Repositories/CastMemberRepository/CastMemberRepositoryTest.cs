@@ -164,4 +164,23 @@ public class CastMemberRepositoryTest
             resultItem.Type.Should().Be(example.Type);
         });
     }
+    
+    [Fact(DisplayName = nameof(SearchReturnsEmptyWhenEpty))]
+    [Trait("Integration/Infra.Data", "CastMemberRepository - Repositories")]
+    public async Task SearchReturnsEmptyWhenEpty()
+    {
+        var castMembersRepository = new Repository
+            .CastMemberRepository(_fixture.CreateDbContext());
+
+        var searchResult = await castMembersRepository.Search(
+            new SearchInput(1, 20, "", "", SearchOrder.Asc),
+            CancellationToken.None
+        );
+
+        searchResult.Should().NotBeNull();
+        searchResult.CurrentPage.Should().Be(1);
+        searchResult.PerPage.Should().Be(20);
+        searchResult.Total.Should().Be(0);
+        searchResult.Items.Should().HaveCount(0);
+    }
 }
