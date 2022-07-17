@@ -5,6 +5,7 @@ using Xunit;
 using Microsoft.EntityFrameworkCore;
 using FluentAssertions;
 using System;
+using System.Linq;
 using FC.Codeflix.Catalog.Application.Exceptions;
 
 namespace FC.Codeflix.Catalog.IntegrationTests.Infra.Data.EF.Repositories.CastMemberRepository;
@@ -74,5 +75,29 @@ public class CastMemberRepositoryTest
 
         await action.Should().ThrowAsync<NotFoundException>()
             .WithMessage($"CastMember '{randomGuid}' not found.");
+    }
+
+    [Fact(DisplayName = nameof(Delete))]
+    [Trait("Integration/Infra.Data", "CastMemberRepository - Repositories")]
+    public async Task Delete()
+    {
+        var castMemberExampleList = _fixture.GetExampleCastMembersList(5);
+        var castMemberExample = castMemberExampleList[3];
+        var arrangeContext = _fixture.CreateDbContext();
+        await arrangeContext.AddRangeAsync(castMemberExampleList);
+        await arrangeContext.SaveChangesAsync();
+        var repository = new Repository
+            .CastMemberRepository(_fixture.CreateDbContext(true));
+
+        await repository.Delete(
+            castMemberExample, CancellationToken.None
+        );
+
+        var assertionContext = _fixture.CreateDbContext(true);
+        var itemsInDatabase = assertionContext.CastMembers
+            .AsNoTracking()
+            .ToList();
+        itemsInDatabase.Should().HaveCount(4);
+        itemsInDatabase.Should().NotContain(castMemberExample);
     }
 }
