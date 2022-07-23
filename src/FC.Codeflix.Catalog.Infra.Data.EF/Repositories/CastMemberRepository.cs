@@ -33,6 +33,7 @@ public class CastMemberRepository : ICastMemberRepository
     {
         var toSkip = (input.Page - 1) * input.PerPage;
         var query = _castMembers.AsNoTracking();
+        query = AddOrderToQuery(query, input.OrderBy, input.Order);
         if (!String.IsNullOrWhiteSpace(input.Search))
             query = query.Where(x => x.Name.Contains(input.Search));
         var items = await query
@@ -50,4 +51,26 @@ public class CastMemberRepository : ICastMemberRepository
 
     public Task Update(CastMember aggregate, CancellationToken _) 
         => Task.FromResult(_castMembers.Update(aggregate));
+
+    private IQueryable<CastMember> AddOrderToQuery(
+        IQueryable<CastMember> query,
+        string orderProperty,
+        SearchOrder order
+    )
+    {
+        var orderedQuery = (orderProperty.ToLower(), order) switch
+        {
+            ("name", SearchOrder.Asc) => query.OrderBy(x => x.Name)
+                .ThenBy(x => x.Id),
+            ("name", SearchOrder.Desc) => query.OrderByDescending(x => x.Name)
+                .ThenByDescending(x => x.Id),
+            ("id", SearchOrder.Asc) => query.OrderBy(x => x.Id),
+            ("id", SearchOrder.Desc) => query.OrderByDescending(x => x.Id),
+            ("createdat", SearchOrder.Asc) => query.OrderBy(x => x.CreatedAt),
+            ("createdat", SearchOrder.Desc) => query.OrderByDescending(x => x.CreatedAt),
+            _ => query.OrderBy(x => x.Name)
+                .ThenBy(x => x.Id)
+        };
+        return orderedQuery;
+    }
 }
