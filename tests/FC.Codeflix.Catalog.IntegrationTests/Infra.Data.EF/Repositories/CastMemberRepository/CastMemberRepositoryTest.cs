@@ -223,7 +223,7 @@ public class CastMemberRepositoryTest
             resultItem.Type.Should().Be(example.Type);
         });
     }
-    
+
     [Theory(DisplayName = nameof(SearchByText))]
     [Trait("Integration/Infra.Data", "CastMemberRepository - Repositories")]
     [InlineData("Action", 1, 5, 1, 1)]
@@ -278,5 +278,49 @@ public class CastMemberRepositoryTest
             resultItem.Name.Should().Be(example!.Name);
             resultItem.Type.Should().Be(example.Type);
         });
+    }
+
+    [Theory(DisplayName = nameof(OrderedSearch))]
+    [Trait("Integration/Infra.Data", "CastMemberRepository - Repositories")]
+    [InlineData("name", "asc")]
+    [InlineData("name", "desc")]
+    [InlineData("id", "asc")]
+    [InlineData("id", "desc")]
+    [InlineData("createdAt", "asc")]
+    [InlineData("createdAt", "desc")]
+    [InlineData("", "asc")]
+    public async Task OrderedSearch(
+        string orderBy,
+        string order
+    )
+    {
+        var exampleList = _fixture.GetExampleCastMembersList(5);
+        var arrangeDbContext = _fixture.CreateDbContext();
+        await arrangeDbContext.AddRangeAsync(exampleList);
+        await arrangeDbContext.SaveChangesAsync();
+        var castMembersRepository = new Repository
+            .CastMemberRepository(_fixture.CreateDbContext(true));
+        var inputOrder = order == "asc" ? SearchOrder.Asc : SearchOrder.Desc;
+
+        var searchResult = await castMembersRepository.Search(
+            new SearchInput(1, 10, "", orderBy, inputOrder),
+            CancellationToken.None
+        );
+
+        searchResult.Should().NotBeNull();
+        searchResult.CurrentPage.Should().Be(1);
+        searchResult.PerPage.Should().Be(10);
+        searchResult.Total.Should().Be(5);
+        searchResult.Items.Should().HaveCount(5);
+        var orderedList = _fixture.CloneListOrdered(
+            exampleList, 
+            orderBy, 
+            inputOrder
+        );
+        for (var i = 0; i < orderedList.Count; i++)
+        {
+            searchResult.Items[i].Name.Should().Be(orderedList[i].Name);
+            searchResult.Items[i].Type.Should().Be(orderedList[i].Type);
+        }
     }
 }
