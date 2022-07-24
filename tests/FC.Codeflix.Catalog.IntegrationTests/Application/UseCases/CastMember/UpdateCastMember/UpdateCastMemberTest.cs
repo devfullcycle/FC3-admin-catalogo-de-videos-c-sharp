@@ -1,5 +1,7 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
+using FC.Codeflix.Catalog.Application.Exceptions;
 using FC.Codeflix.Catalog.Infra.Data.EF;
 using FC.Codeflix.Catalog.Infra.Data.EF.Repositories;
 using FC.Codeflix.Catalog.IntegrationTests.Application.UseCases.CastMember.Common;
@@ -46,5 +48,24 @@ public class UpdateCastMemberTest
         item.Should().NotBeNull();
         item!.Name.Should().Be(newName);
         item.Type.Should().Be(newType);
+    }
+    
+    [Fact(DisplayName = nameof(ThrowWhenNotFound))]
+    [Trait("Integration/Application", "UpdateCastMember - Use Cases")]
+    public async Task ThrowWhenNotFound()
+    {
+        var randomGuid = Guid.NewGuid();
+        var newName = _fixture.GetValidName();
+        var newType = _fixture.GetRandomCastMemberType();
+        var actDbContext = _fixture.CreateDbContext(true);
+        var repository = new CastMemberRepository(actDbContext);
+        var uow = new UnitOfWork(actDbContext);
+        var useCase = new UseCase.UpdateCastMember(repository, uow);
+        var input = new UseCase.UpdateCastMemberInput(randomGuid, newName, newType);
+
+        var action = async () => await useCase.Handle(input, CancellationToken.None);
+
+        await action.Should().ThrowAsync<NotFoundException>()
+            .WithMessage($"CastMember '{randomGuid}' not found.");
     }
 }
