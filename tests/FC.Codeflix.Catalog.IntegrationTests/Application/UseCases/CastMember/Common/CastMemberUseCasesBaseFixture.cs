@@ -4,9 +4,16 @@ using System.Linq;
 using FC.Codeflix.Catalog.Domain.Enum;
 using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using FC.Codeflix.Catalog.IntegrationTests.Base;
+using Xunit;
 using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
 
 namespace FC.Codeflix.Catalog.IntegrationTests.Application.UseCases.CastMember.Common;
+
+[CollectionDefinition(nameof(CastMemberUseCasesBaseFixture))]
+public class CastMemberUseCasesBaseFixtureCollection
+    : ICollectionFixture<CastMemberUseCasesBaseFixture>
+{}
+
 public class CastMemberUseCasesBaseFixture
     : BaseFixture
 {
@@ -40,7 +47,7 @@ public class CastMemberUseCasesBaseFixture
         string orderBy,
         SearchOrder order
     )
-    {
+    {        
         var listClone = new List<DomainEntity.CastMember>(list);
         var orderedEnumerable = (orderBy.ToLower(), order) switch
         {
