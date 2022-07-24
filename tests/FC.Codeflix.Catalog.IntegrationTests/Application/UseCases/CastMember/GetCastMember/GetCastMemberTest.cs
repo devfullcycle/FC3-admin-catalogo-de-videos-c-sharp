@@ -1,5 +1,7 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
+using FC.Codeflix.Catalog.Application.Exceptions;
 using FC.Codeflix.Catalog.Infra.Data.EF.Repositories;
 using FC.Codeflix.Catalog.IntegrationTests.Application.UseCases.CastMember.Common;
 using FluentAssertions;
@@ -36,5 +38,22 @@ public class GetCastMemberTest
         output.Name.Should().Be(example.Name);
         output.Type.Should().Be(example.Type);
         output.Id.Should().Be(example.Id);
+    }
+
+
+    [Fact(DisplayName = nameof(ThrowWhenNotFound))]
+    [Trait("Integration/Application", "GetCastMember - Use Cases")]
+    public async Task ThrowWhenNotFound()
+    {
+        var useCase = new UseCase.GetCastMember(
+            new CastMemberRepository(_fixture.CreateDbContext())
+        );
+        var randomGuid = Guid.NewGuid();
+        var input = new UseCase.GetCastMemberInput(randomGuid);
+
+        var action = async () => await useCase.Handle(input, CancellationToken.None);
+        
+        await action.Should().ThrowAsync<NotFoundException>()
+            .WithMessage($"CastMember '{randomGuid}' not found.");
     }
 }
