@@ -4,12 +4,25 @@ using System.Linq;
 using FC.Codeflix.Catalog.Domain.Enum;
 using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using FC.Codeflix.Catalog.EndToEndTests.Base;
+using Xunit;
 using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
 
 namespace FC.Codeflix.Catalog.EndToEndTests.Api.CastMember.Common;
-public class CastMemberBaseFixture : BaseFixture
-{
 
+[CollectionDefinition(nameof(CastMemberApiBaseFixture))]
+public class CastMemberApiBaseFixtureCollection : ICollectionFixture<CastMemberApiBaseFixture>
+{
+}
+
+public class CastMemberApiBaseFixture : BaseFixture
+{
+    public CastMemberPersistence Persistence;
+
+    public CastMemberApiBaseFixture()
+    {
+        Persistence = new CastMemberPersistence(CreateDbContext());
+    }
+    
     public DomainEntity.CastMember GetExampleCastMember()
         => new(GetValidName(), GetRandomCastMemberType());
 
