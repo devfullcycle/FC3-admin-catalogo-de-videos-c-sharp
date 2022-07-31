@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
@@ -83,6 +84,57 @@ public class ListCastMembersTest
 
         output.Items.Should().HaveCount(expectedQuantityItems);
         output.Total.Should().Be(quantityToGenerate);
+        output.Page.Should().Be(input.Page);
+        output.PerPage.Should().Be(input.PerPage);
+        output.Items.ToList().ForEach(outputItem =>
+        {
+            var exampleItem = examples.First(example => example.Id == outputItem.Id);
+            exampleItem.Should().BeEquivalentTo(outputItem);
+        });
+    }
+    
+    [Theory(DisplayName = nameof(SearchByText))]
+    [Trait("Integration/Application", "ListCastMembers - Use Cases")]
+    [InlineData("Action", 1, 5, 1, 1)]
+    [InlineData("Horror", 1, 5, 3, 3)]
+    [InlineData("Horror", 2, 5, 0, 3)]
+    [InlineData("Sci-fi", 1, 5, 4, 4)]
+    [InlineData("Sci-fi", 1, 2, 2, 4)]
+    [InlineData("Sci-fi", 2, 3, 1, 4)]
+    [InlineData("Sci-fi Other", 1, 3, 0, 0)]
+    [InlineData("Robots", 1, 5, 2, 2)]
+    public async Task SearchByText(
+        string search,
+        int page,
+        int perPage,
+        int expectedQuantityItemsReturned,
+        int expectedQuantityTotalItems
+    )
+    {
+        var namesToGenerate = new List<string>()
+        {
+            "Action",
+            "Horror",
+            "Horror - Robots",
+            "Horror - Based on Real Facts",
+            "Drama",
+            "Sci-fi IA",
+            "Sci-fi Space",
+            "Sci-fi Robots",
+            "Sci-fi Future"
+        };
+        var examples = _fixture.GetExampleCastMembersListByNames(namesToGenerate);
+        var arrangeDbContext = _fixture.CreateDbContext();
+        await arrangeDbContext.AddRangeAsync(examples);
+        await arrangeDbContext.SaveChangesAsync();
+        var repository = new CastMemberRepository(_fixture.CreateDbContext(true));
+        var useCase = new UseCase.ListCastMembers(repository);
+        var input = new UseCase.ListCastMembersInput(page, perPage, search, "", SearchOrder.Asc);
+
+        var output = await useCase.Handle(input, CancellationToken.None);
+
+        output.Items.Should().HaveCount(expectedQuantityItemsReturned);
+        output.Total.Should().Be(expectedQuantityTotalItems);
         output.Page.Should().Be(input.Page);
         output.PerPage.Should().Be(input.PerPage);
         output.Items.ToList().ForEach(outputItem =>
