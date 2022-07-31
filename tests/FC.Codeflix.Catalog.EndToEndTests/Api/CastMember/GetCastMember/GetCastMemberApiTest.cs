@@ -27,7 +27,7 @@ public class GetCastMemberApiTest
 
         var (response, output) = 
             await _fixture.ApiClient.Get<ApiResponse<CastMemberModelOutput>>(
-                $"castmembers/{example.Id}"
+                $"castmembers/{example.Id.ToString()}"
             );
 
         response.Should().NotBeNull();
