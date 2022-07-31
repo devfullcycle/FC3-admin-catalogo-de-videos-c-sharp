@@ -143,4 +143,41 @@ public class ListCastMembersTest
             exampleItem.Should().BeEquivalentTo(outputItem);
         });
     }
+
+    [Theory(DisplayName = nameof(Ordering))]
+    [Trait("Integration/Application", "ListCastMembers - Use Cases")]
+    [InlineData("name", "asc")]
+    [InlineData("name", "desc")]
+    [InlineData("id", "asc")]
+    [InlineData("id", "desc")]
+    [InlineData("createdAt", "asc")]
+    [InlineData("createdAt", "desc")]
+    [InlineData("", "asc")]
+    public async Task Ordering(
+        string orderBy,
+        string order
+    )
+    {
+        var examples = _fixture.GetExampleCastMembersList(10);
+        var arrangeDbContext = _fixture.CreateDbContext();
+        await arrangeDbContext.AddRangeAsync(examples);
+        await arrangeDbContext.SaveChangesAsync();
+        var repository = new CastMemberRepository(_fixture.CreateDbContext(true));
+        var searchOrder = order.ToLower() == "asc" ? SearchOrder.Asc : SearchOrder.Desc;
+        var useCase = new UseCase.ListCastMembers(repository);
+        var input = new UseCase.ListCastMembersInput(1, 20, "", orderBy, searchOrder);
+
+        var output = await useCase.Handle(input, CancellationToken.None);
+
+        output.Items.Should().HaveCount(examples.Count());
+        output.Total.Should().Be(examples.Count());
+        output.Page.Should().Be(input.Page);
+        output.PerPage.Should().Be(input.PerPage);
+        var orderedList = _fixture.CloneListOrdered(
+            examples, 
+            orderBy, searchOrder
+        );
+        for (int i = 0; i < orderedList.Count(); i++)
+            output.Items[i].Should().BeEquivalentTo(orderedList[i]);
+    }
 }
