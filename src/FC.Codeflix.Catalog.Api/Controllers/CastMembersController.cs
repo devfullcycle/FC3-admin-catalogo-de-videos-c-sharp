@@ -51,6 +51,8 @@ public class CastMembersController : ControllerBase
 
     [HttpPut("{id:guid}")]
     [ProducesResponseType(typeof(ApiResponse<CastMemberModelOutput>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
     public async Task<IActionResult> Update(
         [FromRoute] Guid id, 
         [FromBody] UpdateCastMemberApiInput apiInput,

@@ -73,4 +73,27 @@ public class UpdateCastMemberApiTest
         output!.Title.Should().Be("Not Found");
         output.Detail.Should().Be($"CastMember '{randomGuid}' not found.");
     }
+
+    [Fact(DisplayName = nameof(Retuns422IfThereAreValidationErrors))]
+    [Trait("EndToEnd/API", "CastMembers/Update")]
+    public async Task Retuns422IfThereAreValidationErrors()
+    {
+        var examples = _fixture.GetExampleCastMembersList(5);
+        var example = examples[2];
+        var newName = "";
+        var newType = _fixture.GetRandomCastMemberType();
+        await _fixture.Persistence.InsertList(examples);
+
+        var (response, output) =
+            await _fixture.ApiClient.Put<ProblemDetails>(
+                $"castmembers/{example.Id.ToString()}",
+                new UpdateCastMemberApiInput(newName, newType)
+            );
+        
+        response.Should().NotBeNull();
+        response!.StatusCode.Should().Be((HttpStatusCode)StatusCodes.Status422UnprocessableEntity);
+        output.Should().NotBeNull();
+        output!.Title.Should().Be("One or more validation errors ocurred");
+        output.Detail.Should().Be($"Name should not be empty or null");
+    }
 }
