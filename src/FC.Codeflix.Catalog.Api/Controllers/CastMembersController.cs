@@ -1,8 +1,11 @@
-﻿using FC.Codeflix.Catalog.Api.ApiModels.Response;
+﻿using FC.Codeflix.Catalog.Api.ApiModels;
+using FC.Codeflix.Catalog.Api.ApiModels.Category;
+using FC.Codeflix.Catalog.Api.ApiModels.Response;
 using FC.Codeflix.Catalog.Application.UseCases.CastMember.Common;
 using FC.Codeflix.Catalog.Application.UseCases.CastMember.CreateCastMember;
 using FC.Codeflix.Catalog.Application.UseCases.CastMember.DeleteCastMember;
 using FC.Codeflix.Catalog.Application.UseCases.CastMember.GetCastMember;
+using FC.Codeflix.Catalog.Application.UseCases.CastMember.UpdateCastMember;
 using FC.Codeflix.Catalog.Application.UseCases.Category.Common;
 using FC.Codeflix.Catalog.Application.UseCases.Category.GetCategory;
 using MediatR;
@@ -43,6 +46,21 @@ public class CastMembersController : ControllerBase
     )
     {
         var output = await _mediator.Send(new GetCastMemberInput(id), cancellationToken);
+        return Ok(new ApiResponse<CastMemberModelOutput>(output));
+    }
+
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(ApiResponse<CastMemberModelOutput>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Update(
+        [FromRoute] Guid id, 
+        [FromBody] UpdateCastMemberApiInput apiInput,
+        CancellationToken cancellationToken
+    )
+    {
+        var output = await _mediator.Send(
+            new UpdateCastMemberInput(id, apiInput.Name, apiInput.Type), 
+            cancellationToken
+        );
         return Ok(new ApiResponse<CastMemberModelOutput>(output));
     }
 

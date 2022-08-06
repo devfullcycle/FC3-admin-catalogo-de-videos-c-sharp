@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
+using FC.Codeflix.Catalog.Api.ApiModels;
 using FC.Codeflix.Catalog.Api.ApiModels.Response;
 using FC.Codeflix.Catalog.Application.UseCases.CastMember.Common;
 using FC.Codeflix.Catalog.Application.UseCases.CastMember.UpdateCastMember;
@@ -31,7 +32,7 @@ public class UpdatCastMemberApiTest
         var (response, output) =
             await _fixture.ApiClient.Put<ApiResponse<CastMemberModelOutput>>(
                 $"castmembers/{example.Id.ToString()}",
-                new UpdateCastMemberInput(example.Id, newName, newType)
+                new UpdateCastMemberApiInput(newName, newType)
             );
 
         response.Should().NotBeNull();
