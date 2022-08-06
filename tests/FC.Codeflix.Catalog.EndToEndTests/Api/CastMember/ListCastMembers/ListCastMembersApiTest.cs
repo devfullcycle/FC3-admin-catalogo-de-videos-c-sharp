@@ -75,7 +75,8 @@ public class ListCastMembersApiTest : IDisposable
         output.Should().NotBeNull();
         output!.Meta.Should().NotBeNull();
         output.Data.Should().NotBeNull();
-        output.Meta!.CurrentPage.Should().Be(1);
+        output.Meta!.CurrentPage.Should().Be(page);
+        output.Meta!.PerPage.Should().Be(perPage);
         output.Meta.Total.Should().Be(examples.Count);
         output.Data!.Should().HaveCount(expectedQuantityItems);
         output.Data!.ForEach(outputItem =>
