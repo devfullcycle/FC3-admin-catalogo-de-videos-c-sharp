@@ -175,11 +175,10 @@ public class ListCastMembersApiTest : IDisposable
 
         var (response, output) =
             await _fixture.ApiClient.Get<TestApiResponseList<CastMemberModelOutput>>(
-                "castmembers",
-                new ListCastMembersInput()
-                {
+                "castmembers", 
+                new {
                     Sort = orderBy,
-                    Dir = searchOrder
+                    Dir = order
                 }
             );
 
