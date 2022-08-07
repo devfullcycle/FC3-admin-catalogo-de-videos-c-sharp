@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using FC.Codeflix.Catalog.Application.UseCases.CastMember.Common;
 using FC.Codeflix.Catalog.Application.UseCases.CastMember.ListCastMembers;
+using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using FC.Codeflix.Catalog.EndToEndTests.Api.CastMember.Common;
 using FC.Codeflix.Catalog.EndToEndTests.Models;
 using FluentAssertions;
@@ -152,6 +153,55 @@ public class ListCastMembersApiTest : IDisposable
             outputItem.Name.Should().Be(exampleItem.Name);
             outputItem.Type.Should().Be(exampleItem.Type);
         });
+    }
+    
+    [Theory(DisplayName = nameof(Ordering))]
+    [Trait("EndToEnd/API", "CastMembers/List")]
+    [InlineData("name", "asc")]
+    [InlineData("name", "desc")]
+    [InlineData("id", "asc")]
+    [InlineData("id", "desc")]
+    [InlineData("createdAt", "asc")]
+    [InlineData("createdAt", "desc")]
+    [InlineData("", "asc")]
+    public async Task Ordering(
+        string orderBy,
+        string order
+    )
+    {
+        var examples = _fixture.GetExampleCastMembersList(10);
+        await _fixture.Persistence.InsertList(examples);
+        var searchOrder = order.ToLower() == "asc" ? SearchOrder.Asc : SearchOrder.Desc;
+
+        var (response, output) =
+            await _fixture.ApiClient.Get<TestApiResponseList<CastMemberModelOutput>>(
+                "castmembers",
+                new ListCastMembersInput()
+                {
+                    Sort = orderBy,
+                    Dir = searchOrder
+                }
+            );
+
+        response.Should().NotBeNull();
+        response!.StatusCode.Should().Be((HttpStatusCode)StatusCodes.Status200OK);
+        output.Should().NotBeNull();
+        output!.Meta.Should().NotBeNull();
+        output.Data.Should().NotBeNull();
+        output.Meta!.CurrentPage.Should().Be(1);
+        output.Meta.Total.Should().Be(examples.Count);
+        output.Data!.Should().HaveCount(examples.Count);
+        var orderedList = _fixture.CloneListOrdered(
+            examples,
+            orderBy, 
+            searchOrder
+        );
+        for (var i = 0; i < orderedList.Count; i++)
+        {
+            output!.Data[i].Id.Should().Be(orderedList[i].Id);
+            output.Data[i].Name.Should().Be(orderedList[i].Name);
+            output.Data[i].Type.Should().Be(orderedList[i].Type);
+        }
     }
 
     [Fact(DisplayName = nameof(ReturnsEmptyWhenEmpty))]
