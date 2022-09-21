@@ -1,4 +1,5 @@
-﻿using FC.Codeflix.Catalog.UnitTests.Common;
+﻿using System;
+using FC.Codeflix.Catalog.UnitTests.Common;
 using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
 using Xunit;
 
@@ -11,11 +12,29 @@ public class VideoTestFixtureCollection : ICollectionFixture<VideoTestFixture>
 public class VideoTestFixture : BaseFixture
 {
     public DomainEntity.Video GetValidVideo() => new DomainEntity.Video(
-        "Title",
-        "Description",
-        2001,
-        true,
-        true,
-        180
+        GetValidTitle(),
+        GetValidDescription(),
+        GetValidYearLaunched(),
+        GetRandomBoolean(),
+        GetRandomBoolean(),
+        GetValidDuration()
     );
+
+    public string GetValidTitle()
+        => Faker.Lorem.Letter(100);
+
+    public string GetValidDescription()
+        => Faker.Commerce.ProductDescription();
+
+    public int GetValidYearLaunched()
+        => Faker.Date.BetweenDateOnly(
+            new DateOnly(1960, 1, 1), 
+            new DateOnly(2022, 1, 1)
+        ).Year;
+
+    public int GetValidDuration()
+        => (new Random()).Next(100, 300);
+
+    public string GetTooLongTitle()
+        => Faker.Lorem.Letter(400);
 }
