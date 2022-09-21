@@ -1,4 +1,7 @@
-﻿using Xunit;
+﻿using FC.Codeflix.Catalog.Domain.Validation;
+using FC.Codeflix.Catalog.Domain.Validator;
+using FluentAssertions;
+using Xunit;
 
 namespace FC.Codeflix.Catalog.UnitTests.Domain.Entity.Video;
 
@@ -21,6 +24,6 @@ public class VideoValidatorTest
         videoValidator.Validate();
 
         notificationValidationHandler.HasErrors().Should().BeFalse();
-        notificationValidationHandler.GetErrors().Should().HaveLength(0);
+        notificationValidationHandler.Errors.Should().HaveCount(0);
     }
 }

@@ -10,7 +10,7 @@ public class VideoTestFixtureCollection : ICollectionFixture<VideoTestFixture>
 
 public class VideoTestFixture : BaseFixture
 {
-    public object GetValidVideo() => new DomainEntity.Video(
+    public DomainEntity.Video GetValidVideo() => new DomainEntity.Video(
         "Title",
         "Description",
         2001,
