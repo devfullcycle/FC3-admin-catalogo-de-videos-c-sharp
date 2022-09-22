@@ -1,4 +1,7 @@
-﻿using FC.Codeflix.Catalog.Domain.SeedWork;
+﻿using FC.Codeflix.Catalog.Domain.Exceptions;
+using FC.Codeflix.Catalog.Domain.SeedWork;
+using FC.Codeflix.Catalog.Domain.Validation;
+using FC.Codeflix.Catalog.Domain.Validator;
 
 namespace FC.Codeflix.Catalog.Domain.Entity;
 public class Video : AggregateRoot
@@ -27,5 +30,16 @@ public class Video : AggregateRoot
         Duration = duration;
 
         CreatedAt = DateTime.Now;
+
+        Validate();
+    }
+
+    private void Validate()
+    {
+        var notificationHandler = new NotificationValidationHandler();
+        var validator = new VideoValidator(this, notificationHandler);
+        validator.Validate();
+        if(notificationHandler.HasErrors())
+            throw new EntityValidationException("Validation errors");
     }
 }
