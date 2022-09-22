@@ -26,6 +26,9 @@ public class VideoTestFixture : BaseFixture
     public string GetValidDescription()
         => Faker.Commerce.ProductDescription();
 
+    public string GetTooLongDescription()
+        => Faker.Lorem.Letter(4001);
+
     public int GetValidYearLaunched()
         => Faker.Date.BetweenDateOnly(
             new DateOnly(1960, 1, 1), 
