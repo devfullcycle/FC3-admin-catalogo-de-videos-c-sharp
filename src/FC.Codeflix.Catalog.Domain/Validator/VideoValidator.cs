@@ -14,7 +14,15 @@ public class VideoValidator : Validation.Validator
 
     public override void Validate()
     {
-        if(_video.Title.Length > 255)
+        ValidateTitle();
+    }
+
+    private void ValidateTitle()
+    {
+        if (string.IsNullOrWhiteSpace(_video.Title))
+            _handler.HandleError($"'{nameof(_video.Title)}' is required");
+
+        if (_video.Title.Length > 255)
             _handler.HandleError($"'{nameof(_video.Title)}' should be less or equal {TitleMaxLength} characters long");
     }
 }
