@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using FC.Codeflix.Catalog.Domain.Exceptions;
+using FC.Codeflix.Catalog.Domain.Validation;
 using FluentAssertions;
 using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
 using Xunit;
@@ -42,30 +44,5 @@ public class VideoTest
         video.Published.Should().Be(expectedPublished);
         video.Duration.Should().Be(expectedDuration);
         video.CreatedAt.Should().BeCloseTo(expectedCreatedDate, TimeSpan.FromSeconds(10));
-    }
-    
-    [Fact(DisplayName = nameof(InstantiateThrowsExceptionWhrnNotValid))]
-    [Trait("Domain", "Video - Aggregate")]
-    public void InstantiateThrowsExceptionWhrnNotValid()
-    {
-        var expectedTitle = "";
-        var expectedDescription = _fixture.GetTooLongDescription();
-        var expectedYearLaunched = _fixture.GetValidYearLaunched();
-        var expectedOpened = _fixture.GetRandomBoolean();
-        var expectedPublished = _fixture.GetRandomBoolean();
-        var expectedDuration = _fixture.GetValidDuration();
-
-        var expectedCreatedDate = DateTime.Now;
-        var action = () => new DomainEntity.Video(
-            expectedTitle,
-            expectedDescription,
-            expectedYearLaunched,
-            expectedOpened,
-            expectedPublished,
-            expectedDuration
-        );
-
-        action.Should().Throw<EntityValidationException>()
-            .WithMessage("Validation errors");
     }
 }
