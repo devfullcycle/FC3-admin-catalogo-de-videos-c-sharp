@@ -31,4 +31,7 @@ public class Video : AggregateRoot
 
         CreatedAt = DateTime.Now;
     }
+
+    public void Validate(ValidationHandler handler)
+        => (new VideoValidator(this, handler)).Validate();
 }

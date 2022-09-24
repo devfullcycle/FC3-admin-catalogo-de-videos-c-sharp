@@ -45,4 +45,16 @@ public class VideoTest
         video.Duration.Should().Be(expectedDuration);
         video.CreatedAt.Should().BeCloseTo(expectedCreatedDate, TimeSpan.FromSeconds(10));
     }
+
+    [Fact(DisplayName = nameof(ValidateWhenValidState))]
+    [Trait("Domain", "Video - Aggregate")]
+    public void ValidateWhenValidState()
+    {
+        var validVideo = _fixture.GetValidVideo();
+        var notificationHandler = new NotificationValidationHandler();
+
+        validVideo.Validate(notificationHandler);
+
+        notificationHandler.HasErrors().Should().BeFalse();
+    }
 }
