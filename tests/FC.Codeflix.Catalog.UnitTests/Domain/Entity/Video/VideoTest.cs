@@ -57,4 +57,30 @@ public class VideoTest
 
         notificationHandler.HasErrors().Should().BeFalse();
     }
+
+    [Fact(DisplayName = nameof(ValidateWithErrorWhenInvalidState))]
+    [Trait("Domain", "Video - Aggregate")]
+    public void ValidateWithErrorWhenInvalidState()
+    {
+        var invalidVideo = new DomainEntity.Video(
+            _fixture.GetTooLongTitle(),
+            _fixture.GetTooLongDescription(),
+            _fixture.GetValidYearLaunched(),
+            _fixture.GetRandomBoolean(),
+            _fixture.GetRandomBoolean(),
+            _fixture.GetValidDuration()
+        );
+
+        var notificationHandler = new NotificationValidationHandler();
+
+        invalidVideo.Validate(notificationHandler);
+
+        notificationHandler.HasErrors().Should().BeTrue();
+        notificationHandler.Errors.Should()
+            .BeEquivalentTo(new List<ValidationError>()
+            {
+                new ValidationError("'Title' should be less or equal 255 characters long"),
+                new ValidationError("'Description' should be less or equal 4000 characters long")
+            });
+    }
 }
