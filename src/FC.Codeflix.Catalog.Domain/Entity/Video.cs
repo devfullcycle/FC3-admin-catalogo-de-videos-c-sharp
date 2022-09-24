@@ -34,4 +34,20 @@ public class Video : AggregateRoot
 
     public void Validate(ValidationHandler handler)
         => (new VideoValidator(this, handler)).Validate();
+
+    public void Update(
+        string title,
+        string description,
+        int yearLaunched,
+        bool opened,
+        bool published,
+        int duration)
+    {
+        Title = title;
+        Description = description;
+        YearLaunched = yearLaunched;
+        Opened = opened;
+        Published = published;
+        Duration = duration;
+    }
 }
