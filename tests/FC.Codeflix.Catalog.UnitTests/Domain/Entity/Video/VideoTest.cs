@@ -26,6 +26,7 @@ public class VideoTest
         var expectedOpened = _fixture.GetRandomBoolean();
         var expectedPublished = _fixture.GetRandomBoolean();
         var expectedDuration = _fixture.GetValidDuration();
+        var expectedRating = _fixture.GetRandomRating();
 
         var expectedCreatedDate = DateTime.Now;
         var video = new DomainEntity.Video(
@@ -34,7 +35,8 @@ public class VideoTest
             expectedYearLaunched,
             expectedOpened,
             expectedPublished,
-            expectedDuration
+            expectedDuration,
+            expectedRating
         );
 
         video.Title.Should().Be(expectedTitle);
@@ -68,7 +70,8 @@ public class VideoTest
             _fixture.GetValidYearLaunched(),
             _fixture.GetRandomBoolean(),
             _fixture.GetRandomBoolean(),
-            _fixture.GetValidDuration()
+            _fixture.GetValidDuration(),
+            _fixture.GetRandomRating()
         );
         var notificationHandler = new NotificationValidationHandler();
 

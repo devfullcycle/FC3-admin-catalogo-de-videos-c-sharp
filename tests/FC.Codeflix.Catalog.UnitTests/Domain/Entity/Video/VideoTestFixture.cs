@@ -1,4 +1,5 @@
 ﻿using System;
+using FC.Codeflix.Catalog.Domain.Enum;
 using FC.Codeflix.Catalog.UnitTests.Common;
 using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
 using Xunit;
@@ -17,8 +18,16 @@ public class VideoTestFixture : BaseFixture
         GetValidYearLaunched(),
         GetRandomBoolean(),
         GetRandomBoolean(),
-        GetValidDuration()
+        GetValidDuration(),
+        GetRandomRating()
     );
+
+    public Rating GetRandomRating()
+    {
+        var enumValue = Enum.GetValues<Rating>();
+        var random = new Random();
+        return enumValue[random.Next(enumValue.Length)];
+    }
 
     public string GetValidTitle()
         => Faker.Lorem.Letter(100);
