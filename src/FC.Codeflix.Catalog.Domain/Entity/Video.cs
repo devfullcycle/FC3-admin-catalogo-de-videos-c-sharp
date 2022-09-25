@@ -1,8 +1,8 @@
 ﻿using FC.Codeflix.Catalog.Domain.Enum;
-using FC.Codeflix.Catalog.Domain.Exceptions;
 using FC.Codeflix.Catalog.Domain.SeedWork;
 using FC.Codeflix.Catalog.Domain.Validation;
 using FC.Codeflix.Catalog.Domain.Validator;
+using FC.Codeflix.Catalog.Domain.ValueObject;
 
 namespace FC.Codeflix.Catalog.Domain.Entity;
 public class Video : AggregateRoot
@@ -15,6 +15,9 @@ public class Video : AggregateRoot
     public int Duration { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public Rating Rating { get; private set; }
+    public Image? Thumb { get; private set; }
+    public Image? ThumbHalf { get; private set; }
+    public Image? Banner { get; private set; }
 
     public Video(
         string title, 
@@ -54,4 +57,7 @@ public class Video : AggregateRoot
         Published = published;
         Duration = duration;
     }
+
+    public void UpdateThumb(string path) 
+        => Thumb = new Image(path);
 }
