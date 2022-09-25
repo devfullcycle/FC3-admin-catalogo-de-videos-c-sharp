@@ -28,3 +28,13 @@ git clone https://github.com/codeedu/fc3-catalogo-de-videos-dotnet.git
 - Visual Studio 2022
 - SDK do .NET 6 instalado
 - Docker Desktop (para integração do Docker com o Visual Studio)
+
+<br /><br />
+---
+
+| [<img src="https://github.com/wilsonneto-dev.png" width="75px;"/>][1] |
+| :-: |
+|[Tutor Wilson Neto][1]|
+
+
+[1]: https://github.com/wilsonneto-dev
