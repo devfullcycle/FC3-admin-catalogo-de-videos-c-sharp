@@ -15,6 +15,7 @@ public class Video : AggregateRoot
     public int Duration { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public Rating Rating { get; private set; }
+    
     public Image? Thumb { get; private set; }
     public Image? ThumbHalf { get; private set; }
     public Image? Banner { get; private set; }
@@ -58,6 +59,12 @@ public class Video : AggregateRoot
         Duration = duration;
     }
 
-    public void UpdateThumb(string path) 
+    public void UpdateThumb(string path)
         => Thumb = new Image(path);
+
+    public void UpdateThumbHalf(string path)
+        => ThumbHalf = new Image(path);
+    
+    public void UpdateBanner(string path)
+        => Banner = new Image(path);
 }
