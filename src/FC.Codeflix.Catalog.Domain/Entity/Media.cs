@@ -15,4 +15,10 @@ public class Media
     
     public void UpdateAsSentToEncode()
         => Status = MediaStatus.Processing;
+
+    public void UpdateAsEncoded(string encodedExamplePath)
+    {
+        Status = MediaStatus.Completed;
+        EncodedPath = encodedExamplePath;
+    }
 }
