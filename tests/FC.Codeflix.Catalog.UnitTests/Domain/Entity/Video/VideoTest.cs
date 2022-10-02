@@ -341,4 +341,48 @@ public class VideoTest
 
         validVideo.Categories.Should().HaveCount(0);
     }
+
+    [Fact(DisplayName = nameof(AddGenre))]
+    [Trait("Domain", "Video - Aggregate")]
+    public void AddGenre()
+    {
+        var validVideo = _fixture.GetValidVideo();
+        var exampleId = Guid.NewGuid();
+
+        validVideo.AddGenre(exampleId);
+
+        validVideo.Genres.Should().HaveCount(1);
+        validVideo.Genres[0].Should().Be(exampleId);
+    }
+
+    [Fact(DisplayName = nameof(RemoveGenre))]
+    [Trait("Domain", "Video - Aggregate")]
+    public void RemoveGenre()
+    {
+        var validVideo = _fixture.GetValidVideo();
+        var exampleId = Guid.NewGuid();
+        var exampleId2 = Guid.NewGuid();
+        validVideo.AddGenre(exampleId);
+        validVideo.AddGenre(exampleId2);
+
+        validVideo.RemoveGenre(exampleId2);
+
+        validVideo.Genres.Should().HaveCount(1);
+        validVideo.Genres[0].Should().Be(exampleId);
+    }
+
+    [Fact(DisplayName = nameof(RemoveAllGenre))]
+    [Trait("Domain", "Video - Aggregate")]
+    public void RemoveAllGenre()
+    {
+        var validVideo = _fixture.GetValidVideo();
+        var exampleId = Guid.NewGuid();
+        var exampleId2 = Guid.NewGuid();
+        validVideo.AddGenre(exampleId);
+        validVideo.AddGenre(exampleId2);
+
+        validVideo.RemoveAllGenres();
+
+        validVideo.Genres.Should().HaveCount(0);
+    }
 }
