@@ -4,6 +4,8 @@ using FC.Codeflix.Catalog.Domain.Validation;
 using FluentAssertions;
 using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
 using Xunit;
+using FC.Codeflix.Catalog.Domain.Enum;
+using FC.Codeflix.Catalog.Domain.Exceptions;
 
 namespace FC.Codeflix.Catalog.UnitTests.Domain.Entity.Video;
 
@@ -228,6 +230,31 @@ public class VideoTest
 
         validVideo.Media.Should().NotBeNull();
         validVideo.Media!.FilePath.Should().Be(validPath);
+    }
+
+    [Fact(DisplayName = nameof(UpdateAsSentToEncode))]
+    [Trait("Domain", "Video - Aggregate")]
+    public void UpdateAsSentToEncode()
+    {
+        var validVideo = _fixture.GetValidVideo();
+        var validPath = _fixture.GetValidMediaPath();
+        validVideo.UpdateMedia(validPath);
+
+        validVideo.UpdateAsSentToEncode();
+
+        validVideo.Media!.Status.Should().Be(MediaStatus.Processing);
+    }
+
+    [Fact(DisplayName = nameof(UpdateAsSentToEncodeThrowsWhenThereIsNoMedia))]
+    [Trait("Domain", "Video - Aggregate")]
+    public void UpdateAsSentToEncodeThrowsWhenThereIsNoMedia()
+    {
+        var validVideo = _fixture.GetValidVideo();
+        
+        var action = () => validVideo.UpdateAsSentToEncode();
+
+        action.Should().Throw<EntityValidationException>()
+            .WithMessage("There is no Media");
     }
 
     [Fact(DisplayName = nameof(UpdateTrailer))]
