@@ -23,7 +23,10 @@ public class Video : AggregateRoot
 
     public Media? Media { get; private set; }
     public Media? Trailer { get; private set; }
-    
+
+    private List<Guid> _categories;
+    public IReadOnlyList<Guid> Categories => _categories.AsReadOnly();
+
     public Video(
         string title, 
         string description, 
@@ -40,6 +43,8 @@ public class Video : AggregateRoot
         Published = published;
         Duration = duration;
         Rating = rating;
+
+        _categories = new();
 
         CreatedAt = DateTime.Now;
     }
@@ -91,4 +96,10 @@ public class Video : AggregateRoot
             throw new EntityValidationException("There is no Media");
         Media.UpdateAsEncoded(validEncodedPath);
     }
+
+    public void AddCategory(Guid categoryId)
+        => _categories.Add(categoryId);
+
+    public void Removecategory(Guid categoryId)
+        => _categories.Remove(categoryId);
 }

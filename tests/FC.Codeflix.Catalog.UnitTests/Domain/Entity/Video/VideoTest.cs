@@ -297,4 +297,33 @@ public class VideoTest
         validVideo.Trailer.Should().NotBeNull();
         validVideo.Trailer!.FilePath.Should().Be(validPath);
     }
+
+    [Fact(DisplayName = nameof(AddCategory))]
+    [Trait("Domain", "Video - Aggregate")]
+    public void AddCategory()
+    {
+        var validVideo = _fixture.GetValidVideo();
+        var categoryIdExample = Guid.NewGuid();
+
+        validVideo.AddCategory(categoryIdExample);
+
+        validVideo.Categories.Should().HaveCount(1);
+        validVideo.Categories[0].Should().Be(categoryIdExample);
+    }
+
+    [Fact(DisplayName = nameof(RemoveCategory))]
+    [Trait("Domain", "Video - Aggregate")]
+    public void RemoveCategory()
+    {
+        var validVideo = _fixture.GetValidVideo();
+        var categoryIdExample = Guid.NewGuid();
+        var categoryIdExample2 = Guid.NewGuid();
+        validVideo.AddCategory(categoryIdExample);
+        validVideo.AddCategory(categoryIdExample2);
+
+        validVideo.Removecategory(categoryIdExample);
+
+        validVideo.Categories.Should().HaveCount(1);
+        validVideo.Categories[0].Should().Be(categoryIdExample2);
+    }
 }
