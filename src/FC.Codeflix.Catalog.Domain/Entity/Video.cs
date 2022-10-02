@@ -100,6 +100,9 @@ public class Video : AggregateRoot
     public void AddCategory(Guid categoryId)
         => _categories.Add(categoryId);
 
-    public void Removecategory(Guid categoryId)
+    public void RemoveCategory(Guid categoryId)
         => _categories.Remove(categoryId);
+
+    public void RemoveAllCategory()
+        => _categories = new();
 }
