@@ -30,6 +30,9 @@ public class Video : AggregateRoot
     private List<Guid> _genres;
     public IReadOnlyList<Guid> Genres => _genres.AsReadOnly();
 
+    private List<Guid> _castMembers;
+    public IReadOnlyList<Guid> CastMembers => _castMembers.AsReadOnly();
+
     public Video(
         string title, 
         string description, 
@@ -49,6 +52,7 @@ public class Video : AggregateRoot
 
         _categories = new();
         _genres = new();
+        _castMembers = new();
 
         CreatedAt = DateTime.Now;
     }
@@ -118,4 +122,13 @@ public class Video : AggregateRoot
 
     public void RemoveAllGenres()
         => _genres = new();
+
+    public void AddCastMember(Guid castMemberId)
+        => _castMembers.Add(castMemberId);
+
+    public void RemoveCastMember(Guid castMemberid)
+        => _castMembers.Remove(castMemberid);
+
+    public void RemoveAllCastMembers()
+        => _castMembers = new();
 }

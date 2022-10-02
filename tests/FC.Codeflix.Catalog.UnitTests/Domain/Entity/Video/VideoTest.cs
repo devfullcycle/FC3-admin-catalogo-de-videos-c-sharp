@@ -385,4 +385,48 @@ public class VideoTest
 
         validVideo.Genres.Should().HaveCount(0);
     }
+
+    [Fact(DisplayName = nameof(AddCastMember))]
+    [Trait("Domain", "Video - Aggregate")]
+    public void AddCastMember()
+    {
+        var validVideo = _fixture.GetValidVideo();
+        var exampleId = Guid.NewGuid();
+
+        validVideo.AddCastMember(exampleId);
+
+        validVideo.CastMembers.Should().HaveCount(1);
+        validVideo.CastMembers[0].Should().Be(exampleId);
+    }
+
+    [Fact(DisplayName = nameof(RemoveCastMember))]
+    [Trait("Domain", "Video - Aggregate")]
+    public void RemoveCastMember()
+    {
+        var validVideo = _fixture.GetValidVideo();
+        var exampleId = Guid.NewGuid();
+        var exampleId2 = Guid.NewGuid();
+        validVideo.AddCastMember(exampleId);
+        validVideo.AddCastMember(exampleId2);
+
+        validVideo.RemoveCastMember(exampleId2);
+
+        validVideo.CastMembers.Should().HaveCount(1);
+        validVideo.CastMembers[0].Should().Be(exampleId);
+    }
+
+    [Fact(DisplayName = nameof(RemoveAllCastMembers))]
+    [Trait("Domain", "Video - Aggregate")]
+    public void RemoveAllCastMembers()
+    {
+        var validVideo = _fixture.GetValidVideo();
+        var exampleId = Guid.NewGuid();
+        var exampleId2 = Guid.NewGuid();
+        validVideo.AddCastMember(exampleId);
+        validVideo.AddCastMember(exampleId2);
+
+        validVideo.RemoveAllCastMembers();
+
+        validVideo.CastMembers.Should().HaveCount(0);
+    }
 }
