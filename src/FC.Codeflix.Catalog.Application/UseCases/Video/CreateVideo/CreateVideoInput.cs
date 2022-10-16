@@ -7,7 +7,7 @@ public record CreateVideoInput  (
     string Title,
     string Description,
     int YearLaunched,
-    bool Ppened,
+    bool Opened,
     bool Published,
     int Duration,
     Rating Rating
