@@ -1,8 +1,5 @@
-﻿using System;
-using FC.Codeflix.Catalog.Domain.Enum;
-using FC.Codeflix.Catalog.UnitTests.Common;
-using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
-using Xunit;
+﻿using Xunit;
+using FC.Codeflix.Catalog.UnitTests.Common.Fixtures;
 
 namespace FC.Codeflix.Catalog.UnitTests.Domain.Entity.Video;
 
@@ -10,62 +7,5 @@ namespace FC.Codeflix.Catalog.UnitTests.Domain.Entity.Video;
 public class VideoTestFixtureCollection : ICollectionFixture<VideoTestFixture>
 {}
 
-public class VideoTestFixture : BaseFixture
-{
-    public DomainEntity.Video GetValidVideo() => new DomainEntity.Video(
-        GetValidTitle(),
-        GetValidDescription(),
-        GetValidYearLaunched(),
-        GetRandomBoolean(),
-        GetRandomBoolean(),
-        GetValidDuration(),
-        GetRandomRating()
-    );
-
-    public Rating GetRandomRating()
-    {
-        var enumValue = Enum.GetValues<Rating>();
-        var random = new Random();
-        return enumValue[random.Next(enumValue.Length)];
-    }
-
-    public string GetValidTitle()
-        => Faker.Lorem.Letter(100);
-
-    public string GetValidDescription()
-        => Faker.Commerce.ProductDescription();
-
-    public string GetTooLongDescription()
-        => Faker.Lorem.Letter(4001);
-
-    public int GetValidYearLaunched()
-        => Faker.Date.BetweenDateOnly(
-            new DateOnly(1960, 1, 1), 
-            new DateOnly(2022, 1, 1)
-        ).Year;
-
-    public int GetValidDuration()
-        => (new Random()).Next(100, 300);
-
-    public string GetTooLongTitle()
-        => Faker.Lorem.Letter(400);
-
-    public string GetValidImagePath()
-        => Faker.Image.PlaceImgUrl();
-
-    public string GetValidMediaPath()
-    {
-        var exampleMedias = new string[]
-        {
-            "https://www.googlestorage.com/file-example.mp4",
-            "https://www.storage.com/another-example-of-video.mp4",
-            "https://www.S3.com.br/example.mp4",
-            "https://www.glg.io/file.mp4"
-        };
-        var random = new Random();
-        return exampleMedias[random.Next(exampleMedias.Length)];
-    }
-
-    public DomainEntity.Media GetValidMedia()
-        => new(GetValidMediaPath());
-}
+public class VideoTestFixture : VideoTestFixtureBase
+{ }
