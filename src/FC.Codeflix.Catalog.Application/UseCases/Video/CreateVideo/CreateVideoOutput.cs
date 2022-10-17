@@ -10,4 +10,5 @@ public record CreateVideoOutput(
     string Description,
     Rating Rating,
     int YearLaunched,
-    bool Opened);
+    bool Opened,
+    int Duration);

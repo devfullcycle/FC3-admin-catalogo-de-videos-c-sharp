@@ -58,7 +58,7 @@ public class CreateVideoTest
         );
         unitOfWorkMock.Verify(x => x.Commit(It.IsAny<CancellationToken>()));
         output.Id.Should().NotBeEmpty();
-        output.CreatedAt.Should().NotBeEmpty();
+        output.CreatedAt.Should().NotBe(default(DateTime));
         output.Title.Should().Be(input.Title);
         output.Published.Should().Be(input.Published);
         output.Description.Should().Be(input.Description);
