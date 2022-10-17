@@ -67,11 +67,7 @@ public class CreateVideoTest
 
     [Theory(DisplayName = nameof(CreateVideoThrowsWithInvalidInput))]
     [Trait("Application", "CreateVideo - Use Cases")]
-    [MemberData(
-        nameof(CreateVideoTestDataGenerator.GetInvalidInputs),
-        parameters: 2,
-        MemberType = typeof(CreateVideoTestDataGenerator)
-    )]
+    [ClassData(typeof(CreateVideoTestDataGenerator))]
     public async Task CreateVideoThrowsWithInvalidInput(
         CreateVideoInput input,
         string expectedValidationError)
