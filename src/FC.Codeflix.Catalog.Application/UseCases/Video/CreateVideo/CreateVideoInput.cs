@@ -10,5 +10,6 @@ public record CreateVideoInput  (
     bool Opened,
     bool Published,
     int Duration,
-    Rating Rating
+    Rating Rating,
+    IReadOnlyCollection<Guid>? CategoriesIds = null
 ) : IRequest<CreateVideoOutput>;

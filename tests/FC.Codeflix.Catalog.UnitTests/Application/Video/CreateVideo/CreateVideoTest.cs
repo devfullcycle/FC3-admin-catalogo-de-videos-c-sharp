@@ -65,9 +65,9 @@ public class CreateVideoTest
         output.Opened.Should().Be(input.Opened);
     }
 
-    [Fact(DisplayName = nameof(CreateVideoWithcategoriesIds))]
+    [Fact(DisplayName = nameof(CreateVideoWithCategoriesIds))]
     [Trait("Application", "CreateVideo - Use Cases")]
-    public async Task CreateVideoWithcategoriesIds()
+    public async Task CreateVideoWithCategoriesIds()
     {
         var repositoryMock = new Mock<IVideoRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
@@ -91,7 +91,7 @@ public class CreateVideoTest
         output.Rating.Should().Be(input.Rating);
         output.YearLaunched.Should().Be(input.YearLaunched);
         output.Opened.Should().Be(input.Opened);
-        output.CategoryIds.Should().BeEquivalendTo(examplecategoriesIds);
+        output.CategoriesIds.Should().BeEquivalentTo(examplecategoriesIds);
         repositoryMock.Verify(x => x.Insert(
         It.Is<DomainEntities.Video>(
             video =>
