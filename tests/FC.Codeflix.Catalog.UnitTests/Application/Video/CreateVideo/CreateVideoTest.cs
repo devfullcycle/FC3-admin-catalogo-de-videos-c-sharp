@@ -32,7 +32,7 @@ public class CreateVideoTest
         var repositoryMock = new Mock<IVideoRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
         var useCase = new UseCase.CreateVideo(
-            repositoryMock.Object, 
+            repositoryMock.Object,
             unitOfWorkMock.Object
         );
         var input = _fixture.CreateValidCreateVideoInput();
@@ -50,7 +50,7 @@ public class CreateVideoTest
                     video.Id != Guid.Empty &&
                     video.YearLaunched == input.YearLaunched &&
                     video.Opened == input.Opened
-            ), 
+            ),
             It.IsAny<CancellationToken>())
         );
         unitOfWorkMock.Verify(x => x.Commit(It.IsAny<CancellationToken>()));
@@ -63,6 +63,50 @@ public class CreateVideoTest
         output.Rating.Should().Be(input.Rating);
         output.YearLaunched.Should().Be(input.YearLaunched);
         output.Opened.Should().Be(input.Opened);
+    }
+
+    [Fact(DisplayName = nameof(CreateVideoWithcategoriesIds))]
+    [Trait("Application", "CreateVideo - Use Cases")]
+    public async Task CreateVideoWithcategoriesIds()
+    {
+        var repositoryMock = new Mock<IVideoRepository>();
+        var unitOfWorkMock = new Mock<IUnitOfWork>();
+        var useCase = new UseCase.CreateVideo(
+            repositoryMock.Object,
+            unitOfWorkMock.Object
+        );
+        var examplecategoriesIds = Enumerable.Range(1, 5)
+            .Select(_ => Guid.NewGuid()).ToList();
+        var input = _fixture.CreateValidCreateVideoInput(examplecategoriesIds);
+
+        var output = await useCase.Handle(input, CancellationToken.None);
+
+        unitOfWorkMock.Verify(x => x.Commit(It.IsAny<CancellationToken>()));
+        output.Id.Should().NotBeEmpty();
+        output.CreatedAt.Should().NotBe(default(DateTime));
+        output.Title.Should().Be(input.Title);
+        output.Published.Should().Be(input.Published);
+        output.Description.Should().Be(input.Description);
+        output.Duration.Should().Be(input.Duration);
+        output.Rating.Should().Be(input.Rating);
+        output.YearLaunched.Should().Be(input.YearLaunched);
+        output.Opened.Should().Be(input.Opened);
+        output.CategoryIds.Should().BeEquivalendTo(examplecategoriesIds);
+        repositoryMock.Verify(x => x.Insert(
+        It.Is<DomainEntities.Video>(
+            video =>
+                video.Title == input.Title &&
+                video.Published == input.Published &&
+                video.Description == input.Description &&
+                video.Duration == input.Duration &&
+                video.Rating == input.Rating &&
+                video.Id != Guid.Empty &&
+                video.YearLaunched == input.YearLaunched &&
+                video.Opened == input.Opened &&
+                video.Categories.All(categoryId => examplecategoriesIds.Contains(categoryId))
+            ),
+            It.IsAny<CancellationToken>())
+        );
     }
 
     [Theory(DisplayName = nameof(CreateVideoThrowsWithInvalidInput))]
