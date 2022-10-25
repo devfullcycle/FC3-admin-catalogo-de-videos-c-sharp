@@ -33,6 +33,7 @@ public class CreateVideoTest
             repositoryMock.Object,
             Mock.Of<ICategoryRepository>(),
             Mock.Of<IGenreRepository>(),
+            Mock.Of<ICastMemberRepository>(),
             unitOfWorkMock.Object
         );
         var input = _fixture.CreateValidCreateVideoInput();
@@ -81,6 +82,7 @@ public class CreateVideoTest
             videoRepositoryMock.Object,
             categoryRepositoryMock.Object,
             Mock.Of<IGenreRepository>(),
+            Mock.Of<ICastMemberRepository>(),
             unitOfWorkMock.Object
         );
         var input = _fixture.CreateValidCreateVideoInput(examplecategoriesIds);
@@ -134,6 +136,7 @@ public class CreateVideoTest
             videoRepositoryMock.Object,
             categoryRepositoryMock.Object,
             Mock.Of<IGenreRepository>(),
+            Mock.Of<ICastMemberRepository>(),
             unitOfWorkMock.Object
         );
         var input = _fixture.CreateValidCreateVideoInput(examplecategoriesIds);
@@ -158,6 +161,7 @@ public class CreateVideoTest
             repositoryMock.Object,
             Mock.Of<ICategoryRepository>(),
             Mock.Of<IGenreRepository>(),
+            Mock.Of<ICastMemberRepository>(),
             unitOfWorkMock.Object
         );
 
@@ -191,6 +195,7 @@ public class CreateVideoTest
             videoRepositoryMock.Object,
             categoryRepositoryMock.Object,
             genreRepositoryMock.Object,
+            Mock.Of<ICastMemberRepository>(),
             unitOfWorkMock.Object
         );
         var input = _fixture.CreateValidCreateVideoInput(genresIds: exampleIds);
@@ -245,6 +250,7 @@ public class CreateVideoTest
             videoRepositoryMock.Object,
             categoryRepositoryMock.Object,
             genreRepositoryMock.Object,
+            Mock.Of<ICastMemberRepository>(),
             unitOfWorkMock.Object
         );
         var input = _fixture.CreateValidCreateVideoInput(genresIds: exampleIds);

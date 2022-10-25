@@ -13,17 +13,20 @@ public class CreateVideo : ICreateVideo
     private readonly IVideoRepository _videoRepository;
     private readonly ICategoryRepository _categoryRepository;
     private readonly IGenreRepository _genreRepository;
+    private readonly ICastMemberRepository _castMemberRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateVideo(
         IVideoRepository videoRepository,
         ICategoryRepository categoryRepository,
         IGenreRepository genreRepository,
+        ICastMemberRepository castMemberRepository,
         IUnitOfWork unitOfWork)
     {
         _videoRepository = videoRepository;
         _categoryRepository = categoryRepository;
         _genreRepository = genreRepository;
+        _castMemberRepository = castMemberRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -72,6 +75,11 @@ public class CreateVideo : ICreateVideo
                     $"Related genre id (or ids) not found: {string.Join(',', notFoundIds)}.");
             }
             input.GenresIds!.ToList().ForEach(video.AddGenre);
+        }
+
+        if((input.CastMembersIds?.Count ?? 0 ) > 0)
+        {
+            input.CastMembersIds!.ToList().ForEach(video.AddCastMember);
         }
 
         await _videoRepository.Insert(video, cancellationToken);
