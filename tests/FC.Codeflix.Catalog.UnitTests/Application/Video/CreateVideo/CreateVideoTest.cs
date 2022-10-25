@@ -255,4 +255,58 @@ public class CreateVideoTest
             .WithMessage($"Related genre id (or ids) not found: {removedId}.");
         genreRepositoryMock.VerifyAll();
     }
+
+    [Fact(DisplayName = nameof(CreateVideoWithCastMembersIds))]
+    [Trait("Application", "CreateVideo - Use Cases")]
+    public async Task CreateVideoWithCastMembersIds()
+    {
+        var exampleIds = Enumerable.Range(1, 5)
+            .Select(_ => Guid.NewGuid()).ToList();
+        var videoRepositoryMock = new Mock<IVideoRepository>();
+        var castMemberRepositoryMock = new Mock<ICastMemberRepository>();
+        var unitOfWorkMock = new Mock<IUnitOfWork>();
+        //castMemberRepositoryMock.Setup(x => x.GetIdsListByIds(
+        //    It.IsAny<List<Guid>>(), It.IsAny<CancellationToken>())
+        //).ReturnsAsync(exampleIds);
+        var useCase = new UseCase.CreateVideo(
+            videoRepositoryMock.Object,
+            Mock.Of<ICategoryRepository>(),
+            Mock.Of<IGenreRepository>(),
+            castMemberRepositoryMock.Object,
+            unitOfWorkMock.Object
+        );
+        var input = _fixture.CreateValidCreateVideoInput(castMembersIds: exampleIds);
+
+        var output = await useCase.Handle(input, CancellationToken.None);
+
+        unitOfWorkMock.Verify(x => x.Commit(It.IsAny<CancellationToken>()));
+        output.Id.Should().NotBeEmpty();
+        output.CreatedAt.Should().NotBe(default(DateTime));
+        output.Title.Should().Be(input.Title);
+        output.Published.Should().Be(input.Published);
+        output.Description.Should().Be(input.Description);
+        output.Duration.Should().Be(input.Duration);
+        output.Rating.Should().Be(input.Rating);
+        output.YearLaunched.Should().Be(input.YearLaunched);
+        output.Opened.Should().Be(input.Opened);
+        output.CategoriesIds.Should().BeEmpty();
+        output.GenresIds.Should().BeEmpty();
+        output.CastMembersIds.Should().BeEquivalentTo(exampleIds);
+        videoRepositoryMock.Verify(x => x.Insert(
+        It.Is<DomainEntities.Video>(
+            video =>
+                video.Title == input.Title &&
+                video.Published == input.Published &&
+                video.Description == input.Description &&
+                video.Duration == input.Duration &&
+                video.Rating == input.Rating &&
+                video.Id != Guid.Empty &&
+                video.YearLaunched == input.YearLaunched &&
+                video.Opened == input.Opened &&
+                video.CastMembers.All(id => exampleIds.Contains(id))
+            ),
+            It.IsAny<CancellationToken>())
+        );
+        castMemberRepositoryMock.VerifyAll();
+    }
 }

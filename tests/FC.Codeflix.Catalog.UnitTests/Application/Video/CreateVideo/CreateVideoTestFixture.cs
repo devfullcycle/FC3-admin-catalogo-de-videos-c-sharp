@@ -15,7 +15,8 @@ public class CreateVideoTestFixture : VideoTestFixtureBase
 {
     internal CreateVideoInput CreateValidCreateVideoInput(
         List<Guid>? categoriesIds = null,
-        List<Guid>? genresIds = null) => new(
+        List<Guid>? genresIds = null,
+        List<Guid>? castMembersIds = null) => new(
         GetValidTitle(),
         GetValidDescription(),
         GetValidYearLaunched(),
@@ -24,5 +25,6 @@ public class CreateVideoTestFixture : VideoTestFixtureBase
         GetValidDuration(),
         GetRandomRating(),
         categoriesIds,
-        genresIds);
+        genresIds,
+        castMembersIds);
 }
