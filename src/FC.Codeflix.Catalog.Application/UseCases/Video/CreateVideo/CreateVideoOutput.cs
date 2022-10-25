@@ -13,7 +13,8 @@ public record CreateVideoOutput(
     int YearLaunched,
     bool Opened,
     int Duration,
-    IReadOnlyCollection<Guid> CategoriesIds)
+    IReadOnlyCollection<Guid> CategoriesIds,
+    IReadOnlyCollection<Guid> GenresIds)
 {
     public static CreateVideoOutput FromVideo(DomainEntities.Video video) => new(
         video.Id,
@@ -25,5 +26,6 @@ public record CreateVideoOutput(
         video.YearLaunched,
         video.Opened,
         video.Duration,
-        video.Categories);
+        video.Categories,
+        video.Genres);
 }

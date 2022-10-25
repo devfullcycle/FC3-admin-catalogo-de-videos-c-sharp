@@ -24,5 +24,5 @@ public class CreateVideoTestFixture : VideoTestFixtureBase
         GetValidDuration(),
         GetRandomRating(),
         categoriesIds,
-        Genre);
+        genresIds);
 }

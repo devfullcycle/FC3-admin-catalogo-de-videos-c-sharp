@@ -32,6 +32,7 @@ public class CreateVideoTest
         var useCase = new UseCase.CreateVideo(
             repositoryMock.Object,
             Mock.Of<ICategoryRepository>(),
+            Mock.Of<IGenreRepository>(),
             unitOfWorkMock.Object
         );
         var input = _fixture.CreateValidCreateVideoInput();
@@ -79,6 +80,7 @@ public class CreateVideoTest
         var useCase = new UseCase.CreateVideo(
             videoRepositoryMock.Object,
             categoryRepositoryMock.Object,
+            Mock.Of<IGenreRepository>(),
             unitOfWorkMock.Object
         );
         var input = _fixture.CreateValidCreateVideoInput(examplecategoriesIds);
@@ -131,6 +133,7 @@ public class CreateVideoTest
         var useCase = new UseCase.CreateVideo(
             videoRepositoryMock.Object,
             categoryRepositoryMock.Object,
+            Mock.Of<IGenreRepository>(),
             unitOfWorkMock.Object
         );
         var input = _fixture.CreateValidCreateVideoInput(examplecategoriesIds);
@@ -154,6 +157,7 @@ public class CreateVideoTest
         var useCase = new UseCase.CreateVideo(
             repositoryMock.Object,
             Mock.Of<ICategoryRepository>(),
+            Mock.Of<IGenreRepository>(),
             unitOfWorkMock.Object
         );
 
@@ -180,9 +184,9 @@ public class CreateVideoTest
         var categoryRepositoryMock = new Mock<ICategoryRepository>();
         var genreRepositoryMock = new Mock<IGenreRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-        genreRepositoryMock.Setup(x => x.GetIdsListByIds(
-            It.IsAny<List<Guid>>(), It.IsAny<CancellationToken>())
-        ).ReturnsAsync(exampleIds);
+        //genreRepositoryMock.Setup(x => x.GetIdsListByIds(
+        //    It.IsAny<List<Guid>>(), It.IsAny<CancellationToken>())
+        //).ReturnsAsync(exampleIds);
         var useCase = new UseCase.CreateVideo(
             videoRepositoryMock.Object,
             categoryRepositoryMock.Object,
@@ -203,7 +207,7 @@ public class CreateVideoTest
         output.Rating.Should().Be(input.Rating);
         output.YearLaunched.Should().Be(input.YearLaunched);
         output.Opened.Should().Be(input.Opened);
-        output.CategoriesIds.Should().BeNull();
+        output.CategoriesIds.Should().BeEmpty();
         output.GenresIds.Should().BeEquivalentTo(exampleIds);
         videoRepositoryMock.Verify(x => x.Insert(
         It.Is<DomainEntities.Video>(

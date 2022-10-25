@@ -12,15 +12,18 @@ public class CreateVideo : ICreateVideo
 {
     private readonly IVideoRepository _videoRepository;
     private readonly ICategoryRepository _categoryRepository;
+    private readonly IGenreRepository _genreRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateVideo(
-        IVideoRepository videoRepository, 
-        ICategoryRepository categoryRepository, 
+        IVideoRepository videoRepository,
+        ICategoryRepository categoryRepository,
+        IGenreRepository genreRepository,
         IUnitOfWork unitOfWork)
     {
         _videoRepository = videoRepository;
         _categoryRepository = categoryRepository;
+        _genreRepository = genreRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -56,6 +59,9 @@ public class CreateVideo : ICreateVideo
             }
             input.CategoriesIds!.ToList().ForEach(video.AddCategory);
         }
+
+        if((input.GenresIds?.Count ?? 0) > 0)
+            input.GenresIds!.ToList().ForEach(video.AddGenre);
 
         await _videoRepository.Insert(video, cancellationToken);
         await _unitOfWork.Commit(cancellationToken);
