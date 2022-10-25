@@ -4,17 +4,15 @@ using FC.Codeflix.Catalog.Domain.Repository;
 using UseCase = FC.Codeflix.Catalog.Application.UseCases.Video.CreateVideo;
 using DomainEntities = FC.Codeflix.Catalog.Domain.Entity;
 using System.Threading.Tasks;
-using FC.Codeflix.Catalog.Domain.Enum;
-using MediatR;
 using FC.Codeflix.Catalog.Application.Interfaces;
 using System.Threading;
 using System;
-using FC.Codeflix.Catalog.Domain.Entity;
 using FluentAssertions;
 using FC.Codeflix.Catalog.Domain.Exceptions;
-using System.Collections.Generic;
 using System.Linq;
 using FC.Codeflix.Catalog.Application.UseCases.Video.CreateVideo;
+using System.Collections.Generic;
+using FC.Codeflix.Catalog.Application.Exceptions;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.CreateVideo;
 
@@ -107,6 +105,32 @@ public class CreateVideoTest
             ),
             It.IsAny<CancellationToken>())
         );
+    }
+
+    [Fact(DisplayName = nameof(ThrowsWhenCategoryIdInvalid))]
+    [Trait("Application", "CreateVideo - Use Cases")]
+    public async Task ThrowsWhenCategoryIdInvalid()
+    {
+        var videoRepositoryMock = new Mock<IVideoRepository>();
+        var categoryRepositoryMock = new Mock<ICategoryRepository>();
+        var examplecategoriesIds = Enumerable.Range(1, 5)
+            .Select(_ => Guid.NewGuid()).ToList();
+        var removedcategoryId = examplecategoriesIds[2];
+        var unitOfWorkMock = new Mock<IUnitOfWork>();
+        categoryRepositoryMock.Setup(x => x.GetIdsListByIds(
+            It.IsAny<List<Guid>>(),
+            It.IsAny<CancellationToken>())
+        ).ReturnsAsync(examplecategoriesIds.FindAll(x => x!= removedcategoryId).AsReadOnly());
+        var useCase = new UseCase.CreateVideo(
+            videoRepositoryMock.Object,
+            categoryRepositoryMock.Object,
+            unitOfWorkMock.Object
+        );
+        var input = _fixture.CreateValidCreateVideoInput(examplecategoriesIds);
+
+        var action = () => useCase.Handle(input, CancellationToken.None);
+        await action.Should().ThrowAsync<RelatedAggregateException>()
+            .WithMessage($"Related category id (or ids) not found: {removedcategoryId}.");
     }
 
     [Theory(DisplayName = nameof(CreateVideoThrowsWithInvalidInput))]
