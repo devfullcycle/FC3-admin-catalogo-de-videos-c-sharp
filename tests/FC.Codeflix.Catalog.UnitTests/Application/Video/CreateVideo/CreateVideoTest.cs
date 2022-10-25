@@ -184,9 +184,9 @@ public class CreateVideoTest
         var categoryRepositoryMock = new Mock<ICategoryRepository>();
         var genreRepositoryMock = new Mock<IGenreRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-        //genreRepositoryMock.Setup(x => x.GetIdsListByIds(
-        //    It.IsAny<List<Guid>>(), It.IsAny<CancellationToken>())
-        //).ReturnsAsync(exampleIds);
+        genreRepositoryMock.Setup(x => x.GetIdsListByIds(
+            It.IsAny<List<Guid>>(), It.IsAny<CancellationToken>())
+        ).ReturnsAsync(exampleIds);
         var useCase = new UseCase.CreateVideo(
             videoRepositoryMock.Object,
             categoryRepositoryMock.Object,
@@ -224,6 +224,35 @@ public class CreateVideoTest
             ),
             It.IsAny<CancellationToken>())
         );
+        genreRepositoryMock.VerifyAll();
+    }
+
+    [Fact(DisplayName = nameof(ThrowsWhenInvalidGenreId))]
+    [Trait("Application", "CreateVideo - Use Cases")]
+    public async Task ThrowsWhenInvalidGenreId()
+    {
+        var exampleIds = Enumerable.Range(1, 5)
+            .Select(_ => Guid.NewGuid()).ToList();
+        var removedId = exampleIds[2];
+        var videoRepositoryMock = new Mock<IVideoRepository>();
+        var categoryRepositoryMock = new Mock<ICategoryRepository>();
+        var genreRepositoryMock = new Mock<IGenreRepository>();
+        var unitOfWorkMock = new Mock<IUnitOfWork>();
+        genreRepositoryMock.Setup(x => x.GetIdsListByIds(
+            It.IsAny<List<Guid>>(), It.IsAny<CancellationToken>())
+        ).ReturnsAsync(exampleIds.FindAll(id => id != removedId));
+        var useCase = new UseCase.CreateVideo(
+            videoRepositoryMock.Object,
+            categoryRepositoryMock.Object,
+            genreRepositoryMock.Object,
+            unitOfWorkMock.Object
+        );
+        var input = _fixture.CreateValidCreateVideoInput(genresIds: exampleIds);
+
+        var action = () => useCase.Handle(input, CancellationToken.None);
+
+        await action.Should().ThrowAsync<RelatedAggregateException>()
+            .WithMessage($"Related genre id (or ids) not found: {removedId}.");
         genreRepositoryMock.VerifyAll();
     }
 }
