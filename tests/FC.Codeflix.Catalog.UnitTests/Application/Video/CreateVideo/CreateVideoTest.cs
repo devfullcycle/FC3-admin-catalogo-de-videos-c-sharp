@@ -31,6 +31,7 @@ public class CreateVideoTest
         var unitOfWorkMock = new Mock<IUnitOfWork>();
         var useCase = new UseCase.CreateVideo(
             repositoryMock.Object,
+            Mock.Of<ICategoryRepository>(),
             unitOfWorkMock.Object
         );
         var input = _fixture.CreateValidCreateVideoInput();
@@ -67,14 +68,19 @@ public class CreateVideoTest
     [Trait("Application", "CreateVideo - Use Cases")]
     public async Task CreateVideoWithCategoriesIds()
     {
-        var repositoryMock = new Mock<IVideoRepository>();
-        var unitOfWorkMock = new Mock<IUnitOfWork>();
-        var useCase = new UseCase.CreateVideo(
-            repositoryMock.Object,
-            unitOfWorkMock.Object
-        );
         var examplecategoriesIds = Enumerable.Range(1, 5)
             .Select(_ => Guid.NewGuid()).ToList();
+        var videoRepositoryMock = new Mock<IVideoRepository>();
+        var categoryRepositoryMock = new Mock<ICategoryRepository>();
+        var unitOfWorkMock = new Mock<IUnitOfWork>();
+        categoryRepositoryMock.Setup(x => x.GetIdsListByIds(
+            It.IsAny<List<Guid>>(), It.IsAny<CancellationToken>())
+        ).ReturnsAsync(examplecategoriesIds);
+        var useCase = new UseCase.CreateVideo(
+            videoRepositoryMock.Object,
+            categoryRepositoryMock.Object,
+            unitOfWorkMock.Object
+        );
         var input = _fixture.CreateValidCreateVideoInput(examplecategoriesIds);
 
         var output = await useCase.Handle(input, CancellationToken.None);
@@ -90,7 +96,7 @@ public class CreateVideoTest
         output.YearLaunched.Should().Be(input.YearLaunched);
         output.Opened.Should().Be(input.Opened);
         output.CategoriesIds.Should().BeEquivalentTo(examplecategoriesIds);
-        repositoryMock.Verify(x => x.Insert(
+        videoRepositoryMock.Verify(x => x.Insert(
         It.Is<DomainEntities.Video>(
             video =>
                 video.Title == input.Title &&
@@ -105,6 +111,7 @@ public class CreateVideoTest
             ),
             It.IsAny<CancellationToken>())
         );
+        categoryRepositoryMock.VerifyAll();
     }
 
     [Fact(DisplayName = nameof(ThrowsWhenCategoryIdInvalid))]
@@ -129,6 +136,8 @@ public class CreateVideoTest
         var input = _fixture.CreateValidCreateVideoInput(examplecategoriesIds);
 
         var action = () => useCase.Handle(input, CancellationToken.None);
+
+        // categoryRepositoryMock.VerifyAll();
         await action.Should().ThrowAsync<RelatedAggregateException>()
             .WithMessage($"Related category id (or ids) not found: {removedcategoryId}.");
     }
@@ -144,6 +153,7 @@ public class CreateVideoTest
         var unitOfWorkMock = new Mock<IUnitOfWork>();
         var useCase = new UseCase.CreateVideo(
             repositoryMock.Object,
+            Mock.Of<ICategoryRepository>(),
             unitOfWorkMock.Object
         );
 

@@ -1,4 +1,5 @@
-﻿using FC.Codeflix.Catalog.Application.Interfaces;
+﻿using FC.Codeflix.Catalog.Application.Exceptions;
+using FC.Codeflix.Catalog.Application.Interfaces;
 using FC.Codeflix.Catalog.Domain.Exceptions;
 using FC.Codeflix.Catalog.Domain.Repository;
 using FC.Codeflix.Catalog.Domain.Validation;
@@ -10,11 +11,16 @@ namespace FC.Codeflix.Catalog.Application.UseCases.Video.CreateVideo;
 public class CreateVideo : ICreateVideo
 {
     private readonly IVideoRepository _videoRepository;
+    private readonly ICategoryRepository _categoryRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CreateVideo(IVideoRepository videoRepository, IUnitOfWork unitOfWork)
+    public CreateVideo(
+        IVideoRepository videoRepository, 
+        ICategoryRepository categoryRepository, 
+        IUnitOfWork unitOfWork)
     {
         _videoRepository = videoRepository;
+        _categoryRepository = categoryRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -38,7 +44,18 @@ public class CreateVideo : ICreateVideo
                 validationHandler.Errors);
 
         if ((input.CategoriesIds?.Count ?? 0) > 0)
+        {
+            var persistenceIds = await _categoryRepository.GetIdsListByIds(
+                input.CategoriesIds!.ToList(), cancellationToken);
+            if(persistenceIds.Count < input.CategoriesIds!.Count)
+            {
+                var notFoundIds = input.CategoriesIds!.ToList()
+                    .FindAll(categoryId => !persistenceIds.Contains(categoryId));
+                throw new RelatedAggregateException(
+                    $"Related category id (or ids) not found: {string.Join(',', notFoundIds)}.");
+            }
             input.CategoriesIds!.ToList().ForEach(video.AddCategory);
+        }
 
         await _videoRepository.Insert(video, cancellationToken);
         await _unitOfWork.Commit(cancellationToken);
