@@ -37,7 +37,8 @@ public class CreateVideoTest
             Mock.Of<ICategoryRepository>(),
             Mock.Of<IGenreRepository>(),
             Mock.Of<ICastMemberRepository>(),
-            unitOfWorkMock.Object
+            unitOfWorkMock.Object,
+            Mock.Of<IStorageService>()
         );
         var input = _fixture.CreateValidCreateVideoInput();
 
@@ -77,9 +78,9 @@ public class CreateVideoTest
         var repositoryMock = new Mock<IVideoRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
         var storageServiceMock = new Mock<IStorageService>();
-        var thumbFileInput = new FileInput("jpg", 
-            new MemoryStream(Encoding.ASCII.GetBytes("test")));
-        var expectedThumbName = $"{output.Id}-thumb.{thumbFileInput.Extension}";
+        var exampleStream = new MemoryStream(Encoding.ASCII.GetBytes("test"));
+        var thumbFileInput = new FileInput("jpg", exampleStream);
+        var expectedThumbName = $"thumb.{thumbFileInput.Extension}";
         storageServiceMock.Setup(x => x.Upload(
             It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<CancellationToken>())
         ).ReturnsAsync(expectedThumbName);
@@ -139,7 +140,8 @@ public class CreateVideoTest
             categoryRepositoryMock.Object,
             Mock.Of<IGenreRepository>(),
             Mock.Of<ICastMemberRepository>(),
-            unitOfWorkMock.Object
+            unitOfWorkMock.Object,
+            Mock.Of<IStorageService>()
         );
         var input = _fixture.CreateValidCreateVideoInput(examplecategoriesIds);
 
@@ -193,7 +195,8 @@ public class CreateVideoTest
             categoryRepositoryMock.Object,
             Mock.Of<IGenreRepository>(),
             Mock.Of<ICastMemberRepository>(),
-            unitOfWorkMock.Object
+            unitOfWorkMock.Object,
+            Mock.Of<IStorageService>()
         );
         var input = _fixture.CreateValidCreateVideoInput(examplecategoriesIds);
 
@@ -218,7 +221,8 @@ public class CreateVideoTest
             Mock.Of<ICategoryRepository>(),
             Mock.Of<IGenreRepository>(),
             Mock.Of<ICastMemberRepository>(),
-            unitOfWorkMock.Object
+            unitOfWorkMock.Object,
+            Mock.Of<IStorageService>()
         );
 
         var action = async () => await useCase.Handle(input, CancellationToken.None);
@@ -252,7 +256,8 @@ public class CreateVideoTest
             categoryRepositoryMock.Object,
             genreRepositoryMock.Object,
             Mock.Of<ICastMemberRepository>(),
-            unitOfWorkMock.Object
+            unitOfWorkMock.Object,
+            Mock.Of<IStorageService>()
         );
         var input = _fixture.CreateValidCreateVideoInput(genresIds: exampleIds);
 
@@ -307,7 +312,8 @@ public class CreateVideoTest
             categoryRepositoryMock.Object,
             genreRepositoryMock.Object,
             Mock.Of<ICastMemberRepository>(),
-            unitOfWorkMock.Object
+            unitOfWorkMock.Object,
+            Mock.Of<IStorageService>()
         );
         var input = _fixture.CreateValidCreateVideoInput(genresIds: exampleIds);
 
@@ -335,7 +341,8 @@ public class CreateVideoTest
             Mock.Of<ICategoryRepository>(),
             Mock.Of<IGenreRepository>(),
             castMemberRepositoryMock.Object,
-            unitOfWorkMock.Object
+            unitOfWorkMock.Object,
+            Mock.Of<IStorageService>()
         );
         var input = _fixture.CreateValidCreateVideoInput(castMembersIds: exampleIds);
 
@@ -390,7 +397,8 @@ public class CreateVideoTest
             Mock.Of<ICategoryRepository>(),
             Mock.Of<IGenreRepository>(),
             castMemberRepositoryMock.Object,
-            unitOfWorkMock.Object
+            unitOfWorkMock.Object,
+            Mock.Of<IStorageService>()
         );
         var input = _fixture.CreateValidCreateVideoInput(castMembersIds: exampleIds);
 
