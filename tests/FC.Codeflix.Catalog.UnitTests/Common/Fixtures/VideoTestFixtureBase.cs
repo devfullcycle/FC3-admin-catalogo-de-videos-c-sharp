@@ -2,12 +2,14 @@
 using FC.Codeflix.Catalog.Domain.Enum;
 using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
 using System;
+using FC.Codeflix.Catalog.Application.UseCases.Video.Common;
+using System.IO;
+using System.Text;
 
 namespace FC.Codeflix.Catalog.UnitTests.Common.Fixtures;
 
 public abstract class VideoTestFixtureBase : BaseFixture
 {
-
     public DomainEntity.Video GetValidVideo() => new DomainEntity.Video(
         GetValidTitle(),
         GetValidDescription(),
@@ -60,6 +62,13 @@ public abstract class VideoTestFixtureBase : BaseFixture
         };
         var random = new Random();
         return exampleMedias[random.Next(exampleMedias.Length)];
+    }
+
+    public FileInput GetValidImageFileInput()
+    {
+        var exampleStream = new MemoryStream(Encoding.ASCII.GetBytes("test"));
+        var fileInput = new FileInput("jpg", exampleStream);
+        return fileInput;
     }
 
     public DomainEntity.Media GetValidMedia()
