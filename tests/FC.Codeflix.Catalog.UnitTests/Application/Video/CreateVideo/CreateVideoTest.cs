@@ -10,9 +10,12 @@ using System;
 using FluentAssertions;
 using FC.Codeflix.Catalog.Domain.Exceptions;
 using System.Linq;
+using FC.Codeflix.Catalog.Application.UseCases.Video.Common;
 using FC.Codeflix.Catalog.Application.UseCases.Video.CreateVideo;
 using System.Collections.Generic;
 using FC.Codeflix.Catalog.Application.Exceptions;
+using System.Text;
+using System.IO;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.CreateVideo;
 
@@ -64,6 +67,59 @@ public class CreateVideoTest
         output.Rating.Should().Be(input.Rating);
         output.YearLaunched.Should().Be(input.YearLaunched);
         output.Opened.Should().Be(input.Opened);
+    }
+
+
+    [Fact(DisplayName = nameof(CreateVideoWithThumb))]
+    [Trait("Application", "CreateVideo - Use Cases")]
+    public async Task CreateVideoWithThumb()
+    {
+        var repositoryMock = new Mock<IVideoRepository>();
+        var unitOfWorkMock = new Mock<IUnitOfWork>();
+        var storageServiceMock = new Mock<IStorageService>();
+        var thumbFileInput = new FileInput("jpg", 
+            new MemoryStream(Encoding.ASCII.GetBytes("test")));
+        var expectedThumbName = $"{output.Id}-thumb.{thumbFileInput.Extension}";
+        storageServiceMock.Setup(x => x.Upload(
+            It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<CancellationToken>())
+        ).ReturnsAsync(expectedThumbName);
+        var useCase = new UseCase.CreateVideo(
+            repositoryMock.Object,
+            Mock.Of<ICategoryRepository>(),
+            Mock.Of<IGenreRepository>(),
+            Mock.Of<ICastMemberRepository>(),
+            unitOfWorkMock.Object,
+            storageServiceMock.Object
+        );
+        var input = _fixture.CreateValidCreateVideoInput(thumb: thumbFileInput);
+
+        var output = await useCase.Handle(input, CancellationToken.None);
+
+        repositoryMock.Verify(x => x.Insert(
+            It.Is<DomainEntities.Video>(
+                video =>
+                    video.Title == input.Title &&
+                    video.Published == input.Published &&
+                    video.Description == input.Description &&
+                    video.Duration == input.Duration &&
+                    video.Rating == input.Rating &&
+                    video.Id != Guid.Empty &&
+                    video.YearLaunched == input.YearLaunched &&
+                    video.Opened == input.Opened
+            ),
+            It.IsAny<CancellationToken>())
+        );
+        unitOfWorkMock.Verify(x => x.Commit(It.IsAny<CancellationToken>()));
+        output.Id.Should().NotBeEmpty();
+        output.CreatedAt.Should().NotBe(default(DateTime));
+        output.Title.Should().Be(input.Title);
+        output.Published.Should().Be(input.Published);
+        output.Description.Should().Be(input.Description);
+        output.Duration.Should().Be(input.Duration);
+        output.Rating.Should().Be(input.Rating);
+        output.YearLaunched.Should().Be(input.YearLaunched);
+        output.Opened.Should().Be(input.Opened);
+        output.Thumb.Should().Be(expectedThumbName);
     }
 
     [Fact(DisplayName = nameof(CreateVideoWithCategoriesIds))]
