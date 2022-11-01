@@ -17,7 +17,8 @@ public record CreateVideoOutput(
     IReadOnlyCollection<Guid> GenresIds,
     IReadOnlyCollection<Guid> CastMembersIds,
     string? Thumb,
-    string? Banner)
+    string? Banner,
+    string? ThumbHalf)
 {
     public static CreateVideoOutput FromVideo(DomainEntities.Video video) => new(
         video.Id,
@@ -33,5 +34,6 @@ public record CreateVideoOutput(
         video.Genres,
         video.CastMembers,
         video.Thumb?.Path,
-        video.Banner?.Path);
+        video.Banner?.Path,
+        video.ThumbHalf?.Path);
 }

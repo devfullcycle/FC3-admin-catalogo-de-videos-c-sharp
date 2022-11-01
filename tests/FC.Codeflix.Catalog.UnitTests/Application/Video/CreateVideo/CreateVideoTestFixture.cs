@@ -4,8 +4,6 @@ using FC.Codeflix.Catalog.UnitTests.Common.Fixtures;
 using System;
 using System.Collections.Generic;
 using Xunit;
-using System.IO;
-using System.Text;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.CreateVideo;
 
@@ -21,7 +19,8 @@ public class CreateVideoTestFixture : VideoTestFixtureBase
         List<Guid>? genresIds = null,
         List<Guid>? castMembersIds = null,
         FileInput? thumb = null,
-        FileInput? banner = null
+        FileInput? banner = null,
+        FileInput? thumbHalf = null
     ) => new(
         GetValidTitle(),
         GetValidDescription(),
@@ -34,6 +33,7 @@ public class CreateVideoTestFixture : VideoTestFixtureBase
         genresIds,
         castMembersIds,
         thumb,
-        banner
+        banner,
+        thumbHalf
     );
 }

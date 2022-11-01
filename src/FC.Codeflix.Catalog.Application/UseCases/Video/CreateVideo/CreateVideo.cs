@@ -88,6 +88,15 @@ public class CreateVideo : ICreateVideo
             video.UpdateBanner(bannerUrl);
         }
 
+        if (input.ThumbHalf is not null)
+        {
+            var thumbHalfUrl = await _storageService.Upload(
+                $"{video.Id}-thumbhalf.{input.ThumbHalf.Extension}",
+                input.ThumbHalf.FileStream,
+                cancellationToken);
+            video.UpdateThumbHalf(thumbHalfUrl);
+        }
+
         await _videoRepository.Insert(video, cancellationToken);
         await _unitOfWork.Commit(cancellationToken);
 
