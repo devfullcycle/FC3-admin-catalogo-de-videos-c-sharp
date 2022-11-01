@@ -70,13 +70,22 @@ public class CreateVideo : ICreateVideo
             input.CastMembersIds!.ToList().ForEach(video.AddCastMember);
         }
 
-        if(input.Thumb is not null)
+        if (input.Thumb is not null)
         {
             var thumbUrl = await _storageService.Upload(
-                $"{video.Id}-thumb.{input.Thumb.Extension}", 
+                $"{video.Id}-thumb.{input.Thumb.Extension}",
                 input.Thumb.FileStream,
                 cancellationToken);
             video.UpdateThumb(thumbUrl);
+        }
+
+        if (input.Banner is not null)
+        {
+            var bannerUrl = await _storageService.Upload(
+                $"{video.Id}-banner.{input.Banner.Extension}",
+                input.Banner.FileStream,
+                cancellationToken);
+            video.UpdateBanner(bannerUrl);
         }
 
         await _videoRepository.Insert(video, cancellationToken);
