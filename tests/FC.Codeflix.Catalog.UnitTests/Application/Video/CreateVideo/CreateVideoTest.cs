@@ -287,6 +287,67 @@ public class CreateVideoTest
         output.Banner.Should().Be(expectedBannerName);
     }
 
+    [Fact(DisplayName = nameof(ThrowsExceptionInUploadErrorCases))]
+    [Trait("Application", "CreateVideo - Use Cases")]
+    public async Task ThrowsExceptionInUploadErrorCases()
+    {
+        var storageServiceMock = new Mock<IStorageService>();
+        storageServiceMock.Setup(x => x.Upload(
+            It.IsAny<string>(),
+            It.IsAny<Stream>(),
+            It.IsAny<CancellationToken>()))
+        .ThrowsAsync(new Exception("Something went wrong in upload"));
+        var useCase = new UseCase.CreateVideo(
+            Mock.Of<IVideoRepository>(),
+            Mock.Of<ICategoryRepository>(),
+            Mock.Of<IGenreRepository>(),
+            Mock.Of<ICastMemberRepository>(),
+            Mock.Of<IUnitOfWork>(),
+            storageServiceMock.Object
+        );
+        var input = _fixture.CreateValidInputWithAllImages();
+
+        var action = () => useCase.Handle(input, CancellationToken.None);
+
+        await action.Should().ThrowAsync<Exception>()
+            .WithMessage("Something went wrong in upload");
+    }
+
+    [Fact(DisplayName = nameof(ThrowsExceptionAndRollbackUploadInErrorCases))]
+    [Trait("Application", "CreateVideo - Use Cases")]
+    public async Task ThrowsExceptionAndRollbackUploadInErrorCases()
+    {
+        var storageServiceMock = new Mock<IStorageService>();
+        storageServiceMock.Setup(x => x.Upload(
+            It.Is<string>(x => x.EndsWith("-banner.jpg")), It.IsAny<Stream>(), It.IsAny<CancellationToken>())
+        ).ReturnsAsync("123-banner.jpg");
+        storageServiceMock.Setup(x => x.Upload(
+            It.Is<string>(x => x.EndsWith("-thumb.jpg")), It.IsAny<Stream>(), It.IsAny<CancellationToken>())
+        ).ReturnsAsync("123-thumb.jpg");
+        storageServiceMock.Setup(x => x.Upload(
+            It.Is<string>(x => x.EndsWith("-thumbhalf.jpg")), It.IsAny<Stream>(), It.IsAny<CancellationToken>())
+        ).ThrowsAsync(new Exception("Something went wrong in upload"));
+        var useCase = new UseCase.CreateVideo(
+            Mock.Of<IVideoRepository>(),
+            Mock.Of<ICategoryRepository>(),
+            Mock.Of<IGenreRepository>(),
+            Mock.Of<ICastMemberRepository>(),
+            Mock.Of<IUnitOfWork>(),
+            storageServiceMock.Object
+        );
+        var input = _fixture.CreateValidInputWithAllImages();
+
+        var action = () => useCase.Handle(input, CancellationToken.None);
+
+        await action.Should().ThrowAsync<Exception>()
+            .WithMessage("Something went wrong in upload");
+        storageServiceMock.Verify(
+            x => x.Delete(
+                It.Is<string>(x => (x == "123-banner.jpg") || (x == "123-thumb.jpg")), 
+                It.IsAny<CancellationToken>()
+            ), 2);
+    }
+
     [Fact(DisplayName = nameof(CreateVideoWithCategoriesIds))]
     [Trait("Application", "CreateVideo - Use Cases")]
     public async Task CreateVideoWithCategoriesIds()
