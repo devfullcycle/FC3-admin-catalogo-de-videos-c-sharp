@@ -7,6 +7,8 @@ using System;
 using System.Threading;
 using System.IO;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using FC.Codeflix.Catalog.Application.Common;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.UploadMedias;
 
@@ -36,10 +38,16 @@ public class UploadMediasTest
     [Trait("Application", "UploadMedias - Use Cases")]
     public async Task UploadMedias()
     {
+        var video = _fixture.GetValidVideo();
+        var validInput = _fixture.GetValidInput(videoId: video.Id);
+        var fileNames = new List<string>() {
+            StorageFileName.Create(video.Id, nameof(video.Media), validInput.VideoFile!.Extension),
+            StorageFileName.Create(video.Id, nameof(video.Trailer), validInput.TrailerFile!.Extension)
+        };
         _repositoryMock.Setup(x => x.Get(
-            It.IsAny<Guid>(),
+            It.Is<Guid>(x => x == video.Id),
             It.IsAny<CancellationToken>())
-        ).ReturnsAsync(_fixture.GetValidVideo());
+        ).ReturnsAsync(video);
         _storageServiceMock
             .Setup(x => x.Upload(
                 It.IsAny<string>(),
@@ -47,11 +55,14 @@ public class UploadMediasTest
                 It.IsAny<CancellationToken>())
             ).ReturnsAsync(Guid.NewGuid().ToString());
 
-        await _useCase.Handle(_fixture.GetValidInput(), CancellationToken.None);
+        await _useCase.Handle(validInput, CancellationToken.None);
 
         _repositoryMock.VerifyAll();
         _storageServiceMock.Verify(x => 
-            x.Upload(It.IsAny<string>(), It.IsAny<Stream>(),It.IsAny<CancellationToken>()),
+            x.Upload(
+                It.Is<string>(x => fileNames.Contains(x)), 
+                It.IsAny<Stream>(),
+                It.IsAny<CancellationToken>()),
             Times.Exactly(2)
         );
         _unitOfWorkMock.Verify(x => x.Commit(It.IsAny<CancellationToken>()));

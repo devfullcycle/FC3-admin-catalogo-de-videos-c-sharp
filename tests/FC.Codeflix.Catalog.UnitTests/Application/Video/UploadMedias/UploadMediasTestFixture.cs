@@ -12,9 +12,9 @@ public class UploadMediasTestFixtureCollection
 
 public class UploadMediasTestFixture : VideoTestFixtureBase
 {
-    public UseCase.UploadMediasInput GetValidInput()
+    public UseCase.UploadMediasInput GetValidInput(Guid? videoId = null)
         => new(
-            Guid.NewGuid(),
+            videoId ?? Guid.NewGuid(),
             GetValidMediaFileInput(),
             GetValidMediaFileInput()
         );
