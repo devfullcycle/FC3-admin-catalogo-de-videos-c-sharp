@@ -345,7 +345,7 @@ public class CreateVideoTest
             x => x.Delete(
                 It.Is<string>(x => (x == "123-banner.jpg") || (x == "123-thumb.jpg")), 
                 It.IsAny<CancellationToken>()
-            ), 2);
+            ), Times.Exactly(2));
     }
 
     [Fact(DisplayName = nameof(CreateVideoWithCategoriesIds))]
