@@ -9,6 +9,8 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using FC.Codeflix.Catalog.Application.Common;
+using FC.Codeflix.Catalog.Application.Exceptions;
+using FluentAssertions;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.UploadMedias;
 
@@ -58,13 +60,30 @@ public class UploadMediasTest
         await _useCase.Handle(validInput, CancellationToken.None);
 
         _repositoryMock.VerifyAll();
-        _storageServiceMock.Verify(x => 
+        _storageServiceMock.Verify(x =>
             x.Upload(
-                It.Is<string>(x => fileNames.Contains(x)), 
+                It.Is<string>(x => fileNames.Contains(x)),
                 It.IsAny<Stream>(),
                 It.IsAny<CancellationToken>()),
             Times.Exactly(2)
         );
         _unitOfWorkMock.Verify(x => x.Commit(It.IsAny<CancellationToken>()));
+    }
+
+    [Fact(DisplayName = nameof(ThrowsWhenVideoNotFound))]
+    [Trait("Application", "UploadMedias - Use Cases")]
+    public async Task ThrowsWhenVideoNotFound()
+    {
+        var video = _fixture.GetValidVideo();
+        var validInput = _fixture.GetValidInput(videoId: video.Id);
+        _repositoryMock.Setup(x => x.Get(
+            It.Is<Guid>(x => x == video.Id),
+            It.IsAny<CancellationToken>())
+        ).ThrowsAsync(new NotFoundException("Video not found"));
+
+        var action = () => _useCase.Handle(validInput, CancellationToken.None);
+
+        await action.Should().ThrowAsync<NotFoundException>()
+            .WithMessage("Video not found");
     }
 }
