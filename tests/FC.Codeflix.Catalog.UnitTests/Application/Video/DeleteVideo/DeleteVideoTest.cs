@@ -9,6 +9,7 @@ using System.Threading;
 using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using FC.Codeflix.Catalog.Application.Exceptions;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.DeleteVideo;
 
@@ -169,6 +170,33 @@ public class DeleteVideoTest
                 It.IsAny<CancellationToken>())
             , Times.Once);
         _unitOfWorkMock.Verify(x => x.Commit(It.IsAny<CancellationToken>()));
+        _storageService.Verify(x => x.Delete(
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>())
+            , Times.Never);
+    }
+
+    [Fact(DisplayName = nameof(ThrowsNotFoundExceptionWhenVideoNotFound))]
+    [Trait("Application", "DeleteVideo - Use Cases")]
+    public async Task ThrowsNotFoundExceptionWhenVideoNotFound()
+    {
+        var input = _fixture.GetValidInput();
+        _repositoryMock.Setup(x => x.Get(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()
+            )).ThrowsAsync(new NotFoundException("Video not found"));
+
+        var action = () => _useCase.Handle(input, CancellationToken.None);
+
+        await action.Should().ThrowAsync<NotFoundException>()
+            .WithMessage("Video not found");
+
+        _repositoryMock.VerifyAll();
+        _repositoryMock.Verify(x => x.Delete(
+                It.IsAny<DomainEntity.Video>(), 
+                It.IsAny<CancellationToken>())
+            , Times.Never);
+        _unitOfWorkMock.Verify(x => x.Commit(It.IsAny<CancellationToken>()), Times.Never);
         _storageService.Verify(x => x.Delete(
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>())
