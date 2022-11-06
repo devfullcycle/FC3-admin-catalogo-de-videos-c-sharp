@@ -1,4 +1,5 @@
 ﻿using FC.Codeflix.Catalog.UnitTests.Common.Fixtures;
+using System;
 using Xunit;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.DeleteVideo;
@@ -10,4 +11,6 @@ public class DeleteVideoTestFixtureCollection
 
 public class DeleteVideoTestFixture : VideoTestFixtureBase
 {
+    internal DeleteVideoInput GetValidInput(Guid? id = null) 
+        => new(id ?? Guid.NewGuid());
 }
