@@ -1,4 +1,5 @@
-﻿using FC.Codeflix.Catalog.UnitTests.Common.Fixtures;
+﻿using FC.Codeflix.Catalog.Application.UseCases.Video.DeleteVideo;
+using FC.Codeflix.Catalog.UnitTests.Common.Fixtures;
 using System;
 using Xunit;
 
