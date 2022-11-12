@@ -1,9 +1,9 @@
 ﻿using FC.Codeflix.Catalog.Domain.Enum;
 using DomainEntities = FC.Codeflix.Catalog.Domain.Entity;
 
-namespace FC.Codeflix.Catalog.Application.UseCases.Video.GetVideo;
+namespace FC.Codeflix.Catalog.Application.UseCases.Video.Common;
 
-public record GetVideoOutput(
+public record VideoModelOutput(
     Guid Id,
     DateTime CreatedAt,
     string Title,
@@ -22,7 +22,7 @@ public record GetVideoOutput(
     string? Media,
     string? Trailer)
 {
-    public static GetVideoOutput FromVideo(DomainEntities.Video video) => new(
+    public static VideoModelOutput FromVideo(DomainEntities.Video video) => new(
         video.Id,
         video.CreatedAt,
         video.Title,
@@ -41,3 +41,4 @@ public record GetVideoOutput(
         video.Media?.FilePath,
         video.Trailer?.FilePath);
 }
+
