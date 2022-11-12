@@ -21,7 +21,8 @@ public class CreateVideoTestFixture : VideoTestFixtureBase
         List<Guid>? castMembersIds = null,
         FileInput? thumb = null,
         FileInput? banner = null,
-        FileInput? thumbHalf = null
+        FileInput? thumbHalf = null,
+        FileInput? media = null
     ) => new(
         GetValidTitle(),
         GetValidDescription(),
@@ -35,8 +36,10 @@ public class CreateVideoTestFixture : VideoTestFixtureBase
         castMembersIds,
         thumb,
         banner,
-        thumbHalf
+        thumbHalf,
+        media
     );
+
     internal CreateVideoInput CreateValidInputWithAllImages() => new(
         GetValidTitle(),
         GetValidDescription(),
