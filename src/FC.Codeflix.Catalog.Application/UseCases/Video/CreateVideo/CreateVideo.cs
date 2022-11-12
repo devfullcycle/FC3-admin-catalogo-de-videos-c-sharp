@@ -85,8 +85,9 @@ public class CreateVideo : ICreateVideo
     {
         if (input.Thumb is not null)
         {
+            var fileName = StorageFileName.Create(video.Id, nameof(video.Thumb), input.Thumb.Extension);
             var thumbUrl = await _storageService.Upload(
-                $"{video.Id}-thumb.{input.Thumb.Extension}",
+                fileName,
                 input.Thumb.FileStream,
                 cancellationToken);
             video.UpdateThumb(thumbUrl);
@@ -94,8 +95,9 @@ public class CreateVideo : ICreateVideo
 
         if (input.Banner is not null)
         {
+            var fileName = StorageFileName.Create(video.Id, nameof(video.Banner), input.Banner.Extension);
             var bannerUrl = await _storageService.Upload(
-                $"{video.Id}-banner.{input.Banner.Extension}",
+                fileName,
                 input.Banner.FileStream,
                 cancellationToken);
             video.UpdateBanner(bannerUrl);
@@ -103,8 +105,9 @@ public class CreateVideo : ICreateVideo
 
         if (input.ThumbHalf is not null)
         {
+            var fileName = StorageFileName.Create(video.Id, nameof(video.ThumbHalf), input.ThumbHalf.Extension);
             var thumbHalfUrl = await _storageService.Upload(
-                $"{video.Id}-thumbhalf.{input.ThumbHalf.Extension}",
+                fileName,
                 input.ThumbHalf.FileStream,
                 cancellationToken);
             video.UpdateThumbHalf(thumbHalfUrl);
@@ -121,6 +124,15 @@ public class CreateVideo : ICreateVideo
                 input.Media.FileStream,
                 cancellationToken);
             video.UpdateMedia(mediaUrl);
+        }
+        if (input.Trailer is not null)
+        {
+            var fileName = StorageFileName.Create(video.Id, nameof(video.Trailer), input.Trailer.Extension);
+            var mediaUrl = await _storageService.Upload(
+                fileName,
+                input.Trailer.FileStream,
+                cancellationToken);
+            video.UpdateTrailer(mediaUrl);
         }
     }
 

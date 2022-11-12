@@ -19,7 +19,8 @@ public record CreateVideoOutput(
     string? Thumb,
     string? Banner,
     string? ThumbHalf,
-    string? Media)
+    string? Media,
+    string? Trailer)
 {
     public static CreateVideoOutput FromVideo(DomainEntities.Video video) => new(
         video.Id,
@@ -37,5 +38,6 @@ public record CreateVideoOutput(
         video.Thumb?.Path,
         video.Banner?.Path,
         video.ThumbHalf?.Path,
-        video.Media?.FilePath);
+        video.Media?.FilePath,
+        video.Trailer?.FilePath);
 }
