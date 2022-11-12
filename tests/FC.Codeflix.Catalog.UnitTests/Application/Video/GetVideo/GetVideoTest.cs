@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using Xunit;
 using System.Threading.Tasks;
+using FluentAssertions;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.GetVideo;
 
