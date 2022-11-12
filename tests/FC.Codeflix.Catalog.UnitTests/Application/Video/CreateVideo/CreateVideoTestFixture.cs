@@ -57,4 +57,22 @@ public class CreateVideoTestFixture : VideoTestFixtureBase
         GetValidImageFileInput(),
         GetValidImageFileInput()
     );
+
+    internal CreateVideoInput CreateValidInputWithAllMedias() => new(
+        GetValidTitle(),
+        GetValidDescription(),
+        GetValidYearLaunched(),
+        GetRandomBoolean(),
+        GetRandomBoolean(),
+        GetValidDuration(),
+        GetRandomRating(),
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        GetValidMediaFileInput(),
+        GetValidMediaFileInput()
+    );
 }
