@@ -1,4 +1,5 @@
-﻿using FC.Codeflix.Catalog.Application.Exceptions;
+﻿using FC.Codeflix.Catalog.Application.Common;
+using FC.Codeflix.Catalog.Application.Exceptions;
 using FC.Codeflix.Catalog.Application.Interfaces;
 using FC.Codeflix.Catalog.Domain.Exceptions;
 using FC.Codeflix.Catalog.Domain.Repository;
@@ -56,7 +57,8 @@ public class CreateVideo : ICreateVideo
         try
         {
             await UploadImagesMedia(input, video, cancellationToken);
-            
+            await UploadVideosMedia(input, video, cancellationToken);
+
             await _videoRepository.Insert(video, cancellationToken);
             await _unitOfWork.Commit(cancellationToken);
 
@@ -106,6 +108,19 @@ public class CreateVideo : ICreateVideo
                 input.ThumbHalf.FileStream,
                 cancellationToken);
             video.UpdateThumbHalf(thumbHalfUrl);
+        }
+    }
+
+    private async Task UploadVideosMedia(CreateVideoInput input, DomainEntities.Video video, CancellationToken cancellationToken)
+    {
+        if (input.Media is not null)
+        {
+            var fileName = StorageFileName.Create(video.Id, nameof(video.Media), input.Media.Extension);
+            var mediaUrl = await _storageService.Upload(
+                fileName,
+                input.Media.FileStream,
+                cancellationToken);
+            video.UpdateMedia(mediaUrl);
         }
     }
 
