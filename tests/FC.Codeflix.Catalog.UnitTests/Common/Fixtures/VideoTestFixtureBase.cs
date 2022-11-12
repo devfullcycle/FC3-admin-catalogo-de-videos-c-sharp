@@ -5,6 +5,7 @@ using System;
 using FC.Codeflix.Catalog.Application.UseCases.Video.Common;
 using System.IO;
 using System.Text;
+using System.Linq;
 
 namespace FC.Codeflix.Catalog.UnitTests.Common.Fixtures;
 
@@ -19,6 +20,36 @@ public abstract class VideoTestFixtureBase : BaseFixture
         GetValidDuration(),
         GetRandomRating()
     );
+
+    public DomainEntity.Video GetValidVideoWithAllProperties()
+    {
+        var video = new DomainEntity.Video(
+            GetValidTitle(),
+            GetValidDescription(),
+            GetValidYearLaunched(),
+            GetRandomBoolean(),
+            GetRandomBoolean(),
+            GetValidDuration(),
+            GetRandomRating()
+        );
+
+        video.UpdateBanner(GetValidImagePath());
+        video.UpdateThumb(GetValidImagePath());
+        video.UpdateThumbHalf(GetValidImagePath());
+
+        video.UpdateMedia(GetValidMediaPath());
+        video.UpdateTrailer(GetValidMediaPath());
+
+        var random = new Random();
+        Enumerable.Range(1, random.Next(2, 5)).ToList()
+            .ForEach(_ => video.AddCastMember(Guid.NewGuid()));
+        Enumerable.Range(1, random.Next(2, 5)).ToList()
+            .ForEach(_ => video.AddCategory(Guid.NewGuid()));
+        Enumerable.Range(1, random.Next(2, 5)).ToList()
+            .ForEach(_ => video.AddGenre(Guid.NewGuid()));
+
+        return video;
+    }
 
     public Rating GetRandomRating()
     {
