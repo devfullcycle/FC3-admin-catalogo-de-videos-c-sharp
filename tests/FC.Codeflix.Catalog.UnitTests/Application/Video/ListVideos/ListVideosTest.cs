@@ -13,6 +13,7 @@ using FC.Codeflix.Catalog.Application.UseCases.Video.Common;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.ListVideos;
 
+[Collection(nameof(ListVideosTestFixture))]
 public class ListVideosTest
 {
     private readonly ListVideosTestFixture _fixture;
@@ -31,7 +32,7 @@ public class ListVideosTest
     public async Task ListVideos()
     {
         var exampleVideosList = _fixture.CreateExampleVideosList();
-        var input = new ListVideosInput(1, 10, "", "", SearchOrder.Asc);
+        var input = new UseCase.ListVideosInput(1, 10, "", "", SearchOrder.Asc);
         _videoRepositoryMock.Setup(x =>
             x.Search(
                 It.Is<SearchInput>(x =>
@@ -41,8 +42,13 @@ public class ListVideosTest
                     x.OrderBy == input.Sort &&
                     x.Order == input.Dir),
                 It.IsAny<CancellationToken>()
-            ).ReturnsAsync(exampleVideosList)
-        );
+            )
+        ).ReturnsAsync(
+            new SearchOutput<DomainEntities.Video>(
+                input.Page, 
+                input.PerPage, 
+                exampleVideosList.Count, 
+                exampleVideosList));
 
         PaginatedListOutput<VideoModelOutput> output = await _useCase.Handle(input, CancellationToken.None);
 
