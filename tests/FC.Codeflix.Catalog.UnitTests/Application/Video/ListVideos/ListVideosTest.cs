@@ -12,6 +12,7 @@ using System.Linq;
 using FC.Codeflix.Catalog.Application.UseCases.Video.Common;
 using System.Collections.Generic;
 using FC.Codeflix.Catalog.Domain.Extensions;
+using System;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.ListVideos;
 
@@ -20,13 +21,17 @@ public class ListVideosTest
 {
     private readonly ListVideosTestFixture _fixture;
     private readonly Mock<IVideoRepository> _videoRepositoryMock;
+    private readonly Mock<ICategoryRepository> _categoryRepository;
     private readonly UseCase.ListVideos _useCase;
 
     public ListVideosTest(ListVideosTestFixture fixture)
     {
         _fixture = fixture;
         _videoRepositoryMock = new Mock<IVideoRepository>();
-        _useCase = new UseCase.ListVideos(_videoRepositoryMock.Object);
+        _categoryRepository = new Mock<ICategoryRepository>();
+        _useCase = new UseCase.ListVideos(
+            _videoRepositoryMock.Object, 
+            _categoryRepository.Object);
     }
 
     [Fact(DisplayName = nameof(ListVideos))]
@@ -95,6 +100,11 @@ public class ListVideosTest
         var (exampleVideosList, examplesCategories) = 
             _fixture.CreateExampleVideosListWithRelations();
         var input = new UseCase.ListVideosInput(1, 10, "", "", SearchOrder.Asc);
+        _categoryRepository.Setup(x => x.GetListByIds(
+            It.Is<List<Guid>>(list => list.Equals(
+                examplesCategories.Select(category => category.Id).ToList())),
+            It.IsAny<CancellationToken>()
+        )).ReturnsAsync(examplesCategories);
         _videoRepositoryMock.Setup(x =>
             x.Search(
                 It.Is<SearchInput>(x =>
@@ -112,7 +122,8 @@ public class ListVideosTest
                 exampleVideosList.Count,
                 exampleVideosList));
 
-        PaginatedListOutput<VideoModelOutput> output = await _useCase.Handle(input, CancellationToken.None);
+        PaginatedListOutput<VideoModelOutput> output = 
+            await _useCase.Handle(input, CancellationToken.None);
 
         output.Page.Should().Be(input.Page);
         output.PerPage.Should().Be(input.PerPage);
