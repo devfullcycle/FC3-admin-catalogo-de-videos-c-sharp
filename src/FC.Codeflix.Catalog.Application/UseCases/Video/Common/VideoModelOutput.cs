@@ -1,4 +1,5 @@
 ﻿using FC.Codeflix.Catalog.Domain.Enum;
+using FC.Codeflix.Catalog.Domain.Extensions;
 using DomainEntities = FC.Codeflix.Catalog.Domain.Entity;
 
 namespace FC.Codeflix.Catalog.Application.UseCases.Video.Common;
@@ -9,18 +10,18 @@ public record VideoModelOutput(
     string Title,
     bool Published,
     string Description,
-    Rating Rating,
+    string Rating,
     int YearLaunched,
     bool Opened,
     int Duration,
     IReadOnlyCollection<Guid> CategoriesIds,
     IReadOnlyCollection<Guid> GenresIds,
     IReadOnlyCollection<Guid> CastMembersIds,
-    string? Thumb,
-    string? Banner,
-    string? ThumbHalf,
-    string? Media,
-    string? Trailer)
+    string? ThumbFileUrl,
+    string? BannerFileUrl,
+    string? ThumbHalfFileUrl,
+    string? VideoFileUrl,
+    string? TrailerFileUrl)
 {
     public static VideoModelOutput FromVideo(DomainEntities.Video video) => new(
         video.Id,
@@ -28,7 +29,7 @@ public record VideoModelOutput(
         video.Title,
         video.Published,
         video.Description,
-        video.Rating,
+        video.Rating.ToStringSignal(),
         video.YearLaunched,
         video.Opened,
         video.Duration,

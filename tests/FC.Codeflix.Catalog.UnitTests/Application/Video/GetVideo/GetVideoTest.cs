@@ -7,6 +7,7 @@ using Xunit;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FC.Codeflix.Catalog.Application.Exceptions;
+using FC.Codeflix.Catalog.Domain.Extensions;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.GetVideo;
 
@@ -40,7 +41,7 @@ public class GetVideoTest
         output.Published.Should().Be(exampleVideo.Published);
         output.Description.Should().Be(exampleVideo.Description);
         output.Duration.Should().Be(exampleVideo.Duration);
-        output.Rating.Should().Be(exampleVideo.Rating);
+        output.Rating.Should().Be(exampleVideo.Rating.ToStringSignal());
         output.YearLaunched.Should().Be(exampleVideo.YearLaunched);
         output.Opened.Should().Be(exampleVideo.Opened);
         repositoryMock.VerifyAll();
@@ -68,14 +69,14 @@ public class GetVideoTest
         output.Published.Should().Be(exampleVideo.Published);
         output.Description.Should().Be(exampleVideo.Description);
         output.Duration.Should().Be(exampleVideo.Duration);
-        output.Rating.Should().Be(exampleVideo.Rating);
+        output.Rating.Should().Be(exampleVideo.Rating.ToStringSignal());
         output.YearLaunched.Should().Be(exampleVideo.YearLaunched);
         output.Opened.Should().Be(exampleVideo.Opened);
-        output.Thumb.Should().Be(exampleVideo.Thumb!.Path);
-        output.ThumbHalf.Should().Be(exampleVideo.ThumbHalf!.Path);
-        output.Banner.Should().Be(exampleVideo.Banner!.Path);
-        output.Media.Should().Be(exampleVideo.Media!.FilePath);
-        output.Trailer.Should().Be(exampleVideo.Trailer!.FilePath);
+        output.ThumbFileUrl.Should().Be(exampleVideo.Thumb!.Path);
+        output.ThumbHalfFileUrl.Should().Be(exampleVideo.ThumbHalf!.Path);
+        output.BannerFileUrl.Should().Be(exampleVideo.Banner!.Path);
+        output.VideoFileUrl.Should().Be(exampleVideo.Media!.FilePath);
+        output.TrailerFileUrl.Should().Be(exampleVideo.Trailer!.FilePath);
         output.CategoriesIds.Should().BeEquivalentTo(exampleVideo.Categories);
         output.CastMembersIds.Should().BeEquivalentTo(exampleVideo.CastMembers);
         output.GenresIds.Should().BeEquivalentTo(exampleVideo.Genres);

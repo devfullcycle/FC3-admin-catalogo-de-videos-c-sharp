@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using FC.Codeflix.Catalog.Application.Exceptions;
 using System.IO;
 using FC.Codeflix.Catalog.Application.Common;
+using FC.Codeflix.Catalog.Domain.Extensions;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.CreateVideo;
 
@@ -64,7 +65,7 @@ public class CreateVideoTest
         output.Published.Should().Be(input.Published);
         output.Description.Should().Be(input.Description);
         output.Duration.Should().Be(input.Duration);
-        output.Rating.Should().Be(input.Rating);
+        output.Rating.Should().Be(input.Rating.ToStringSignal());
         output.YearLaunched.Should().Be(input.YearLaunched);
         output.Opened.Should().Be(input.Opened);
     }
@@ -115,10 +116,10 @@ public class CreateVideoTest
         output.Published.Should().Be(input.Published);
         output.Description.Should().Be(input.Description);
         output.Duration.Should().Be(input.Duration);
-        output.Rating.Should().Be(input.Rating);
+        output.Rating.Should().Be(input.Rating.ToStringSignal());
         output.YearLaunched.Should().Be(input.YearLaunched);
         output.Opened.Should().Be(input.Opened);
-        output.Thumb.Should().Be(expectedThumbName);
+        output.ThumbFileUrl.Should().Be(expectedThumbName);
     }
 
     [Fact(DisplayName = nameof(CreateVideoWithBanner))]
@@ -167,10 +168,10 @@ public class CreateVideoTest
         output.Published.Should().Be(input.Published);
         output.Description.Should().Be(input.Description);
         output.Duration.Should().Be(input.Duration);
-        output.Rating.Should().Be(input.Rating);
+        output.Rating.Should().Be(input.Rating.ToStringSignal());
         output.YearLaunched.Should().Be(input.YearLaunched);
         output.Opened.Should().Be(input.Opened);
-        output.ThumbHalf.Should().Be(expectedThumbHalfName);
+        output.ThumbHalfFileUrl.Should().Be(expectedThumbHalfName);
     }
 
     [Fact(DisplayName = nameof(CreateVideoWithThumbHalf))]
@@ -219,10 +220,10 @@ public class CreateVideoTest
         output.Published.Should().Be(input.Published);
         output.Description.Should().Be(input.Description);
         output.Duration.Should().Be(input.Duration);
-        output.Rating.Should().Be(input.Rating);
+        output.Rating.Should().Be(input.Rating.ToStringSignal());
         output.YearLaunched.Should().Be(input.YearLaunched);
         output.Opened.Should().Be(input.Opened);
-        output.Banner.Should().Be(expectedBannerName);
+        output.BannerFileUrl.Should().Be(expectedBannerName);
     }
 
     [Fact(DisplayName = nameof(CreateVideoWithAllImages))]
@@ -278,12 +279,12 @@ public class CreateVideoTest
         output.Published.Should().Be(input.Published);
         output.Description.Should().Be(input.Description);
         output.Duration.Should().Be(input.Duration);
-        output.Rating.Should().Be(input.Rating);
+        output.Rating.Should().Be(input.Rating.ToStringSignal());
         output.YearLaunched.Should().Be(input.YearLaunched);
         output.Opened.Should().Be(input.Opened);
-        output.ThumbHalf.Should().Be(expectedThumbHalfName);
-        output.Thumb.Should().Be(expectedThumbName);
-        output.Banner.Should().Be(expectedBannerName);
+        output.ThumbHalfFileUrl.Should().Be(expectedThumbHalfName);
+        output.ThumbFileUrl.Should().Be(expectedThumbName);
+        output.BannerFileUrl.Should().Be(expectedBannerName);
     }
 
     [Fact(DisplayName = nameof(CreateVideoWithMedia))]
@@ -332,10 +333,10 @@ public class CreateVideoTest
         output.Published.Should().Be(input.Published);
         output.Description.Should().Be(input.Description);
         output.Duration.Should().Be(input.Duration);
-        output.Rating.Should().Be(input.Rating);
+        output.Rating.Should().Be(input.Rating.ToStringSignal());
         output.YearLaunched.Should().Be(input.YearLaunched);
         output.Opened.Should().Be(input.Opened);
-        output.Media.Should().Be(expectedMediaName);
+        output.VideoFileUrl.Should().Be(expectedMediaName);
     }
 
     [Fact(DisplayName = nameof(CreateVideoWithTrailer))]
@@ -384,10 +385,10 @@ public class CreateVideoTest
         output.Published.Should().Be(input.Published);
         output.Description.Should().Be(input.Description);
         output.Duration.Should().Be(input.Duration);
-        output.Rating.Should().Be(input.Rating);
+        output.Rating.Should().Be(input.Rating.ToStringSignal());
         output.YearLaunched.Should().Be(input.YearLaunched);
         output.Opened.Should().Be(input.Opened);
-        output.Trailer.Should().Be(expectedTrailerName);
+        output.TrailerFileUrl.Should().Be(expectedTrailerName);
     }
 
     [Fact(DisplayName = nameof(ThrowsExceptionInUploadErrorCases))]
@@ -525,7 +526,7 @@ public class CreateVideoTest
         output.Published.Should().Be(input.Published);
         output.Description.Should().Be(input.Description);
         output.Duration.Should().Be(input.Duration);
-        output.Rating.Should().Be(input.Rating);
+        output.Rating.Should().Be(input.Rating.ToStringSignal());
         output.YearLaunched.Should().Be(input.YearLaunched);
         output.Opened.Should().Be(input.Opened);
         output.CategoriesIds.Should().BeEquivalentTo(examplecategoriesIds);
@@ -641,7 +642,7 @@ public class CreateVideoTest
         output.Published.Should().Be(input.Published);
         output.Description.Should().Be(input.Description);
         output.Duration.Should().Be(input.Duration);
-        output.Rating.Should().Be(input.Rating);
+        output.Rating.Should().Be(input.Rating.ToStringSignal());
         output.YearLaunched.Should().Be(input.YearLaunched);
         output.Opened.Should().Be(input.Opened);
         output.CategoriesIds.Should().BeEmpty();
@@ -726,7 +727,7 @@ public class CreateVideoTest
         output.Published.Should().Be(input.Published);
         output.Description.Should().Be(input.Description);
         output.Duration.Should().Be(input.Duration);
-        output.Rating.Should().Be(input.Rating);
+        output.Rating.Should().Be(input.Rating.ToStringSignal());
         output.YearLaunched.Should().Be(input.YearLaunched);
         output.Opened.Should().Be(input.Opened);
         output.CategoriesIds.Should().BeEmpty();
