@@ -12,7 +12,6 @@ using System.Linq;
 using FC.Codeflix.Catalog.Application.UseCases.Video.Common;
 using System.Collections.Generic;
 using FC.Codeflix.Catalog.Domain.Extensions;
-using System;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.ListVideos;
 
@@ -93,7 +92,8 @@ public class ListVideosTest
     [Trait("Application", "ListVideos - Use Cases")]
     public async Task ListVideosWithRelations()
     {
-        var exampleVideosList = _fixture.CreateExampleVideosList();
+        var (exampleVideosList, examplesCategories) = 
+            _fixture.CreateExampleVideosListWithRelations();
         var input = new UseCase.ListVideosInput(1, 10, "", "", SearchOrder.Asc);
         _videoRepositoryMock.Setup(x =>
             x.Search(
@@ -136,9 +136,13 @@ public class ListVideosTest
             outputItem.BannerFileUrl.Should().Be(exampleVideo.Banner!.Path);
             outputItem.VideoFileUrl.Should().Be(exampleVideo.Media!.FilePath);
             outputItem.TrailerFileUrl.Should().Be(exampleVideo.Trailer!.FilePath);
-            var outputItemCategoryIds = outputItem.Categories
-                .Select(categoryDto => categoryDto.Id).ToList();
-            outputItemCategoryIds.Should().BeEquivalentTo(exampleVideo.Categories);
+            outputItem.Categories.ToList().ForEach(relation =>
+            {
+                var exampleCategory = examplesCategories.Find(x => x.Id == relation.Id);
+                exampleCategory.Should().NotBeNull();
+                relation.Name.Should().Be(exampleCategory?.Name);
+            });
+
             var outputItemGenresIds = outputItem.Genres
                 .Select(dto => dto.Id).ToList();
             outputItemGenresIds.Should().BeEquivalentTo(exampleVideo.Genres);
