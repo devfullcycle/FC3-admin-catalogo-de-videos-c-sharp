@@ -14,9 +14,10 @@ public record VideoModelOutput(
     int YearLaunched,
     bool Opened,
     int Duration,
-    IReadOnlyCollection<Guid> CategoriesIds,
-    IReadOnlyCollection<Guid> GenresIds,
-    IReadOnlyCollection<Guid> CastMembersIds,
+    IReadOnlyCollection<RelatedAggregate> Categories,
+    IReadOnlyCollection<RelatedAggregate> Genres,
+    IReadOnlyCollection<RelatedAggregate> CastMembers,
+
     string? ThumbFileUrl,
     string? BannerFileUrl,
     string? ThumbHalfFileUrl,
@@ -33,9 +34,9 @@ public record VideoModelOutput(
         video.YearLaunched,
         video.Opened,
         video.Duration,
-        video.Categories,
-        video.Genres,
-        video.CastMembers,
+        video.Categories.Select(id => new RelatedAggregate(id)).ToList(),
+        video.Genres.Select(id => new RelatedAggregate(id)).ToList(),
+        video.CastMembers.Select(id => new RelatedAggregate(id)).ToList(),
         video.Thumb?.Path,
         video.Banner?.Path,
         video.ThumbHalf?.Path,
@@ -43,3 +44,4 @@ public record VideoModelOutput(
         video.Trailer?.FilePath);
 }
 
+public record RelatedAggregate(Guid Id, string? Name = null);

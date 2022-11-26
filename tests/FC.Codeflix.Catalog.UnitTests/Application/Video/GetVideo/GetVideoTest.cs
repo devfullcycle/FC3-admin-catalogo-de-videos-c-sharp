@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using FC.Codeflix.Catalog.Application.Exceptions;
 using FC.Codeflix.Catalog.Domain.Extensions;
+using System.Linq;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.GetVideo;
 
@@ -77,9 +78,14 @@ public class GetVideoTest
         output.BannerFileUrl.Should().Be(exampleVideo.Banner!.Path);
         output.VideoFileUrl.Should().Be(exampleVideo.Media!.FilePath);
         output.TrailerFileUrl.Should().Be(exampleVideo.Trailer!.FilePath);
-        output.CategoriesIds.Should().BeEquivalentTo(exampleVideo.Categories);
-        output.CastMembersIds.Should().BeEquivalentTo(exampleVideo.CastMembers);
-        output.GenresIds.Should().BeEquivalentTo(exampleVideo.Genres);
+        var outputItemCategoryIds = output.Categories
+            .Select(categoryDto => categoryDto.Id).ToList();
+        outputItemCategoryIds.Should().BeEquivalentTo(exampleVideo.Categories);
+        var outputItemGenresIds = output.Genres
+            .Select(dto => dto.Id).ToList();
+        outputItemGenresIds.Should().BeEquivalentTo(exampleVideo.Genres);
+        var outputItemCastMembersIds = output.CastMembers
+            .Select(dto => dto.Id).ToList();
         repositoryMock.VerifyAll();
     }
 

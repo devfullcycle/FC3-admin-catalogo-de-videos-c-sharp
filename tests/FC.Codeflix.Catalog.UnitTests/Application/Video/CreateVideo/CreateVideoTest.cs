@@ -529,7 +529,9 @@ public class CreateVideoTest
         output.Rating.Should().Be(input.Rating.ToStringSignal());
         output.YearLaunched.Should().Be(input.YearLaunched);
         output.Opened.Should().Be(input.Opened);
-        output.CategoriesIds.Should().BeEquivalentTo(examplecategoriesIds);
+        List<Guid> outputItemCategoryIds = output.Categories
+            .Select(categoryDto => categoryDto.Id).ToList();
+        outputItemCategoryIds.Should().BeEquivalentTo(examplecategoriesIds);
         videoRepositoryMock.Verify(x => x.Insert(
         It.Is<DomainEntities.Video>(
             video =>
@@ -645,8 +647,9 @@ public class CreateVideoTest
         output.Rating.Should().Be(input.Rating.ToStringSignal());
         output.YearLaunched.Should().Be(input.YearLaunched);
         output.Opened.Should().Be(input.Opened);
-        output.CategoriesIds.Should().BeEmpty();
-        output.GenresIds.Should().BeEquivalentTo(exampleIds);
+        var outputItemGenresIds = output.Genres
+            .Select(dto => dto.Id).ToList();
+        outputItemGenresIds.Should().BeEquivalentTo(exampleIds);
         videoRepositoryMock.Verify(x => x.Insert(
         It.Is<DomainEntities.Video>(
             video =>
@@ -730,9 +733,9 @@ public class CreateVideoTest
         output.Rating.Should().Be(input.Rating.ToStringSignal());
         output.YearLaunched.Should().Be(input.YearLaunched);
         output.Opened.Should().Be(input.Opened);
-        output.CategoriesIds.Should().BeEmpty();
-        output.GenresIds.Should().BeEmpty();
-        output.CastMembersIds.Should().BeEquivalentTo(exampleIds);
+        var outputItemCastMembersIds = output.CastMembers
+            .Select(dto => dto.Id).ToList();
+        outputItemCastMembersIds.Should().BeEquivalentTo(exampleIds);
         videoRepositoryMock.Verify(x => x.Insert(
         It.Is<DomainEntities.Video>(
             video =>
