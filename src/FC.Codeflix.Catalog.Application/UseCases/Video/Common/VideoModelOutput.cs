@@ -1,5 +1,4 @@
-﻿using FC.Codeflix.Catalog.Domain.Enum;
-using FC.Codeflix.Catalog.Domain.Extensions;
+﻿using FC.Codeflix.Catalog.Domain.Extensions;
 using DomainEntities = FC.Codeflix.Catalog.Domain.Entity;
 
 namespace FC.Codeflix.Catalog.Application.UseCases.Video.Common;
@@ -14,9 +13,9 @@ public record VideoModelOutput(
     int YearLaunched,
     bool Opened,
     int Duration,
-    IReadOnlyCollection<RelatedAggregate> Categories,
-    IReadOnlyCollection<RelatedAggregate> Genres,
-    IReadOnlyCollection<RelatedAggregate> CastMembers,
+    IReadOnlyCollection<VideoModelOutputRelatedAggregate> Categories,
+    IReadOnlyCollection<VideoModelOutputRelatedAggregate> Genres,
+    IReadOnlyCollection<VideoModelOutputRelatedAggregate> CastMembers,
 
     string? ThumbFileUrl,
     string? BannerFileUrl,
@@ -34,9 +33,9 @@ public record VideoModelOutput(
         video.YearLaunched,
         video.Opened,
         video.Duration,
-        video.Categories.Select(id => new RelatedAggregate(id)).ToList(),
-        video.Genres.Select(id => new RelatedAggregate(id)).ToList(),
-        video.CastMembers.Select(id => new RelatedAggregate(id)).ToList(),
+        video.Categories.Select(id => new VideoModelOutputRelatedAggregate(id)).ToList(),
+        video.Genres.Select(id => new VideoModelOutputRelatedAggregate(id)).ToList(),
+        video.CastMembers.Select(id => new VideoModelOutputRelatedAggregate(id)).ToList(),
         video.Thumb?.Path,
         video.Banner?.Path,
         video.ThumbHalf?.Path,
@@ -44,4 +43,4 @@ public record VideoModelOutput(
         video.Trailer?.FilePath);
 }
 
-public record RelatedAggregate(Guid Id, string? Name = null);
+public record VideoModelOutputRelatedAggregate(Guid Id, string? Name = null);
