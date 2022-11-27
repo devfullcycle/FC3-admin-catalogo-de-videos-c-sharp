@@ -66,7 +66,8 @@ public class Video : AggregateRoot
         int yearLaunched,
         bool opened,
         bool published,
-        int duration)
+        int duration,
+        Rating? rating = null)
     {
         Title = title;
         Description = description;
@@ -74,6 +75,8 @@ public class Video : AggregateRoot
         Opened = opened;
         Published = published;
         Duration = duration;
+        if(rating is not null)
+            Rating = (Rating) rating;
     }
 
     public void UpdateThumb(string path)

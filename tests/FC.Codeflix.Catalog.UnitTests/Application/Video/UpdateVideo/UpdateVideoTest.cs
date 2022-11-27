@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FC.Codeflix.Catalog.Application.UseCases.Video.Common;
 using FluentAssertions;
+using FC.Codeflix.Catalog.Domain.Extensions;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.UpdateVideo;
 
@@ -56,6 +57,7 @@ public class UpdateVideoTest
             , It.IsAny<CancellationToken>())
         , Times.Once);
         _unitofWork.Verify(uow => uow.Commit(It.IsAny<CancellationToken>()), Times.Once);
+        output.Should().NotBeNull();
         output.Id.Should().NotBeEmpty();
         output.CreatedAt.Should().NotBe(default(DateTime));
         output.Title.Should().Be(input.Title);
