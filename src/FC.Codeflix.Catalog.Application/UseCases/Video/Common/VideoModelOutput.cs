@@ -44,7 +44,8 @@ public record VideoModelOutput(
 
     public static VideoModelOutput FromVideo(
         DomainEntities.Video video,
-        IReadOnlyList<DomainEntities.Category>? categories = null
+        IReadOnlyList<DomainEntities.Category>? categories = null,
+        IReadOnlyCollection<DomainEntities.Genre>? genres = null
     ) => new(
         video.Id,
         video.CreatedAt,
@@ -60,7 +61,11 @@ public record VideoModelOutput(
                 id, 
                 categories?.FirstOrDefault(category => category.Id == id)?.Name
             )).ToList(),
-        video.Genres.Select(id => new VideoModelOutputRelatedAggregate(id)).ToList(),
+        video.Genres.Select(id => 
+            new VideoModelOutputRelatedAggregate(
+                id,
+                genres?.FirstOrDefault(genre => genre.Id == id)?.Name
+            )).ToList(),
         video.CastMembers.Select(id => new VideoModelOutputRelatedAggregate(id)).ToList(),
         video.Thumb?.Path,
         video.Banner?.Path,

@@ -34,7 +34,7 @@ public class ListVideosTest
         _useCase = new UseCase.ListVideos(
             _videoRepositoryMock.Object, 
             _categoryRepository.Object,
-            _genreRepository);
+            _genreRepository.Object);
     }
 
     [Fact(DisplayName = nameof(ListVideos))]
@@ -116,7 +116,7 @@ public class ListVideosTest
                 list.All(exampleGenresIds.Contains) 
                 && list.Count == exampleGenresIds.Count),
             It.IsAny<CancellationToken>()
-        )).RetursAsync(exampleGenres);
+        )).ReturnsAsync(exampleGenres);
         _videoRepositoryMock.Setup(x =>
             x.Search(
                 It.Is<SearchInput>(x =>

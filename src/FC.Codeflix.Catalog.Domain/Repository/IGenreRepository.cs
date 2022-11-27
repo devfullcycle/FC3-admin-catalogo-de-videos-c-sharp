@@ -11,4 +11,9 @@ public interface IGenreRepository
         List<Guid> ids,
         CancellationToken cancellationToken
     );
+
+    public Task<IReadOnlyList<Genre>> GetListByIds(
+        List<Guid> ids,
+        CancellationToken cancellationToken
+    );
 }
