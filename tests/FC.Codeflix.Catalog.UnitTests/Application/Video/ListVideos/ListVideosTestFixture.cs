@@ -19,6 +19,11 @@ public class ListVideosTestFixture : VideoTestFixtureBase
             .Select(_ => GetValidVideoWithAllProperties())
             .ToList();
 
+    public List<DomainEntities.Video> CreateExampleVideosListWithoutRelations()
+        => Enumerable.Range(1, Random.Shared.Next(2, 10))
+            .Select(_ => GetValidVideo())
+            .ToList();
+
     public (
         List<DomainEntities.Video> Videos,
         List<DomainEntities.Category> Categories,
