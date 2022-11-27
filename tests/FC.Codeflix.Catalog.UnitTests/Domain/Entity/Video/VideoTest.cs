@@ -121,6 +121,57 @@ public class VideoTest
         video.Duration.Should().Be(expectedDuration);
     }
 
+    [Fact(DisplayName = nameof(UpdateWithRating))]
+    [Trait("Domain", "Video - Aggregate")]
+    public void UpdateWithRating()
+    {
+        var expectedTitle = _fixture.GetValidTitle();
+        var expectedDescription = _fixture.GetValidDescription();
+        var expectedYearLaunched = _fixture.GetValidYearLaunched();
+        var expectedOpened = _fixture.GetRandomBoolean();
+        var expectedPublished = _fixture.GetRandomBoolean();
+        var expectedDuration = _fixture.GetValidDuration();
+        var expectedRating = _fixture.GetRandomRating();
+        var video = _fixture.GetValidVideo();
+
+        video.Update(
+            expectedTitle,
+            expectedDescription,
+            expectedYearLaunched,
+            expectedOpened,
+            expectedPublished,
+            expectedDuration,
+            expectedRating
+        );
+
+        video.Title.Should().Be(expectedTitle);
+        video.Description.Should().Be(expectedDescription);
+        video.YearLaunched.Should().Be(expectedYearLaunched);
+        video.Opened.Should().Be(expectedOpened);
+        video.Published.Should().Be(expectedPublished);
+        video.Duration.Should().Be(expectedDuration);
+        video.Rating.Should().Be(expectedRating);
+    }
+
+    [Fact(DisplayName = nameof(UpdateWithoutRatingDoesntChangeTheRating))]
+    [Trait("Domain", "Video - Aggregate")]
+    public void UpdateWithoutRatingDoesntChangeTheRating()
+    {
+        var video = _fixture.GetValidVideo();
+        var expectedRating = video.Rating;
+
+        video.Update(
+            _fixture.GetValidTitle(),
+            _fixture.GetValidDescription(),
+            _fixture.GetValidYearLaunched(),
+            _fixture.GetRandomBoolean(),
+            _fixture.GetRandomBoolean(),
+            _fixture.GetValidDuration()
+        );
+
+        video.Rating.Should().Be(expectedRating);
+    }
+
     [Fact(DisplayName = nameof(ValidateStillValidatingAfterUpdateToValidState))]
     [Trait("Domain", "Video - Aggregate")]
     public void ValidateStillValidatingAfterUpdateToValidState()

@@ -26,7 +26,8 @@ public class UpdateVideo : IUpdateVideo
             input.YearLaunched,
             input.Opened,
             input.Published,
-            input.Duration);
+            input.Duration,
+            input.Rating);
         await _videoRepository.Update(video, cancellationToken);
         await _unitOfWork.Commit(cancellationToken);
         return VideoModelOutput.FromVideo(video);
