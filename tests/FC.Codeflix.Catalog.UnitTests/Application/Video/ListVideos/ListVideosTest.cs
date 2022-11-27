@@ -99,10 +99,13 @@ public class ListVideosTest
     {
         var (exampleVideosList, examplesCategories) = 
             _fixture.CreateExampleVideosListWithRelations();
+        var examplesCategoriesIds = examplesCategories
+            .Select(category => category.Id).ToList();
         var input = new UseCase.ListVideosInput(1, 10, "", "", SearchOrder.Asc);
         _categoryRepository.Setup(x => x.GetListByIds(
-            It.Is<List<Guid>>(list => list.Equals(
-                examplesCategories.Select(category => category.Id).ToList())),
+            It.Is<List<Guid>>(list => 
+                list.All(examplesCategoriesIds.Contains) && 
+                list.Count == examplesCategoriesIds.Count),
             It.IsAny<CancellationToken>()
         )).ReturnsAsync(examplesCategories);
         _videoRepositoryMock.Setup(x =>
@@ -162,6 +165,7 @@ public class ListVideosTest
             outputItemCastMembersIds.Should().BeEquivalentTo(exampleVideo.CastMembers);
         });
         _videoRepositoryMock.VerifyAll();
+        _categoryRepository.VerifyAll();
     }
 
     [Fact(DisplayName = nameof(ListReturnsEmptyWhenThereIsNoVideo))]
