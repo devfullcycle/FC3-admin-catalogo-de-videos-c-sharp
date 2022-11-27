@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using FC.Codeflix.Catalog.Application.UseCases.Video.Common;
 using FluentAssertions;
 using FC.Codeflix.Catalog.Domain.Extensions;
+using FC.Codeflix.Catalog.Application.Exceptions;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.UpdateVideo;
 
@@ -45,9 +46,9 @@ public class UpdateVideoTest
 
         _videoRepository.VerifyAll();
         _videoRepository.Verify(repository => repository.Update(
-            It.Is<DomainEntities.Video>(video => 
+            It.Is<DomainEntities.Video>(video =>
                 ((video.Id == exampleVideo.Id) &&
-                (video.Title == input.Title) && 
+                (video.Title == input.Title) &&
                 (video.Description == input.Description) &&
                 (video.Rating == input.Rating) &&
                 (video.YearLaunched == input.YearLaunched) &&
@@ -67,5 +68,24 @@ public class UpdateVideoTest
         output.Rating.Should().Be(input.Rating.ToStringSignal());
         output.YearLaunched.Should().Be(input.YearLaunched);
         output.Opened.Should().Be(input.Opened);
+    }
+
+    [Fact(DisplayName = nameof(UpdateVideosThrowsWhenVideoNotFound))]
+    [Trait("Application", "UpdateVideo - Use Cases")]
+    public async Task UpdateVideosThrowsWhenVideoNotFound()
+    {
+        var input = _fixture.CreateValidInput(Guid.NewGuid());
+        _videoRepository.Setup(repository =>
+            repository.Get(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        .ThrowsAsync(new NotFoundException("Video not found"));
+
+        var action = () => _useCase.Handle(input, CancellationToken.None);
+        await action.Should().ThrowAsync<NotFoundException>()
+            .WithMessage("Video not found");
+
+        _videoRepository.Verify(repository => repository.Update(
+            It.IsAny<DomainEntities.Video>(), It.IsAny<CancellationToken>()), 
+            Times.Never);
+        _unitofWork.Verify(uow => uow.Commit(It.IsAny<CancellationToken>()), Times.Never);
     }
 }
