@@ -2,6 +2,7 @@
 using FC.Codeflix.Catalog.UnitTests.Common.Fixtures;
 using System;
 using Xunit;
+using System.Collections.Generic;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.UpdateVideo;
 
@@ -11,7 +12,9 @@ public class UpdateVideoTestFixtureCollection : ICollectionFixture<UpdateVideoTe
 
 public class UpdateVideoTestFixture : VideoTestFixtureBase
 {
-    public UseCase.UpdateVideoInput CreateValidInput(Guid videoId) 
+    public UseCase.UpdateVideoInput CreateValidInput(
+        Guid videoId,
+        List<Guid>? genreIds = null) 
         => new(
             videoId,
             GetValidTitle(),
@@ -20,6 +23,7 @@ public class UpdateVideoTestFixture : VideoTestFixtureBase
             GetRandomBoolean(),
             GetRandomBoolean(),
             GetValidDuration(),
-            GetRandomRating()
+            GetRandomRating(),
+            genreIds
         );
 }
