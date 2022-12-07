@@ -1,6 +1,8 @@
 ﻿using FC.Codeflix.Catalog.Application.Interfaces;
 using FC.Codeflix.Catalog.Application.UseCases.Video.Common;
+using FC.Codeflix.Catalog.Domain.Exceptions;
 using FC.Codeflix.Catalog.Domain.Repository;
+using FC.Codeflix.Catalog.Domain.Validation;
 
 namespace FC.Codeflix.Catalog.Application.UseCases.Video.UpdateVideo;
 
@@ -28,6 +30,13 @@ public class UpdateVideo : IUpdateVideo
             input.Published,
             input.Duration,
             input.Rating);
+
+        var validationHandler = new NotificationValidationHandler();
+        video.Validate(validationHandler);
+        if(validationHandler.HasErrors())
+            throw new EntityValidationException("There are validation errors",
+                validationHandler.Errors);
+
         await _videoRepository.Update(video, cancellationToken);
         await _unitOfWork.Commit(cancellationToken);
         return VideoModelOutput.FromVideo(video);

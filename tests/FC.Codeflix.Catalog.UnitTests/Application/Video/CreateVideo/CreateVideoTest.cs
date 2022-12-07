@@ -14,7 +14,6 @@ using FC.Codeflix.Catalog.Application.UseCases.Video.CreateVideo;
 using System.Collections.Generic;
 using FC.Codeflix.Catalog.Application.Exceptions;
 using System.IO;
-using FC.Codeflix.Catalog.Application.Common;
 using FC.Codeflix.Catalog.Domain.Extensions;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.CreateVideo;

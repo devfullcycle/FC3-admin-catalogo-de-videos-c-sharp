@@ -11,6 +11,9 @@ using FC.Codeflix.Catalog.Application.UseCases.Video.Common;
 using FluentAssertions;
 using FC.Codeflix.Catalog.Domain.Extensions;
 using FC.Codeflix.Catalog.Application.Exceptions;
+using FC.Codeflix.Catalog.Application.UseCases.Video.UpdateVideo;
+using FC.Codeflix.Catalog.Domain.Exceptions;
+using System.Linq;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.UpdateVideo;
 
@@ -68,6 +71,28 @@ public class UpdateVideoTest
         output.Rating.Should().Be(input.Rating.ToStringSignal());
         output.YearLaunched.Should().Be(input.YearLaunched);
         output.Opened.Should().Be(input.Opened);
+    }
+
+    [Theory(DisplayName = nameof(UpdateVideosThrowsWhenReceiveINvalidInput))]
+    [Trait("Application", "UpdateVideo - Use Cases")]
+    [ClassData(typeof(UpdateVideoTestDataGenerator))]
+    public async Task UpdateVideosThrowsWhenReceiveINvalidInput(
+        UpdateVideoInput invalidinput,
+        string expectedExceptionMessage)
+    {
+        var exampleVideo = _fixture.GetValidVideo();
+        _videoRepository.Setup(repository => repository
+            .Get(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(exampleVideo);
+
+        var action = () => _useCase.Handle(invalidinput, CancellationToken.None);
+
+        var exceptionAssertion = await action.Should().ThrowAsync<EntityValidationException>()
+            .WithMessage("There are validation errors");
+        exceptionAssertion.Which.Errors!.ToList()[0].Message.Should()
+            .Be(expectedExceptionMessage);
+        _videoRepository.VerifyAll();
+        _unitofWork.Verify(x => x.Commit(It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact(DisplayName = nameof(UpdateVideosThrowsWhenVideoNotFound))]
