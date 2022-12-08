@@ -14,7 +14,8 @@ public class UpdateVideoTestFixture : VideoTestFixtureBase
 {
     public UseCase.UpdateVideoInput CreateValidInput(
         Guid videoId,
-        List<Guid>? genreIds = null) 
+        List<Guid>? genreIds = null,
+        List<Guid>? categoryIds = null) 
         => new(
             videoId,
             GetValidTitle(),
@@ -24,6 +25,7 @@ public class UpdateVideoTestFixture : VideoTestFixtureBase
             GetRandomBoolean(),
             GetValidDuration(),
             GetRandomRating(),
-            genreIds
+            genreIds,
+            categoryIds
         );
 }
