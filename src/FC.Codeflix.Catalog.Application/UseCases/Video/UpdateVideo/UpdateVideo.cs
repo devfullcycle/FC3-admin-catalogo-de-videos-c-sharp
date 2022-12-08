@@ -13,15 +13,18 @@ public class UpdateVideo : IUpdateVideo
 {
     private readonly IVideoRepository _videoRepository;
     private readonly IGenreRepository _genreRepository;
+    private readonly ICategoryRepository _categoryRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public UpdateVideo(
         IVideoRepository videoRepository,
         IGenreRepository genreRepository,
+        ICategoryRepository categoryRepository,
         IUnitOfWork unitOfWork)
     {
         _videoRepository = videoRepository;
         _genreRepository = genreRepository;
+        _categoryRepository = categoryRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -60,7 +63,15 @@ public class UpdateVideo : IUpdateVideo
         if((input.GenresIds?.Count ?? 0) > 0)
         {
             await ValidateGenresIds(input, cancellationToken);
+            video.RemoveAllGenres();
             input.GenresIds!.ToList().ForEach(video.AddGenre);
+        }
+
+        if((input.CategoriesIds?.Count ?? 0) > 0)
+        {
+            await ValidateCategoriesIds(input, cancellationToken);
+            video.RemoveAllCategories();
+            input.CategoriesIds!.ToList().ForEach(video.AddCategory);
         }
     }
 
@@ -74,6 +85,19 @@ public class UpdateVideo : IUpdateVideo
                 .FindAll(id => !persistenceIds.Contains(id));
             throw new RelatedAggregateException(
                 $"Related genre id (or ids) not found: {string.Join(',', notFoundIds)}.");
+        }
+    }
+
+    private async Task ValidateCategoriesIds(UpdateVideoInput input, CancellationToken cancellationToken)
+    {
+        var persistenceIds = await _categoryRepository.GetIdsListByIds(
+            input.CategoriesIds!.ToList(), cancellationToken);
+        if(persistenceIds.Count < input.CategoriesIds!.Count)
+        {
+            var notFoundIds = input.CategoriesIds!.ToList()
+                .FindAll(id => !persistenceIds.Contains(id));
+            throw new RelatedAggregateException(
+                $"Related category id (or ids) not found: {string.Join(',', notFoundIds)}.");
         }
     }
 }

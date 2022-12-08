@@ -388,7 +388,7 @@ public class VideoTest
         validVideo.AddCategory(categoryIdExample);
         validVideo.AddCategory(categoryIdExample2);
 
-        validVideo.RemoveAllCategory();
+        validVideo.RemoveAllCategories();
 
         validVideo.Categories.Should().HaveCount(0);
     }

@@ -34,7 +34,7 @@ public class UpdateVideoTest
         _fixture = fixture;
         _videoRepository = new();
         _genreRepository = new();
-        _categoryRepository = new Mock();
+        _categoryRepository = new();
         _unitofWork = new();
         _useCase = new(_videoRepository.Object,
             _genreRepository.Object,
@@ -218,6 +218,38 @@ public class UpdateVideoTest
             .WithMessage($"Related genre id (or ids) not found: {invalidGenreId}.");
         _videoRepository.VerifyAll();
         _genreRepository.VerifyAll();
+        _unitofWork.Verify(x => x.Commit(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact(DisplayName = nameof(UpdateVideosThrowsWhenInvalidCategoryId))]
+    [Trait("Application", "UpdateVideo - Use Cases")]
+    public async Task UpdateVideosThrowsWhenInvalidCategoryId()
+    {
+        var exampleVideo = _fixture.GetValidVideo();
+        var exampleIds = Enumerable.Range(1, 5)
+            .Select(_ => Guid.NewGuid()).ToList();
+        var invalidId = Guid.NewGuid();
+        var inputInvalidIdsList = exampleIds
+            .Concat(new List<Guid>() { invalidId }).ToList();
+        var input = _fixture.CreateValidInput(exampleVideo.Id, 
+            categoryIds: inputInvalidIdsList);
+        _videoRepository.Setup(repository =>
+            repository.Get(
+                It.Is<Guid>(id => id == exampleVideo.Id),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(exampleVideo);
+        _categoryRepository.Setup(x =>
+            x.GetIdsListByIds(
+                It.IsAny<List<Guid>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(exampleIds);
+
+        var action = () => _useCase.Handle(input, CancellationToken.None);
+
+        await action.Should().ThrowAsync<RelatedAggregateException>()
+            .WithMessage($"Related category id (or ids) not found: {invalidId}.");
+        _videoRepository.VerifyAll();
+        _categoryRepository.VerifyAll();
         _unitofWork.Verify(x => x.Commit(It.IsAny<CancellationToken>()), Times.Never);
     }
 

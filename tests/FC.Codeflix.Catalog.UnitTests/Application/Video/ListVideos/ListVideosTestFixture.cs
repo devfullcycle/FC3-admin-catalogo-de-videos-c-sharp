@@ -39,7 +39,7 @@ public class ListVideosTestFixture : VideoTestFixtureBase
 
         videos.ForEach(video =>
         {
-            video.RemoveAllCategory();
+            video.RemoveAllCategories();
             var qtdCategories = Random.Shared.Next(2, 5);
             for(var i = 0; i < qtdCategories; i++)
             {
