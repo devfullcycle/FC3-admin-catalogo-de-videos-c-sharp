@@ -3,6 +3,7 @@ using FC.Codeflix.Catalog.UnitTests.Common.Fixtures;
 using System;
 using Xunit;
 using System.Collections.Generic;
+using FC.Codeflix.Catalog.Application.UseCases.Video.Common;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.UpdateVideo;
 
@@ -16,7 +17,8 @@ public class UpdateVideoTestFixture : VideoTestFixtureBase
         Guid videoId,
         List<Guid>? genreIds = null,
         List<Guid>? categoryIds = null,
-        List<Guid>? castMemberIds = null) 
+        List<Guid>? castMemberIds = null,
+        FileInput? banner = null) 
         => new(
             videoId,
             GetValidTitle(),
@@ -28,6 +30,7 @@ public class UpdateVideoTestFixture : VideoTestFixtureBase
             GetRandomRating(),
             genreIds,
             categoryIds,
-            castMemberIds
+            castMemberIds,
+            banner
         );
 }

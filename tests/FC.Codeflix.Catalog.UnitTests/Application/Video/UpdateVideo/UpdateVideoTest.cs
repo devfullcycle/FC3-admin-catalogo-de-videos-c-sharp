@@ -16,6 +16,8 @@ using FC.Codeflix.Catalog.Domain.Exceptions;
 using System.Linq;
 using System.Collections.Generic;
 using FC.Codeflix.Catalog.Domain.Entity;
+using System.IO;
+using FC.Codeflix.Catalog.Application.Common;
 
 namespace FC.Codeflix.Catalog.UnitTests.Application.Video.UpdateVideo;
 
@@ -28,6 +30,7 @@ public class UpdateVideoTest
     private readonly Mock<ICategoryRepository> _categoryRepository;
     private readonly Mock<ICastMemberRepository> _castMemberRepository;
     private readonly Mock<IUnitOfWork> _unitofWork;
+    private readonly Mock<IStorageService> _storageService;
     private readonly UseCase.UpdateVideo _useCase;
 
     public UpdateVideoTest(UpdateVideoTestFixture fixture)
@@ -38,11 +41,13 @@ public class UpdateVideoTest
         _categoryRepository = new();
         _castMemberRepository = new();
         _unitofWork = new();
+        _storageService = new();
         _useCase = new(_videoRepository.Object,
             _genreRepository.Object,
             _categoryRepository.Object,
             _castMemberRepository.Object,
-            _unitofWork.Object);
+            _unitofWork.Object,
+            _storageService);
     }
 
     [Fact(DisplayName = nameof(UpdateVideosBasicInfo))]
@@ -681,5 +686,59 @@ public class UpdateVideoTest
             It.IsAny<DomainEntities.Video>(), It.IsAny<CancellationToken>()), 
             Times.Never);
         _unitofWork.Verify(uow => uow.Commit(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact(DisplayName = nameof(UpdateVideosWithBannerWhenVideoHaveNoBanner))]
+    [Trait("Application", "UpdateVideo - Use Cases")]
+    public async Task UpdateVideosWithBannerWhenVideoHaveNoBanner()
+    {
+        var exampleVideo = _fixture.GetValidVideo();
+        var input = _fixture.CreateValidInput(exampleVideo.Id, 
+            banner: _fixture.GetValidImageFileInput());
+        var bannerPath = $"storage/{input.Banner}";
+        _videoRepository.Setup(repository =>
+            repository.Get(
+                It.Is<Guid>(id => id == exampleVideo.Id),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(exampleVideo);
+        _storageService.Setup(x => x.Upload(
+            It.Is<string>(name => StorageFileName.Create(
+                exampleVideo.Id, 
+                nameof(exampleVideo.Banner), 
+                input.Banner.Extension)
+            ),
+            It.IsAny<MemoryStream>(),
+            It.IsAny<CancellationToken>())
+        ).Returns(bannerPath);
+
+        var output = await _useCase.Handle(input, CancellationToken.None);
+
+        output.Should().NotBeNull();
+        output.Id.Should().NotBeEmpty();
+        output.CreatedAt.Should().NotBe(default(DateTime));
+        output.Title.Should().Be(input.Title);
+        output.Published.Should().Be(input.Published);
+        output.Description.Should().Be(input.Description);
+        output.Duration.Should().Be(input.Duration);
+        output.Rating.Should().Be(input.Rating.ToStringSignal());
+        output.YearLaunched.Should().Be(input.YearLaunched);
+        output.Opened.Should().Be(input.Opened);
+        output.BannerFileUrl.Should().Be(bannerPath);
+        _videoRepository.VerifyAll();
+        _storageService.VerifyAll();
+        _videoRepository.Verify(repository => repository.Update(
+            It.Is<DomainEntities.Video>(video =>
+                (video.Id == exampleVideo.Id) &&
+                (video.Title == input.Title) &&
+                (video.Description == input.Description) &&
+                (video.Rating == input.Rating) &&
+                (video.YearLaunched == input.YearLaunched) &&
+                (video.Opened == input.Opened) &&
+                (video.Published == input.Published) &&
+                (video.Duration == input.Duration) &&
+                (video.Banner == bannerPath)
+            ), It.IsAny<CancellationToken>())
+        , Times.Once);
+        _unitofWork.Verify(uow => uow.Commit(It.IsAny<CancellationToken>()), Times.Once);
     }
 }
