@@ -63,25 +63,34 @@ public class UpdateVideo : IUpdateVideo
         DomainEntities.Video video, 
         CancellationToken cancellationToken)
     {
-        if((input.GenresIds?.Count ?? 0) > 0)
+        if(input.GenresIds is not null)
         {
-            await ValidateGenresIds(input, cancellationToken);
             video.RemoveAllGenres();
-            input.GenresIds!.ToList().ForEach(video.AddGenre);
+            if(input.GenresIds.Count > 0)
+            {
+                await ValidateGenresIds(input, cancellationToken);
+                input.GenresIds!.ToList().ForEach(video.AddGenre);
+            }
         }
 
-        if((input.CategoriesIds?.Count ?? 0) > 0)
+        if(input.CategoriesIds is not null)
         {
-            await ValidateCategoriesIds(input, cancellationToken);
             video.RemoveAllCategories();
-            input.CategoriesIds!.ToList().ForEach(video.AddCategory);
+            if(input.CategoriesIds.Count > 0)
+            {
+                await ValidateCategoriesIds(input, cancellationToken);
+                input.CategoriesIds!.ToList().ForEach(video.AddCategory);
+            }
         }
 
-        if((input.CastMembersIds?.Count ?? 0) > 0)
+        if(input.CastMembersIds is not null)
         {
-            await ValidateCastMembersIds(input, cancellationToken);
             video.RemoveAllCastMembers();
-            input.CastMembersIds!.ToList().ForEach(video.AddCastMember);
+            if(input.CastMembersIds.Count > 0)
+            {
+                await ValidateCastMembersIds(input, cancellationToken);
+                input.CastMembersIds!.ToList().ForEach(video.AddCastMember);
+            }
         }
     }
 
