@@ -120,7 +120,7 @@ public class UpdateVideo : IUpdateVideo
             var notFoundIds = input.CastMembersIds!.ToList()
                 .FindAll(id => !persistenceIds.Contains(id));
             throw new RelatedAggregateException(
-                $"Related category id (or ids) not found: {string.Join(',', notFoundIds)}.");
+                $"Related cast member(s) id (or ids) not found: {string.Join(',', notFoundIds)}.");
         }
     }
 }

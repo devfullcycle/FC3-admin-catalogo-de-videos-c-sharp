@@ -248,34 +248,35 @@ public class UpdateVideoTest
             .Should().BeEquivalentTo(exampleIds);
     }
 
-    [Fact(DisplayName = nameof(UpdateVideosThrowsWhenInvalidGenreId))]
+    [Fact(DisplayName = nameof(UpdateVideosThrowsWhenInvalidCastMemberId))]
     [Trait("Application", "UpdateVideo - Use Cases")]
     public async Task UpdateVideosThrowsWhenInvalidGenreId()
     {
         var exampleVideo = _fixture.GetValidVideo();
-        var examplesGenreIds = Enumerable.Range(1, 5)
+        var examplesIds = Enumerable.Range(1, 5)
             .Select(_ => Guid.NewGuid()).ToList();
-        var invalidGenreId = Guid.NewGuid();
-        var inputInvalidIdsList = examplesGenreIds
-            .Concat(new List<Guid>() { invalidGenreId }).ToList();
-        var input = _fixture.CreateValidInput(exampleVideo.Id, inputInvalidIdsList);
+        var invalidId = Guid.NewGuid();
+        var inputInvalidIdsList = examplesIds
+            .Concat(new List<Guid>() { invalidId }).ToList();
+        var input = _fixture.CreateValidInput(exampleVideo.Id, 
+            castMemberIds: inputInvalidIdsList);
         _videoRepository.Setup(repository =>
             repository.Get(
                 It.Is<Guid>(id => id == exampleVideo.Id),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(exampleVideo);
-        _genreRepository.Setup(x =>
+        _castMemberRepository.Setup(x =>
             x.GetIdsListByIds(
                 It.IsAny<List<Guid>>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(examplesGenreIds);
+            .ReturnsAsync(examplesIds);
 
         var action = () => _useCase.Handle(input, CancellationToken.None);
 
         await action.Should().ThrowAsync<RelatedAggregateException>()
-            .WithMessage($"Related genre id (or ids) not found: {invalidGenreId}.");
+            .WithMessage($"Related cast member(s) id (or ids) not found: {invalidId}.");
         _videoRepository.VerifyAll();
-        _genreRepository.VerifyAll();
+        _castMemberRepository.VerifyAll();
         _unitofWork.Verify(x => x.Commit(It.IsAny<CancellationToken>()), Times.Never);
     }
 
@@ -311,10 +312,42 @@ public class UpdateVideoTest
         _unitofWork.Verify(x => x.Commit(It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    [Theory(DisplayName = nameof(UpdateVideosThrowsWhenReceiveINvalidInput))]
+    [Fact(DisplayName = nameof(UpdateVideosThrowsWhenInvalidGenreId))]
+    [Trait("Application", "UpdateVideo - Use Cases")]
+    public async Task UpdateVideosThrowsWhenInvalidCastMemberId()
+    {
+        var exampleVideo = _fixture.GetValidVideo();
+        var examplesGenreIds = Enumerable.Range(1, 5)
+            .Select(_ => Guid.NewGuid()).ToList();
+        var invalidGenreId = Guid.NewGuid();
+        var inputInvalidIdsList = examplesGenreIds
+            .Concat(new List<Guid>() { invalidGenreId }).ToList();
+        var input = _fixture.CreateValidInput(exampleVideo.Id, inputInvalidIdsList);
+        _videoRepository.Setup(repository =>
+            repository.Get(
+                It.Is<Guid>(id => id == exampleVideo.Id),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(exampleVideo);
+        _genreRepository.Setup(x =>
+            x.GetIdsListByIds(
+                It.IsAny<List<Guid>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(examplesGenreIds);
+
+        var action = () => _useCase.Handle(input, CancellationToken.None);
+
+        await action.Should().ThrowAsync<RelatedAggregateException>()
+            .WithMessage($"Related genre id (or ids) not found: {invalidGenreId}.");
+        _videoRepository.VerifyAll();
+        _genreRepository.VerifyAll();
+        _unitofWork.Verify(x => x.Commit(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+
+    [Theory(DisplayName = nameof(UpdateVideosThrowsWhenReceiveInvalidInput))]
     [Trait("Application", "UpdateVideo - Use Cases")]
     [ClassData(typeof(UpdateVideoTestDataGenerator))]
-    public async Task UpdateVideosThrowsWhenReceiveINvalidInput(
+    public async Task UpdateVideosThrowsWhenReceiveInvalidInput(
         UpdateVideoInput invalidinput,
         string expectedExceptionMessage)
     {
