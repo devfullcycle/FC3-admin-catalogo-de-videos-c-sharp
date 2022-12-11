@@ -139,7 +139,7 @@ public class UpdateVideoTest
             .Should().BeEquivalentTo(examplesGenreIds);
     }
 
-    [Fact(DisplayName = nameof(UpdateVideosWithGenreIds))]
+    [Fact(DisplayName = nameof(UpdateVideosWithoutRelationsWithRelations))]
     [Trait("Application", "UpdateVideo - Use Cases")]
     public async Task UpdateVideosWithoutRelationsWithRelations()
     {
@@ -222,6 +222,152 @@ public class UpdateVideoTest
             .Should().BeEquivalentTo(examplesCategoriesIds);
         output.CastMembers.Select(castMember => castMember.Id).ToList()
             .Should().BeEquivalentTo(examplesCastMembersIds);
+    }
+
+    [Fact(DisplayName = nameof(UpdateVideosWithRelationsToOtherRelations))]
+    [Trait("Application", "UpdateVideo - Use Cases")]
+    public async Task UpdateVideosWithRelationsToOtherRelations()
+    {
+        var exampleVideo = _fixture.GetValidVideoWithAllProperties();
+        var examplesGenreIds = Enumerable.Range(1, 5)
+            .Select(_ => Guid.NewGuid()).ToList();
+        var examplesCastMembersIds = Enumerable.Range(1, 5)
+            .Select(_ => Guid.NewGuid()).ToList();
+        var examplesCategoriesIds = Enumerable.Range(1, 5)
+            .Select(_ => Guid.NewGuid()).ToList();
+        var input = _fixture.CreateValidInput(exampleVideo.Id,
+            genreIds: examplesGenreIds,
+            categoryIds: examplesCategoriesIds,
+            castMemberIds: examplesCastMembersIds);
+        _videoRepository.Setup(repository =>
+            repository.Get(
+                It.Is<Guid>(id => id == exampleVideo.Id),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(exampleVideo);
+        _genreRepository.Setup(x =>
+            x.GetIdsListByIds(
+                It.Is<List<Guid>>(idsList =>
+                    idsList.Count == examplesGenreIds.Count &&
+                    idsList.All(id => examplesGenreIds.Contains(id))),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(examplesGenreIds);
+        _castMemberRepository.Setup(x =>
+            x.GetIdsListByIds(
+                It.Is<List<Guid>>(idsList =>
+                    idsList.Count == examplesCastMembersIds.Count &&
+                    idsList.All(id => examplesCastMembersIds.Contains(id))),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(examplesCastMembersIds);
+        _categoryRepository.Setup(x =>
+            x.GetIdsListByIds(
+                It.Is<List<Guid>>(idsList =>
+                    idsList.Count == examplesCategoriesIds.Count &&
+                    idsList.All(id => examplesCategoriesIds.Contains(id))),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(examplesCategoriesIds);
+
+        VideoModelOutput output = await _useCase.Handle(input, CancellationToken.None);
+
+        _videoRepository.VerifyAll();
+        _genreRepository.VerifyAll();
+        _categoryRepository.VerifyAll();
+        _castMemberRepository.VerifyAll();
+        _videoRepository.Verify(repository => repository.Update(
+            It.Is<DomainEntities.Video>(video =>
+                (video.Id == exampleVideo.Id) &&
+                (video.Title == input.Title) &&
+                (video.Description == input.Description) &&
+                (video.Rating == input.Rating) &&
+                (video.YearLaunched == input.YearLaunched) &&
+                (video.Opened == input.Opened) &&
+                (video.Published == input.Published) &&
+                (video.Duration == input.Duration) &&
+                video.Genres.All(genreId => examplesGenreIds.Contains(genreId)) &&
+                (video.Genres.Count == examplesGenreIds.Count) &&
+                video.Categories.All(id => examplesCategoriesIds.Contains(id)) &&
+                (video.Categories.Count == examplesCategoriesIds.Count) &&
+                video.CastMembers.All(id => examplesCastMembersIds.Contains(id)) &&
+                (video.CastMembers.Count == examplesCastMembersIds.Count)
+            ), It.IsAny<CancellationToken>())
+        , Times.Once);
+        _unitofWork.Verify(uow => uow.Commit(It.IsAny<CancellationToken>()), Times.Once);
+        output.Should().NotBeNull();
+        output.Id.Should().NotBeEmpty();
+        output.CreatedAt.Should().NotBe(default(DateTime));
+        output.Title.Should().Be(input.Title);
+        output.Published.Should().Be(input.Published);
+        output.Description.Should().Be(input.Description);
+        output.Duration.Should().Be(input.Duration);
+        output.Rating.Should().Be(input.Rating.ToStringSignal());
+        output.YearLaunched.Should().Be(input.YearLaunched);
+        output.Opened.Should().Be(input.Opened);
+        output.Genres.Select(genre => genre.Id).ToList()
+            .Should().BeEquivalentTo(examplesGenreIds);
+        output.Categories.Select(category => category.Id).ToList()
+            .Should().BeEquivalentTo(examplesCategoriesIds);
+        output.CastMembers.Select(castMember => castMember.Id).ToList()
+            .Should().BeEquivalentTo(examplesCastMembersIds);
+    }
+
+    [Fact(DisplayName = nameof(UpdateVideosWithRelationsRemovingRelations))]
+    [Trait("Application", "UpdateVideo - Use Cases")]
+    public async Task UpdateVideosWithRelationsRemovingRelations()
+    {
+        var exampleVideo = _fixture.GetValidVideoWithAllProperties();
+        var input = _fixture.CreateValidInput(exampleVideo.Id,
+            genreIds: new(),
+            categoryIds: new(),
+            castMemberIds: new());
+        _videoRepository.Setup(repository =>
+            repository.Get(
+                It.Is<Guid>(id => id == exampleVideo.Id),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(exampleVideo);
+
+        VideoModelOutput output = await _useCase.Handle(input, CancellationToken.None);
+
+        output.Should().NotBeNull();
+        output.Id.Should().NotBeEmpty();
+        output.CreatedAt.Should().NotBe(default(DateTime));
+        output.Title.Should().Be(input.Title);
+        output.Published.Should().Be(input.Published);
+        output.Description.Should().Be(input.Description);
+        output.Duration.Should().Be(input.Duration);
+        output.Rating.Should().Be(input.Rating.ToStringSignal());
+        output.YearLaunched.Should().Be(input.YearLaunched);
+        output.Opened.Should().Be(input.Opened);
+        output.Genres.Should().BeEmpty();
+        output.Categories.Should().BeEmpty();
+        output.CastMembers.Should().BeEmpty();
+        _videoRepository.VerifyAll();
+        _genreRepository.Verify(x => x.GetIdsListByIds(
+            It.IsAny<List<Guid>>(), 
+            It.IsAny<CancellationToken>()
+        ), Times.Never);
+        _categoryRepository.Verify(x => x.GetIdsListByIds(
+            It.IsAny<List<Guid>>(),
+            It.IsAny<CancellationToken>()
+        ), Times.Never);
+        _castMemberRepository.Verify(x => x.GetIdsListByIds(
+            It.IsAny<List<Guid>>(),
+            It.IsAny<CancellationToken>()
+        ), Times.Never); ;
+        _videoRepository.Verify(repository => repository.Update(
+            It.Is<DomainEntities.Video>(video =>
+                (video.Id == exampleVideo.Id) &&
+                (video.Title == input.Title) &&
+                (video.Description == input.Description) &&
+                (video.Rating == input.Rating) &&
+                (video.YearLaunched == input.YearLaunched) &&
+                (video.Opened == input.Opened) &&
+                (video.Published == input.Published) &&
+                (video.Duration == input.Duration) &&
+                (video.Genres.Count == 0) &&
+                (video.Categories.Count == 0) &&
+                (video.CastMembers.Count == 0)
+            ), It.IsAny<CancellationToken>())
+        , Times.Once);
+        _unitofWork.Verify(uow => uow.Commit(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact(DisplayName = nameof(UpdateVideosWithCategoryIds))]
