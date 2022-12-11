@@ -6,6 +6,9 @@ using FC.Codeflix.Catalog.Domain.Exceptions;
 using FC.Codeflix.Catalog.Domain.Repository;
 using FC.Codeflix.Catalog.Domain.Validation;
 using FC.Codeflix.Catalog.Application.Exceptions;
+using FC.Codeflix.Catalog.Application.Common;
+using FC.Codeflix.Catalog.Domain.Entity;
+using System.Threading;
 
 namespace FC.Codeflix.Catalog.Application.UseCases.Video.UpdateVideo;
 
@@ -16,19 +19,22 @@ public class UpdateVideo : IUpdateVideo
     private readonly ICategoryRepository _categoryRepository;
     private readonly ICastMemberRepository _castMemberRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IStorageService _storageService;
 
     public UpdateVideo(
         IVideoRepository videoRepository,
         IGenreRepository genreRepository,
         ICategoryRepository categoryRepository,
         ICastMemberRepository castMemberRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IStorageService storageService)
     {
         _videoRepository = videoRepository;
         _genreRepository = genreRepository;
         _categoryRepository = categoryRepository;
         _castMemberRepository = castMemberRepository;
         _unitOfWork = unitOfWork;
+        _storageService = storageService;
     }
 
     public async Task<VideoModelOutput> Handle(
@@ -45,13 +51,15 @@ public class UpdateVideo : IUpdateVideo
             input.Duration,
             input.Rating);
 
-        await ValidateAndAddRelations(input, video, cancellationToken);
-
         var validationHandler = new NotificationValidationHandler();
         video.Validate(validationHandler);
         if(validationHandler.HasErrors())
             throw new EntityValidationException("There are validation errors",
                 validationHandler.Errors);
+
+        await ValidateAndAddRelations(input, video, cancellationToken);
+
+        await UploadImagesMedia(video, input, cancellationToken);
 
         await _videoRepository.Update(video, cancellationToken);
         await _unitOfWork.Commit(cancellationToken);
@@ -130,6 +138,22 @@ public class UpdateVideo : IUpdateVideo
                 .FindAll(id => !persistenceIds.Contains(id));
             throw new RelatedAggregateException(
                 $"Related cast member(s) id (or ids) not found: {string.Join(',', notFoundIds)}.");
+        }
+    }
+
+    private async Task UploadImagesMedia(
+        DomainEntities.Video video,
+        UpdateVideoInput input,
+        CancellationToken cancellationToken)
+    {
+        if(input.Banner is not null)
+        {
+            var fileName = StorageFileName.Create(video.Id, nameof(video.Banner), input.Banner.Extension);
+            var bannerUrl = await _storageService.Upload(
+            fileName,
+                input.Banner.FileStream,
+                cancellationToken);
+            video.UpdateBanner(bannerUrl);
         }
     }
 }

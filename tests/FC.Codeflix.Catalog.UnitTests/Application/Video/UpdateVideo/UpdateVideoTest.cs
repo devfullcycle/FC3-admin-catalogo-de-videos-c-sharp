@@ -47,7 +47,7 @@ public class UpdateVideoTest
             _categoryRepository.Object,
             _castMemberRepository.Object,
             _unitofWork.Object,
-            _storageService);
+            _storageService.Object);
     }
 
     [Fact(DisplayName = nameof(UpdateVideosBasicInfo))]
@@ -695,21 +695,21 @@ public class UpdateVideoTest
         var exampleVideo = _fixture.GetValidVideo();
         var input = _fixture.CreateValidInput(exampleVideo.Id, 
             banner: _fixture.GetValidImageFileInput());
-        var bannerPath = $"storage/{input.Banner}";
+        var bannerPath = $"storage/banner.{input.Banner!.Extension}";
         _videoRepository.Setup(repository =>
             repository.Get(
                 It.Is<Guid>(id => id == exampleVideo.Id),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(exampleVideo);
         _storageService.Setup(x => x.Upload(
-            It.Is<string>(name => StorageFileName.Create(
+            It.Is<string>(name => (name == StorageFileName.Create(
                 exampleVideo.Id, 
                 nameof(exampleVideo.Banner), 
-                input.Banner.Extension)
+                input.Banner!.Extension))
             ),
             It.IsAny<MemoryStream>(),
             It.IsAny<CancellationToken>())
-        ).Returns(bannerPath);
+        ).ReturnsAsync(bannerPath);
 
         var output = await _useCase.Handle(input, CancellationToken.None);
 
@@ -736,7 +736,7 @@ public class UpdateVideoTest
                 (video.Opened == input.Opened) &&
                 (video.Published == input.Published) &&
                 (video.Duration == input.Duration) &&
-                (video.Banner == bannerPath)
+                (video.Banner.Path == bannerPath)
             ), It.IsAny<CancellationToken>())
         , Times.Once);
         _unitofWork.Verify(uow => uow.Commit(It.IsAny<CancellationToken>()), Times.Once);
