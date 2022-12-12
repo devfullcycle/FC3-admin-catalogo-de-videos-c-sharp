@@ -688,12 +688,12 @@ public class UpdateVideoTest
         _unitofWork.Verify(uow => uow.Commit(It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    [Fact(DisplayName = nameof(UpdateVideosWithBannerWhenVideoHaveNoBanner))]
+    [Fact(DisplayName = nameof(UpdateVideosWithBannerWhenVideoHasNoBanner))]
     [Trait("Application", "UpdateVideo - Use Cases")]
-    public async Task UpdateVideosWithBannerWhenVideoHaveNoBanner()
+    public async Task UpdateVideosWithBannerWhenVideoHasNoBanner()
     {
         var exampleVideo = _fixture.GetValidVideo();
-        var input = _fixture.CreateValidInput(exampleVideo.Id, 
+        var input = _fixture.CreateValidInput(exampleVideo.Id,
             banner: _fixture.GetValidImageFileInput());
         var bannerPath = $"storage/banner.{input.Banner!.Extension}";
         _videoRepository.Setup(repository =>
@@ -703,8 +703,8 @@ public class UpdateVideoTest
             .ReturnsAsync(exampleVideo);
         _storageService.Setup(x => x.Upload(
             It.Is<string>(name => (name == StorageFileName.Create(
-                exampleVideo.Id, 
-                nameof(exampleVideo.Banner), 
+                exampleVideo.Id,
+                nameof(exampleVideo.Banner),
                 input.Banner!.Extension))
             ),
             It.IsAny<MemoryStream>(),
@@ -737,6 +737,54 @@ public class UpdateVideoTest
                 (video.Published == input.Published) &&
                 (video.Duration == input.Duration) &&
                 (video.Banner.Path == bannerPath)
+            ), It.IsAny<CancellationToken>())
+        , Times.Once);
+        _unitofWork.Verify(uow => uow.Commit(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact(DisplayName = nameof(UpdateVideosKeepBannerWhenReceiveNull))]
+    [Trait("Application", "UpdateVideo - Use Cases")]
+    public async Task UpdateVideosKeepBannerWhenReceiveNull()
+    {
+        var exampleVideo = _fixture.GetValidVideoWithAllProperties();
+        var input = _fixture.CreateValidInput(exampleVideo.Id,
+            banner: null);
+        _videoRepository.Setup(repository =>
+            repository.Get(
+                It.Is<Guid>(id => id == exampleVideo.Id),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(exampleVideo);
+
+        var output = await _useCase.Handle(input, CancellationToken.None);
+
+        output.Should().NotBeNull();
+        output.Id.Should().NotBeEmpty();
+        output.CreatedAt.Should().NotBe(default(DateTime));
+        output.Title.Should().Be(input.Title);
+        output.Published.Should().Be(input.Published);
+        output.Description.Should().Be(input.Description);
+        output.Duration.Should().Be(input.Duration);
+        output.Rating.Should().Be(input.Rating.ToStringSignal());
+        output.YearLaunched.Should().Be(input.YearLaunched);
+        output.Opened.Should().Be(input.Opened);
+        output.BannerFileUrl.Should().Be(exampleVideo.Banner!.Path);
+        _videoRepository.VerifyAll();
+        _storageService.Verify(x => x.Upload(
+            It.IsAny<string>(), 
+            It.IsAny<Stream>(), 
+            It.IsAny<CancellationToken>())
+        , Times.Never);
+        _videoRepository.Verify(repository => repository.Update(
+            It.Is<DomainEntities.Video>(video =>
+                (video.Id == exampleVideo.Id) &&
+                (video.Title == input.Title) &&
+                (video.Description == input.Description) &&
+                (video.Rating == input.Rating) &&
+                (video.YearLaunched == input.YearLaunched) &&
+                (video.Opened == input.Opened) &&
+                (video.Published == input.Published) &&
+                (video.Duration == input.Duration) &&
+                (video.Banner!.Path == exampleVideo.Banner!.Path)
             ), It.IsAny<CancellationToken>())
         , Times.Once);
         _unitofWork.Verify(uow => uow.Commit(It.IsAny<CancellationToken>()), Times.Once);
