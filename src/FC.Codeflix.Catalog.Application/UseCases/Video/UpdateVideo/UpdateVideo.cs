@@ -155,5 +155,15 @@ public class UpdateVideo : IUpdateVideo
                 cancellationToken);
             video.UpdateBanner(bannerUrl);
         }
+
+        if(input.Thumb is not null)
+        {
+            var fileName = StorageFileName.Create(video.Id, nameof(video.Thumb), input.Thumb.Extension);
+            var thumbUrl = await _storageService.Upload(
+            fileName,
+                input.Thumb.FileStream,
+                cancellationToken);
+            video.UpdateThumb(thumbUrl);
+        }
     }
 }
