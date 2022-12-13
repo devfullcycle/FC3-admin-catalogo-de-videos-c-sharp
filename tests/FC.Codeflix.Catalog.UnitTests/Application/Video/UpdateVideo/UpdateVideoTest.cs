@@ -843,4 +843,154 @@ public class UpdateVideoTest
         , Times.Once);
         _unitofWork.Verify(uow => uow.Commit(It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    [Fact(DisplayName = nameof(UpdateVideosKeepThumbWhenReceiveNull))]
+    [Trait("Application", "UpdateVideo - Use Cases")]
+    public async Task UpdateVideosKeepThumbWhenReceiveNull()
+    {
+        var exampleVideo = _fixture.GetValidVideoWithAllProperties();
+        var input = _fixture.CreateValidInput(exampleVideo.Id,
+            thumb: null);
+        _videoRepository.Setup(repository =>
+            repository.Get(
+                It.Is<Guid>(id => id == exampleVideo.Id),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(exampleVideo);
+
+        var output = await _useCase.Handle(input, CancellationToken.None);
+
+        output.Should().NotBeNull();
+        output.Id.Should().NotBeEmpty();
+        output.CreatedAt.Should().NotBe(default(DateTime));
+        output.Title.Should().Be(input.Title);
+        output.Published.Should().Be(input.Published);
+        output.Description.Should().Be(input.Description);
+        output.Duration.Should().Be(input.Duration);
+        output.Rating.Should().Be(input.Rating.ToStringSignal());
+        output.YearLaunched.Should().Be(input.YearLaunched);
+        output.Opened.Should().Be(input.Opened);
+        output.ThumbFileUrl.Should().Be(exampleVideo.Thumb!.Path);
+        _videoRepository.VerifyAll();
+        _storageService.Verify(x => x.Upload(
+            It.IsAny<string>(),
+            It.IsAny<Stream>(),
+            It.IsAny<CancellationToken>())
+        , Times.Never);
+        _videoRepository.Verify(repository => repository.Update(
+            It.Is<DomainEntities.Video>(video =>
+                (video.Id == exampleVideo.Id) &&
+                (video.Title == input.Title) &&
+                (video.Description == input.Description) &&
+                (video.Rating == input.Rating) &&
+                (video.YearLaunched == input.YearLaunched) &&
+                (video.Opened == input.Opened) &&
+                (video.Published == input.Published) &&
+                (video.Duration == input.Duration) &&
+                (video.Thumb!.Path == exampleVideo.Thumb!.Path)
+            ), It.IsAny<CancellationToken>())
+        , Times.Once);
+        _unitofWork.Verify(uow => uow.Commit(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact(DisplayName = nameof(UpdateVideosWithThumbHalfWhenVideoHasNoThumbHalf))]
+    [Trait("Application", "UpdateVideo - Use Cases")]
+    public async Task UpdateVideosWithThumbHalfWhenVideoHasNoThumbHalf()
+    {
+        var exampleVideo = _fixture.GetValidVideo();
+        var input = _fixture.CreateValidInput(exampleVideo.Id,
+            thumbHalf: _fixture.GetValidImageFileInput());
+        var path = $"storage/thumb-half.{input.ThumbHalf!.Extension}";
+        _videoRepository.Setup(repository =>
+            repository.Get(
+                It.Is<Guid>(id => id == exampleVideo.Id),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(exampleVideo);
+        _storageService.Setup(x => x.Upload(
+            It.Is<string>(name => (name == StorageFileName.Create(
+                exampleVideo.Id,
+                nameof(exampleVideo.ThumbHalf),
+                input.ThumbHalf!.Extension))
+            ),
+            It.IsAny<MemoryStream>(),
+            It.IsAny<CancellationToken>())
+        ).ReturnsAsync(path);
+
+        var output = await _useCase.Handle(input, CancellationToken.None);
+
+        output.Should().NotBeNull();
+        output.Id.Should().NotBeEmpty();
+        output.CreatedAt.Should().NotBe(default(DateTime));
+        output.Title.Should().Be(input.Title);
+        output.Published.Should().Be(input.Published);
+        output.Description.Should().Be(input.Description);
+        output.Duration.Should().Be(input.Duration);
+        output.Rating.Should().Be(input.Rating.ToStringSignal());
+        output.YearLaunched.Should().Be(input.YearLaunched);
+        output.Opened.Should().Be(input.Opened);
+        output.ThumbHalfFileUrl.Should().Be(path);
+        _videoRepository.VerifyAll();
+        _storageService.VerifyAll();
+        _videoRepository.Verify(repository => repository.Update(
+            It.Is<DomainEntities.Video>(video =>
+                (video.Id == exampleVideo.Id) &&
+                (video.Title == input.Title) &&
+                (video.Description == input.Description) &&
+                (video.Rating == input.Rating) &&
+                (video.YearLaunched == input.YearLaunched) &&
+                (video.Opened == input.Opened) &&
+                (video.Published == input.Published) &&
+                (video.Duration == input.Duration) &&
+                (video.ThumbHalf!.Path == path)
+            ), It.IsAny<CancellationToken>())
+        , Times.Once);
+        _unitofWork.Verify(uow => uow.Commit(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact(DisplayName = nameof(UpdateVideosKeepThumbHalfWhenReceiveNull))]
+    [Trait("Application", "UpdateVideo - Use Cases")]
+    public async Task UpdateVideosKeepThumbHalfWhenReceiveNull()
+    {
+        var exampleVideo = _fixture.GetValidVideoWithAllProperties();
+        var input = _fixture.CreateValidInput(exampleVideo.Id,
+            thumbHalf: null);
+        _videoRepository.Setup(repository =>
+            repository.Get(
+                It.Is<Guid>(id => id == exampleVideo.Id),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(exampleVideo);
+
+        var output = await _useCase.Handle(input, CancellationToken.None);
+
+        output.Should().NotBeNull();
+        output.Id.Should().NotBeEmpty();
+        output.CreatedAt.Should().NotBe(default(DateTime));
+        output.Title.Should().Be(input.Title);
+        output.Published.Should().Be(input.Published);
+        output.Description.Should().Be(input.Description);
+        output.Duration.Should().Be(input.Duration);
+        output.Rating.Should().Be(input.Rating.ToStringSignal());
+        output.YearLaunched.Should().Be(input.YearLaunched);
+        output.Opened.Should().Be(input.Opened);
+        output.ThumbHalfFileUrl.Should().Be(exampleVideo.ThumbHalf!.Path);
+        _videoRepository.VerifyAll();
+        _storageService.Verify(x => x.Upload(
+            It.IsAny<string>(),
+            It.IsAny<Stream>(),
+            It.IsAny<CancellationToken>())
+        , Times.Never);
+        _videoRepository.Verify(repository => repository.Update(
+            It.Is<DomainEntities.Video>(video =>
+                (video.Id == exampleVideo.Id) &&
+                (video.Title == input.Title) &&
+                (video.Description == input.Description) &&
+                (video.Rating == input.Rating) &&
+                (video.YearLaunched == input.YearLaunched) &&
+                (video.Opened == input.Opened) &&
+                (video.Published == input.Published) &&
+                (video.Duration == input.Duration) &&
+                (video.ThumbHalf!.Path == exampleVideo.ThumbHalf!.Path)
+            ), It.IsAny<CancellationToken>())
+        , Times.Once);
+        _unitofWork.Verify(uow => uow.Commit(It.IsAny<CancellationToken>()), Times.Once);
+    }
 }

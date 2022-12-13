@@ -165,5 +165,15 @@ public class UpdateVideo : IUpdateVideo
                 cancellationToken);
             video.UpdateThumb(thumbUrl);
         }
+
+        if(input.ThumbHalf is not null)
+        {
+            var fileName = StorageFileName.Create(video.Id, nameof(video.ThumbHalf), input.ThumbHalf.Extension);
+            var thumbUrl = await _storageService.Upload(
+            fileName,
+                input.ThumbHalf.FileStream,
+                cancellationToken);
+            video.UpdateThumbHalf(thumbUrl);
+        }
     }
 }

@@ -19,8 +19,9 @@ public class UpdateVideoTestFixture : VideoTestFixtureBase
         List<Guid>? categoryIds = null,
         List<Guid>? castMemberIds = null,
         FileInput? banner = null,
-        FileInput? thumb = null)
-        => new(
+        FileInput? thumb = null,
+        FileInput? thumbHalf = null)
+        => new (
             videoId,
             GetValidTitle(),
             GetValidDescription(),
@@ -33,6 +34,7 @@ public class UpdateVideoTestFixture : VideoTestFixtureBase
             categoryIds,
             castMemberIds,
             banner,
-            thumb
+            thumb,
+            thumbHalf
         );
 }
