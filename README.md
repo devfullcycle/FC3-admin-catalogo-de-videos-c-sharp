@@ -6,7 +6,7 @@
   <h1 align="center">🚀 Microsserviço Catálogo de Vídeos com .NET</h1>
   <p align="center">
     Microsserviço referente ao backend da Administração do Catálogo de Vídeos<br />
-    Utilizando Clean Rachitecture, DDD, TDD e as principais boas práticas atuais de mercado
+    Utilizando Clean Architecture, DDD, TDD e as principais boas práticas atuais de mercado
   </p>
 </center>
 <br />
