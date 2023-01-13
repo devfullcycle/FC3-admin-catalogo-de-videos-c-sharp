@@ -21,6 +21,7 @@ public class MediaTest
 
         var media = new Media(expectedFilePath);
 
+        media.Id.Should().NotBe(default);
         media.FilePath.Should().Be(expectedFilePath);
         media.Status.Should().Be(MediaStatus.Pending);
     }

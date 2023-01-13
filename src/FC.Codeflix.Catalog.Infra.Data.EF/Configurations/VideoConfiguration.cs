@@ -14,5 +14,15 @@ internal class VideoConfiguration
             .HasMaxLength(255);
         builder.Property(video => video.Description)
             .HasMaxLength(4_000);
+        
+        builder.OwnsOne(video => video.Thumb, thumb =>
+            thumb.Property(image => image.Path).HasColumnName("ThumbPath")
+        );
+        builder.OwnsOne(video => video.ThumbHalf, thumbHalf =>
+            thumbHalf.Property(image => image.Path).HasColumnName("ThumbHalfPath")
+        );
+        builder.OwnsOne(video => video.Banner, banner =>
+            banner.Property(image => image.Path).HasColumnName("bannerPath")
+        );
     }
 }
