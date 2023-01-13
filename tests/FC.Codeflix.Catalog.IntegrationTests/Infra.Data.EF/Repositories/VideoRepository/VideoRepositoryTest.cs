@@ -55,8 +55,7 @@ public class VideoRepositoryTest
         dbVideo.CastMembers.Should().BeEmpty();
     }
 
-
-    [Fact(DisplayName = nameof(Insert))]
+    [Fact(DisplayName = nameof(InsertWithRelations))]
     [Trait("Integration/Infra.Data", "Video Repository - Repositories")]
     public async Task InsertWithRelations()
     {
@@ -83,8 +82,14 @@ public class VideoRepositoryTest
         var assertsDbContext = _fixture.CreateDbContext(true);
         var dbVideo = await assertsDbContext.Videos.FindAsync(exampleVideo.Id);
         dbVideo.Should().NotBeNull();
-        dbVideo!.Genres.Should().BeEmpty();
-        dbVideo.Categories.Should().BeEmpty();
-        dbVideo.CastMembers.Should().BeEmpty();
+        dbVideo!.Genres.Should().HaveCount(genres.Count());
+        dbVideo.Genres.Should().BeEquivalentTo(
+            genres.Select(genre => genre.Id));
+        dbVideo.Categories.Should().HaveCount(categories.Count());
+        dbVideo.Categories.Should().BeEquivalentTo(
+            categories.Select(category => category.Id));
+        dbVideo.CastMembers.Should().HaveCount(castMembers.Count());
+        dbVideo.CastMembers.Should().BeEquivalentTo(
+            castMembers.Select(castMember => castMember.Id));
     }
 }
