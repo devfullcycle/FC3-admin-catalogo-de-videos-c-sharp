@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Repository = FC.Codeflix.Catalog.Infra.Data.EF.Repositories;
-
+using System.Linq;
 
 namespace FC.Codeflix.Catalog.IntegrationTests.Infra.Data.EF.Repositories.VideoRepository;
 
@@ -32,9 +32,9 @@ public class VideoRepositoryTest
         await dbContext.SaveChangesAsync(CancellationToken.None);
 
         var assertsDbContext = _fixture.CreateDbContext(true);
-        Video dbVideo = await assertsDbContext.Videos.FindAsync(exampleVideo.Id);
+        var dbVideo = await assertsDbContext.Videos.FindAsync(exampleVideo.Id);
         dbVideo.Should().NotBeNull();
-        dbVideo.Id.Should().Be(exampleVideo.Id);
+        dbVideo!.Id.Should().Be(exampleVideo.Id);
         dbVideo.Title.Should().Be(exampleVideo.Title);
         dbVideo.Description.Should().Be(exampleVideo.Description);
         dbVideo.YearLaunched.Should().Be(exampleVideo.YearLaunched);
@@ -51,6 +51,39 @@ public class VideoRepositoryTest
         dbVideo.Trailer.Should().BeNull();
 
         dbVideo.Genres.Should().BeEmpty();
+        dbVideo.Categories.Should().BeEmpty();
+        dbVideo.CastMembers.Should().BeEmpty();
+    }
+
+
+    [Fact(DisplayName = nameof(Insert))]
+    [Trait("Integration/Infra.Data", "Video Repository - Repositories")]
+    public async Task InsertWithRelations()
+    {
+        var dbContext = _fixture.CreateDbContext();
+        var exampleVideo = _fixture.GetExampleVideo();
+        var castMembers = _fixture.GetRandomCastMembersList();
+        castMembers.ToList().ForEach(castMember 
+            => exampleVideo.AddCastMember(castMember.Id));
+        await dbContext.CastMembers.AddRangeAsync(castMembers);
+        var categories = _fixture.GetRandomCategoriesList();
+        categories.ToList().ForEach(category
+            => exampleVideo.AddCategory(category.Id));
+        await dbContext.Categories.AddRangeAsync(categories);
+        var genres = _fixture.GetRandomGenresList();
+        genres.ToList().ForEach(genre
+            => exampleVideo.AddGenre(genre.Id));
+        await dbContext.Genres.AddRangeAsync(genres);
+        await dbContext.SaveChangesAsync();
+        IVideoRepository videoRepository = new Repository.VideoRepository(dbContext);
+        
+        await videoRepository.Insert(exampleVideo, CancellationToken.None);
+        await dbContext.SaveChangesAsync(CancellationToken.None);
+
+        var assertsDbContext = _fixture.CreateDbContext(true);
+        var dbVideo = await assertsDbContext.Videos.FindAsync(exampleVideo.Id);
+        dbVideo.Should().NotBeNull();
+        dbVideo!.Genres.Should().BeEmpty();
         dbVideo.Categories.Should().BeEmpty();
         dbVideo.CastMembers.Should().BeEmpty();
     }
