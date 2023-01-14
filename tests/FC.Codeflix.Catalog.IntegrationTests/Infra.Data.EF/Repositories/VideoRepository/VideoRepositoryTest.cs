@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Xunit;
 using Repository = FC.Codeflix.Catalog.Infra.Data.EF.Repositories;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace FC.Codeflix.Catalog.IntegrationTests.Infra.Data.EF.Repositories.VideoRepository;
 
@@ -52,7 +53,6 @@ public class VideoRepositoryTest
         dbVideo.CastMembers.Should().BeEmpty();
     }
 
-
     [Fact(DisplayName = nameof(InsertWithMediasAndImages))]
     [Trait("Integration/Infra.Data", "Video Repository - Repositories")]
     public async Task InsertWithMediasAndImages()
@@ -65,7 +65,10 @@ public class VideoRepositoryTest
         await dbContext.SaveChangesAsync(CancellationToken.None);
 
         var assertsDbContext = _fixture.CreateDbContext(true);
-        var dbVideo = await assertsDbContext.Videos.FindAsync(exampleVideo.Id);
+        var dbVideo = await assertsDbContext.Videos
+            .Include(x => x.Media)
+            .Include(x => x.Trailer)
+            .FirstOrDefaultAsync(video => video.Id == exampleVideo.Id);
         dbVideo.Should().NotBeNull();
         dbVideo!.Id.Should().Be(exampleVideo.Id);
         dbVideo.Thumb.Should().NotBeNull();
