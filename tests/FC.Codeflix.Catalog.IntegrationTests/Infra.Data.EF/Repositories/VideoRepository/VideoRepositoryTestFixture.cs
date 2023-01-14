@@ -110,4 +110,44 @@ public class VideoRepositoryTestFixture : BaseFixture
     public List<Genre> GetRandomGenresList()
         => Enumerable.Range(0, Random.Shared.Next(1, 5))
             .Select(_ => GetExampleGenre()).ToList();
+
+    public Video GetValidVideoWithAllProperties()
+    {
+        var video = new Video(
+            GetValidTitle(),
+            GetValidDescription(),
+            GetValidYearLaunched(),
+            GetRandomBoolean(),
+            GetRandomBoolean(),
+            GetValidDuration(),
+            GetRandomRating()
+        );
+
+        video.UpdateBanner(GetValidImagePath());
+        video.UpdateThumb(GetValidImagePath());
+        video.UpdateThumbHalf(GetValidImagePath());
+
+        video.UpdateMedia(GetValidMediaPath());
+        video.UpdateTrailer(GetValidMediaPath());
+
+        video.UpdateAsEncoded(GetValidImagePath());
+        
+        return video;
+    }
+
+    public string GetValidImagePath()
+        => Faker.Image.PlaceImgUrl();
+
+    public string GetValidMediaPath()
+    {
+        var exampleMedias = new string[]
+        {
+            "https://www.googlestorage.com/file-example.mp4",
+            "https://www.storage.com/another-example-of-video.mp4",
+            "https://www.S3.com.br/example.mp4",
+            "https://www.glg.io/file.mp4"
+        };
+        var random = new Random();
+        return exampleMedias[random.Next(exampleMedias.Length)];
+    }
 }

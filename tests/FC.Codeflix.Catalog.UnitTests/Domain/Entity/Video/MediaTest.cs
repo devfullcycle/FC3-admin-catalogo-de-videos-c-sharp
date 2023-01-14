@@ -1,6 +1,7 @@
 ﻿using FC.Codeflix.Catalog.Domain.Entity;
 using FC.Codeflix.Catalog.Domain.Enum;
 using FluentAssertions;
+using System;
 using Xunit;
 
 namespace FC.Codeflix.Catalog.UnitTests.Domain.Entity.Video;
@@ -21,7 +22,7 @@ public class MediaTest
 
         var media = new Media(expectedFilePath);
 
-        media.Id.Should().NotBe(default);
+        media.Id.Should().NotBe(default(Guid));
         media.FilePath.Should().Be(expectedFilePath);
         media.Status.Should().Be(MediaStatus.Pending);
     }

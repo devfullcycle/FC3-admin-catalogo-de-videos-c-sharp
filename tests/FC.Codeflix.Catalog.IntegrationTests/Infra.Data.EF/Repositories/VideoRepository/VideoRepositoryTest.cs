@@ -1,8 +1,5 @@
-﻿using FC.Codeflix.Catalog.Domain.Entity;
-using FC.Codeflix.Catalog.Domain.Enum;
-using FC.Codeflix.Catalog.Domain.Repository;
+﻿using FC.Codeflix.Catalog.Domain.Repository;
 using FluentAssertions;
-using System.Collections.Generic;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,6 +50,38 @@ public class VideoRepositoryTest
         dbVideo.Genres.Should().BeEmpty();
         dbVideo.Categories.Should().BeEmpty();
         dbVideo.CastMembers.Should().BeEmpty();
+    }
+
+
+    [Fact(DisplayName = nameof(InsertWithMediasAndImages))]
+    [Trait("Integration/Infra.Data", "Video Repository - Repositories")]
+    public async Task InsertWithMediasAndImages()
+    {
+        var dbContext = _fixture.CreateDbContext();
+        var exampleVideo = _fixture.GetValidVideoWithAllProperties();
+        IVideoRepository videoRepository = new Repository.VideoRepository(dbContext);
+
+        await videoRepository.Insert(exampleVideo, CancellationToken.None);
+        await dbContext.SaveChangesAsync(CancellationToken.None);
+
+        var assertsDbContext = _fixture.CreateDbContext(true);
+        var dbVideo = await assertsDbContext.Videos.FindAsync(exampleVideo.Id);
+        dbVideo.Should().NotBeNull();
+        dbVideo!.Id.Should().Be(exampleVideo.Id);
+        dbVideo.Thumb.Should().NotBeNull();
+        dbVideo.Thumb!.Path.Should().Be(exampleVideo.Thumb!.Path);
+        dbVideo.ThumbHalf.Should().NotBeNull();
+        dbVideo.ThumbHalf!.Path.Should().Be(exampleVideo.ThumbHalf!.Path);
+        dbVideo.Banner.Should().NotBeNull();
+        dbVideo.Banner!.Path.Should().Be(exampleVideo.Banner!.Path);
+        dbVideo.Media.Should().NotBeNull();
+        dbVideo.Media!.FilePath.Should().Be(exampleVideo.Media!.FilePath);
+        dbVideo.Media.EncodedPath.Should().Be(exampleVideo.Media.EncodedPath);
+        dbVideo.Media.Status.Should().Be(exampleVideo.Media.Status);
+        dbVideo.Trailer.Should().NotBeNull();
+        dbVideo.Trailer!.FilePath.Should().Be(exampleVideo.Trailer!.FilePath);
+        dbVideo.Trailer.EncodedPath.Should().Be(exampleVideo.Trailer.EncodedPath);
+        dbVideo.Trailer.Status.Should().Be(exampleVideo.Trailer.Status);
     }
 
     [Fact(DisplayName = nameof(InsertWithRelations))]
