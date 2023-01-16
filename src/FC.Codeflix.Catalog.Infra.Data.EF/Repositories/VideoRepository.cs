@@ -56,8 +56,13 @@ public class VideoRepository : IVideoRepository
         }
     }
 
+    public Task Update(Video aggregate, CancellationToken cancellationToken)
+    {
+        _videos.Update(aggregate);
+        return Task.CompletedTask;
+    }
+
     public Task Delete(Video aggregate, CancellationToken cancellationToken) => throw new NotImplementedException();
     public Task<Video> Get(Guid id, CancellationToken cancellationToken) => throw new NotImplementedException();
     public Task<SearchOutput<Video>> Search(SearchInput input, CancellationToken cancellationToken) => throw new NotImplementedException();
-    public Task Update(Video aggregate, CancellationToken cancellationToken) => throw new NotImplementedException();
 }

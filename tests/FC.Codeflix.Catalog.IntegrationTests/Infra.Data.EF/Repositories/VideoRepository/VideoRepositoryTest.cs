@@ -136,4 +136,48 @@ public class VideoRepositoryTest
             .Should().BeEquivalentTo(
                 castMembers.Select(castMember => castMember.Id));
     }
+
+    [Fact(DisplayName = nameof(Update))]
+    [Trait("Integration/Infra.Data", "Video Repository - Repositories")]
+    public async Task Update()
+    {
+        var dbContextArrange = _fixture.CreateDbContext();
+        var exampleVideo = _fixture.GetExampleVideo();
+        await dbContextArrange.AddAsync(exampleVideo);
+        await dbContextArrange.SaveChangesAsync();
+        var newValuesVideo = _fixture.GetExampleVideo();
+        var dbContextAct = _fixture.CreateDbContext(true);
+        IVideoRepository videoRepository = new Repository.VideoRepository(dbContextAct);
+
+        exampleVideo.Update(
+            newValuesVideo.Title,
+            newValuesVideo.Description,
+            newValuesVideo.YearLaunched,
+            newValuesVideo.Opened,
+            newValuesVideo.Published,
+            newValuesVideo.Duration,
+            newValuesVideo.Rating);
+        await videoRepository.Update(exampleVideo, CancellationToken.None);
+        await dbContextArrange.SaveChangesAsync(CancellationToken.None);
+
+        var assertsDbContext = _fixture.CreateDbContext(true);
+        var dbVideo = await assertsDbContext.Videos.FindAsync(exampleVideo.Id);
+        dbVideo.Should().NotBeNull();
+        dbVideo!.Id.Should().Be(exampleVideo.Id);
+        dbVideo.Title.Should().Be(exampleVideo.Title);
+        dbVideo.Description.Should().Be(exampleVideo.Description);
+        dbVideo.YearLaunched.Should().Be(exampleVideo.YearLaunched);
+        dbVideo.Opened.Should().Be(exampleVideo.Opened);
+        dbVideo.Published.Should().Be(exampleVideo.Published);
+        dbVideo.Duration.Should().Be(exampleVideo.Duration);
+        dbVideo.Rating.Should().Be(exampleVideo.Rating);
+        dbVideo.Thumb.Should().BeNull();
+        dbVideo.ThumbHalf.Should().BeNull();
+        dbVideo.Banner.Should().BeNull();
+        dbVideo.Media.Should().BeNull();
+        dbVideo.Trailer.Should().BeNull();
+        dbVideo.Genres.Should().BeEmpty();
+        dbVideo.Categories.Should().BeEmpty();
+        dbVideo.CastMembers.Should().BeEmpty();
+    }
 }
