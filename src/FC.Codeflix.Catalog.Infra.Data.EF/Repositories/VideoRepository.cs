@@ -4,6 +4,7 @@ using FC.Codeflix.Catalog.Domain.SeedWork;
 using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using FC.Codeflix.Catalog.Infra.Data.EF.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace FC.Codeflix.Catalog.Infra.Data.EF.Repositories;
 
@@ -17,7 +18,6 @@ public class VideoRepository : IVideoRepository
         => _context.Set<VideosGenres>();
     private DbSet<VideosCastMembers> _videosCastMembers
             => _context.Set<VideosCastMembers>();
-
 
     public VideoRepository(CodeflixCatalogDbContext context)
         => _context = context;
@@ -56,10 +56,44 @@ public class VideoRepository : IVideoRepository
         }
     }
 
-    public Task Update(Video aggregate, CancellationToken cancellationToken)
+    public async Task Update(Video video, CancellationToken cancellationToken)
     {
-        _videos.Update(aggregate);
-        return Task.CompletedTask;
+        _videos.Update(video);
+
+        _videosCategories.RemoveRange(_videosCategories
+            .Where(x => x.VideoId == video.Id));
+        _videosCastMembers.RemoveRange(_videosCastMembers
+            .Where(x => x.VideoId == video.Id));
+        _videosGenres.RemoveRange(_videosGenres
+            .Where(x => x.VideoId == video.Id));
+
+        if(video.Categories.Count > 0)
+        {
+            var relations = video.Categories
+                .Select(categoryId => new VideosCategories(
+                    categoryId,
+                    video.Id
+                ));
+            await _videosCategories.AddRangeAsync(relations);
+        }
+        if(video.Genres.Count > 0)
+        {
+            var relations = video.Genres
+                .Select(genreId => new VideosGenres(
+                    genreId,
+                    video.Id
+                ));
+            await _videosGenres.AddRangeAsync(relations);
+        }
+        if(video.CastMembers.Count > 0)
+        {
+            var relations = video.CastMembers
+                .Select(castMemberId => new VideosCastMembers(
+                    castMemberId,
+                    video.Id
+                ));
+            await _videosCastMembers.AddRangeAsync(relations);
+        }
     }
 
     public Task Delete(Video aggregate, CancellationToken cancellationToken) => throw new NotImplementedException();

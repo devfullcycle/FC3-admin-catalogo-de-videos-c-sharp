@@ -226,4 +226,63 @@ public class VideoRepositoryTest
         dbVideo.Media.Status.Should().Be(MediaStatus.Completed);
         dbVideo.Trailer!.FilePath.Should().Be(updatedTrailer);
     }
+
+    [Fact(DisplayName = nameof(UpdateWithRelations))]
+    [Trait("Integration/Infra.Data", "Video Repository - Repositories")]
+    public async Task UpdateWithRelations()
+    {
+        var id = Guid.Empty;
+        var castMembers = _fixture.GetRandomCastMembersList();
+        var categories = _fixture.GetRandomCategoriesList();
+        var genres = _fixture.GetRandomGenresList();
+        using(var dbContext = _fixture.CreateDbContext())
+        {
+            var exampleVideo = _fixture.GetExampleVideo();
+            id = exampleVideo.Id;
+            await dbContext.Videos.AddAsync(exampleVideo);
+            await dbContext.CastMembers.AddRangeAsync(castMembers);
+            await dbContext.Categories.AddRangeAsync(categories);
+            await dbContext.Genres.AddRangeAsync(genres);
+            await dbContext.SaveChangesAsync();
+        }
+        var actDbContext = _fixture.CreateDbContext(true);
+        var savedVideo = actDbContext.Videos
+            .First(video => video.Id == id);
+        IVideoRepository videoRepository = new Repository.VideoRepository(actDbContext);
+
+        castMembers.ToList().ForEach(castMember
+            => savedVideo.AddCastMember(castMember.Id));
+        categories.ToList().ForEach(category
+            => savedVideo.AddCategory(category.Id));
+        genres.ToList().ForEach(genre
+            => savedVideo.AddGenre(genre.Id));
+
+        await videoRepository.Update(savedVideo, CancellationToken.None);
+        await actDbContext.SaveChangesAsync(CancellationToken.None);
+
+        var assertsDbContext = _fixture.CreateDbContext(true);
+        var dbVideo = await assertsDbContext.Videos.FindAsync(id);
+        dbVideo.Should().NotBeNull();
+        var dbVideosCategories = assertsDbContext.VideosCategories
+            .Where(relation => relation.VideoId == id)
+            .ToList();
+        dbVideosCategories.Should().HaveCount(categories.Count);
+        dbVideosCategories.Select(relation => relation.CategoryId).ToList()
+            .Should().BeEquivalentTo(
+                categories.Select(category => category.Id));
+        var dbVideosGenres = assertsDbContext.VideosGenres
+            .Where(relation => relation.VideoId == id)
+            .ToList();
+        dbVideosGenres.Should().HaveCount(genres.Count);
+        dbVideosGenres.Select(relation => relation.GenreId).ToList()
+            .Should().BeEquivalentTo(
+                genres.Select(genre => genre.Id));
+        var dbVideosCastMembers = assertsDbContext.VideosCastMembers
+            .Where(relation => relation.VideoId == id)
+            .ToList();
+        dbVideosCastMembers.Should().HaveCount(castMembers.Count);
+        dbVideosCastMembers.Select(relation => relation.CastMemberId).ToList()
+            .Should().BeEquivalentTo(
+                castMembers.Select(castMember => castMember.Id));
+    }
 }
