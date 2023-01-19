@@ -96,9 +96,16 @@ public class VideoRepository : IVideoRepository
         }
     }
 
-    public Task Delete(Video aggregate, CancellationToken cancellationToken)
+    public Task Delete(Video video, CancellationToken cancellationToken)
     {
-        _videos.Remove(aggregate);
+        _videosCategories.RemoveRange(_videosCategories
+            .Where(x => x.VideoId == video.Id));
+        _videosCastMembers.RemoveRange(_videosCastMembers
+            .Where(x => x.VideoId == video.Id));
+        _videosGenres.RemoveRange(_videosGenres
+            .Where(x => x.VideoId == video.Id));
+
+        _videos.Remove(video);
         return Task.CompletedTask;
     }
 
