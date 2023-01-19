@@ -285,4 +285,28 @@ public class VideoRepositoryTest
             .Should().BeEquivalentTo(
                 castMembers.Select(castMember => castMember.Id));
     }
+
+    [Fact(DisplayName = nameof(Delete))]
+    [Trait("Integration/Infra.Data", "Video Repository - Repositories")]
+    public async Task Delete()
+    {
+        var id = Guid.Empty;
+        using(var dbContext = _fixture.CreateDbContext())
+        {
+            var exampleVideo = _fixture.GetExampleVideo();
+            id = exampleVideo.Id;
+            await dbContext.Videos.AddAsync(exampleVideo);
+            await dbContext.SaveChangesAsync();
+        }
+        var actDbContext = _fixture.CreateDbContext(true);
+        var savedVideo = actDbContext.Videos.First(video => video.Id == id);
+        IVideoRepository videoRepository = new Repository.VideoRepository(actDbContext);
+
+        await videoRepository.Delete(savedVideo, CancellationToken.None);
+        await actDbContext.SaveChangesAsync(CancellationToken.None);
+
+        var assertsDbContext = _fixture.CreateDbContext(true);
+        var dbVideo = await assertsDbContext.Videos.FindAsync(id);
+        dbVideo.Should().BeNull();
+    }
 }
