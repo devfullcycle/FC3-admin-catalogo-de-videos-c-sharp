@@ -392,9 +392,9 @@ public class VideoRepositoryTest
     }
 
 
-    [Fact(DisplayName = nameof(GetWithAllproperties))]
+    [Fact(DisplayName = nameof(GetWithAllProperties))]
     [Trait("Integration/Infra.Data", "Video Repository - Repositories")]
-    public async Task GetWithAllproperties()
+    public async Task GetWithAllProperties()
     {
         var id = Guid.Empty;
         var exampleVideo = _fixture.GetValidVideoWithAllProperties();
@@ -404,12 +404,19 @@ public class VideoRepositoryTest
             var castMembers = _fixture.GetRandomCastMembersList();
             var categories = _fixture.GetRandomCategoriesList();
             var genres = _fixture.GetRandomGenresList();
-            castMembers.ToList().ForEach(castMember
-                => dbContext.VideosCastMembers.Add(new(castMember.Id, id)));
-            categories.ToList().ForEach(category
-                => dbContext.VideosCategories.Add(new(category.Id, id)));
-            genres.ToList().ForEach(genre
-                => dbContext.VideosGenres.Add(new(genre.Id, id)));
+            castMembers.ToList().ForEach(castMember => {
+                exampleVideo.AddCastMember(castMember.Id);
+                dbContext.VideosCastMembers.Add(new(castMember.Id, id));
+            });
+            categories.ToList().ForEach(category => {
+                exampleVideo.AddCategory(category.Id);
+                dbContext.VideosCategories.Add(new(category.Id, id));
+            });
+            genres.ToList().ForEach(genre =>
+            {
+                exampleVideo.AddGenre(genre.Id);
+                dbContext.VideosGenres.Add(new(genre.Id, id));
+            });
             await dbContext.CastMembers.AddRangeAsync(castMembers);
             await dbContext.Categories.AddRangeAsync(categories);
             await dbContext.Genres.AddRangeAsync(genres);
@@ -446,6 +453,9 @@ public class VideoRepositoryTest
         video.Trailer!.FilePath.Should().Be(exampleVideo.Trailer!.FilePath);
         video.Trailer.EncodedPath.Should().Be(exampleVideo.Trailer.EncodedPath);
         video.Trailer.Status.Should().Be(exampleVideo.Trailer.Status);
+        video.Genres.Should().BeEquivalentTo(exampleVideo.Genres);
+        video.Categories.Should().BeEquivalentTo(exampleVideo.Categories);
+        video.CastMembers.Should().BeEquivalentTo(exampleVideo.CastMembers);
     }
 
     [Fact(DisplayName = nameof(GetThrowIfNotFind))]

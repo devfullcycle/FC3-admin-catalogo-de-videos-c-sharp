@@ -121,7 +121,26 @@ public class VideoRepository : IVideoRepository
     {
         var video = await _videos.FirstOrDefaultAsync(video => video.Id == id);
         NotFoundException.ThrowIfNull(video, $"Video '{id}' not found.");
-        return video!;
+
+        var categoryIds = await _videosCategories
+            .Where(x => x.VideoId == video!.Id)
+            .Select(x => x.CategoryId)
+            .ToListAsync(cancellationToken);
+        categoryIds.ForEach(video!.AddCategory);
+
+        var genresIds = await _videosGenres
+            .Where(x => x.VideoId == video!.Id)
+            .Select(x => x.GenreId)
+            .ToListAsync(cancellationToken);
+        genresIds.ForEach(video!.AddGenre);
+
+        var castMembersIds = await _videosCastMembers
+            .Where(x => x.VideoId == video!.Id)
+            .Select(x => x.CastMemberId)
+            .ToListAsync(cancellationToken);
+        castMembersIds.ForEach(video!.AddCastMember);
+
+        return video;
     }
 
     public Task<SearchOutput<Video>> Search(SearchInput input, CancellationToken cancellationToken) => throw new NotImplementedException();
