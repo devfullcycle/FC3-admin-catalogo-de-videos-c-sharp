@@ -9,6 +9,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using FC.Codeflix.Catalog.Domain.Enum;
 using FC.Codeflix.Catalog.Domain.Entity;
+using FC.Codeflix.Catalog.Application.Exceptions;
 
 namespace FC.Codeflix.Catalog.IntegrationTests.Infra.Data.EF.Repositories.VideoRepository;
 
@@ -388,5 +389,76 @@ public class VideoRepositoryTest
         video.Banner.Should().BeNull();
         video.Media.Should().BeNull();
         video.Trailer.Should().BeNull();
+    }
+
+
+    [Fact(DisplayName = nameof(GetWithAllproperties))]
+    [Trait("Integration/Infra.Data", "Video Repository - Repositories")]
+    public async Task GetWithAllproperties()
+    {
+        var id = Guid.Empty;
+        var exampleVideo = _fixture.GetValidVideoWithAllProperties();
+        using(var dbContext = _fixture.CreateDbContext())
+        {
+            id = exampleVideo.Id;
+            var castMembers = _fixture.GetRandomCastMembersList();
+            var categories = _fixture.GetRandomCategoriesList();
+            var genres = _fixture.GetRandomGenresList();
+            castMembers.ToList().ForEach(castMember
+                => dbContext.VideosCastMembers.Add(new(castMember.Id, id)));
+            categories.ToList().ForEach(category
+                => dbContext.VideosCategories.Add(new(category.Id, id)));
+            genres.ToList().ForEach(genre
+                => dbContext.VideosGenres.Add(new(genre.Id, id)));
+            await dbContext.CastMembers.AddRangeAsync(castMembers);
+            await dbContext.Categories.AddRangeAsync(categories);
+            await dbContext.Genres.AddRangeAsync(genres);
+            await dbContext.Videos.AddAsync(exampleVideo);
+            await dbContext.Videos.AddAsync(exampleVideo);
+            await dbContext.SaveChangesAsync();
+        }
+        IVideoRepository videoRepository =
+            new Repository.VideoRepository(_fixture.CreateDbContext(true));
+
+        var video = await videoRepository.Get(id, CancellationToken.None);
+
+        video.Should().NotBeNull();
+        video!.Id.Should().Be(exampleVideo.Id);
+        video.Title.Should().Be(exampleVideo.Title);
+        video.Description.Should().Be(exampleVideo.Description);
+        video.YearLaunched.Should().Be(exampleVideo.YearLaunched);
+        video.Opened.Should().Be(exampleVideo.Opened);
+        video.Published.Should().Be(exampleVideo.Published);
+        video.Duration.Should().Be(exampleVideo.Duration);
+        video.CreatedAt.Should().BeCloseTo(exampleVideo.CreatedAt, TimeSpan.FromSeconds(1));
+        video.Rating.Should().Be(exampleVideo.Rating);
+        video.ThumbHalf.Should().NotBeNull();
+        video.Thumb.Should().NotBeNull();
+        video.Banner.Should().NotBeNull();
+        video.Media.Should().NotBeNull();
+        video.Trailer.Should().NotBeNull();
+        video.ThumbHalf!.Path.Should().Be(exampleVideo.ThumbHalf!.Path);
+        video.Thumb!.Path.Should().Be(exampleVideo.Thumb!.Path);
+        video.Banner!.Path.Should().Be(exampleVideo.Banner!.Path);
+        video.Media!.FilePath.Should().Be(exampleVideo.Media!.FilePath);
+        video.Media.EncodedPath.Should().Be(exampleVideo.Media.EncodedPath);
+        video.Media.Status.Should().Be(exampleVideo.Media.Status);
+        video.Trailer!.FilePath.Should().Be(exampleVideo.Trailer!.FilePath);
+        video.Trailer.EncodedPath.Should().Be(exampleVideo.Trailer.EncodedPath);
+        video.Trailer.Status.Should().Be(exampleVideo.Trailer.Status);
+    }
+
+    [Fact(DisplayName = nameof(GetThrowIfNotFind))]
+    [Trait("Integration/Infra.Data", "Video Repository - Repositories")]
+    public async Task GetThrowIfNotFind()
+    {
+        var id = Guid.NewGuid();
+        IVideoRepository videoRepository =
+            new Repository.VideoRepository(_fixture.CreateDbContext());
+
+        var action = () => videoRepository.Get(id, CancellationToken.None);
+
+        await action.Should().ThrowAsync<NotFoundException>()
+            .WithMessage($"Video '{id}' not found.");
     }
 }

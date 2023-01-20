@@ -117,9 +117,9 @@ public class VideoRepository : IVideoRepository
         return Task.CompletedTask;
     }
 
-    public Task<Video> Get(Guid id, CancellationToken cancellationToken)
+    public async Task<Video> Get(Guid id, CancellationToken cancellationToken)
     {
-        var video = _videos.FirstOrDefaultAsync(video => video.Id == id);
+        var video = await _videos.FirstOrDefaultAsync(video => video.Id == id);
         NotFoundException.ThrowIfNull(video, $"Video '{id}' not found.");
         return video!;
     }
