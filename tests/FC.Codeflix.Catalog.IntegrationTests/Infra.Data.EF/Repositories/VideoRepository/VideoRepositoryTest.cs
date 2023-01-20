@@ -347,7 +347,6 @@ public class VideoRepositoryTest
         var assertsDbContext = _fixture.CreateDbContext(true);
         var dbVideo = await assertsDbContext.Videos.FindAsync(id);
         dbVideo.Should().BeNull();
-
         assertsDbContext.VideosCategories
             .Where(relation => relation.VideoId == id)
             .ToList().Count().Should().Be(0);
@@ -357,5 +356,6 @@ public class VideoRepositoryTest
         assertsDbContext.VideosCastMembers
             .Where(relation => relation.VideoId == id)
             .ToList().Count().Should().Be(0);
+        assertsDbContext.Set<Media>().Count().Should().Be(0);
     }
 }

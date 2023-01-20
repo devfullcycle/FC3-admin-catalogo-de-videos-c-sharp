@@ -12,6 +12,7 @@ public class VideoRepository : IVideoRepository
 {
     private readonly CodeflixCatalogDbContext _context;
     private DbSet<Video> _videos => _context.Set<Video>();
+    private DbSet<Media> _medias => _context.Set<Media>();
     private DbSet<VideosCategories> _videosCategories 
         => _context.Set<VideosCategories>();
     private DbSet<VideosGenres> _videosGenres
@@ -104,6 +105,12 @@ public class VideoRepository : IVideoRepository
             .Where(x => x.VideoId == video.Id));
         _videosGenres.RemoveRange(_videosGenres
             .Where(x => x.VideoId == video.Id));
+
+        if(video.Trailer is not null)
+            _medias.Remove(video.Trailer);
+
+        if(video.Media is not null)
+            _medias.Remove(video.Media);
 
         _videos.Remove(video);
         return Task.CompletedTask;
