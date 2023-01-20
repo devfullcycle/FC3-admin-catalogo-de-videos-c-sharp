@@ -1,4 +1,5 @@
-﻿using FC.Codeflix.Catalog.Domain.Entity;
+﻿using FC.Codeflix.Catalog.Application.Exceptions;
+using FC.Codeflix.Catalog.Domain.Entity;
 using FC.Codeflix.Catalog.Domain.Repository;
 using FC.Codeflix.Catalog.Domain.SeedWork;
 using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
@@ -116,6 +117,12 @@ public class VideoRepository : IVideoRepository
         return Task.CompletedTask;
     }
 
-    public Task<Video> Get(Guid id, CancellationToken cancellationToken) => throw new NotImplementedException();
+    public Task<Video> Get(Guid id, CancellationToken cancellationToken)
+    {
+        var video = _videos.FirstOrDefaultAsync(video => video.Id == id);
+        NotFoundException.ThrowIfNull(video, $"Video '{id}' not found.");
+        return video!;
+    }
+
     public Task<SearchOutput<Video>> Search(SearchInput input, CancellationToken cancellationToken) => throw new NotImplementedException();
 }

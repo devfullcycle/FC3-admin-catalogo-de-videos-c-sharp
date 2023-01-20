@@ -9,7 +9,6 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using FC.Codeflix.Catalog.Domain.Enum;
 using FC.Codeflix.Catalog.Domain.Entity;
-using FC.Codeflix.Catalog.Infra.Data.EF.Models;
 
 namespace FC.Codeflix.Catalog.IntegrationTests.Infra.Data.EF.Repositories.VideoRepository;
 
@@ -357,5 +356,37 @@ public class VideoRepositoryTest
             .Where(relation => relation.VideoId == id)
             .ToList().Count().Should().Be(0);
         assertsDbContext.Set<Media>().Count().Should().Be(0);
+    }
+
+    [Fact(DisplayName = nameof(Get))]
+    [Trait("Integration/Infra.Data", "Video Repository - Repositories")]
+    public async Task Get()
+    {
+        var exampleVideo = _fixture.GetExampleVideo();
+        using(var dbContext = _fixture.CreateDbContext())
+        {
+            await dbContext.Videos.AddAsync(exampleVideo);
+            await dbContext.SaveChangesAsync();
+        }
+        IVideoRepository videoRepository = 
+            new Repository.VideoRepository(_fixture.CreateDbContext(true));
+
+        var video = await videoRepository.Get(exampleVideo.Id, CancellationToken.None);
+
+        video!.Id.Should().Be(exampleVideo.Id);
+        video.Title.Should().Be(exampleVideo.Title);
+        video.Description.Should().Be(exampleVideo.Description);
+        video.YearLaunched.Should().Be(exampleVideo.YearLaunched);
+        video.Opened.Should().Be(exampleVideo.Opened);
+        video.Published.Should().Be(exampleVideo.Published);
+        video.Duration.Should().Be(exampleVideo.Duration);
+        video.CreatedAt.Should().BeCloseTo(exampleVideo.CreatedAt, TimeSpan.FromSeconds(1));
+        video.Rating.Should().Be(exampleVideo.Rating);
+        video.Should().NotBeNull();
+        video!.ThumbHalf.Should().BeNull();
+        video.Thumb.Should().BeNull();
+        video.Banner.Should().BeNull();
+        video.Media.Should().BeNull();
+        video.Trailer.Should().BeNull();
     }
 }
