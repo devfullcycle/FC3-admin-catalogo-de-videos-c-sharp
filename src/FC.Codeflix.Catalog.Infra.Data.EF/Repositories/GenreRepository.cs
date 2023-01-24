@@ -138,9 +138,18 @@ public class GenreRepository
         return orderedQuery;
     }
 
-    public Task<IReadOnlyList<Guid>> GetIdsListByIds(List<Guid> ids, CancellationToken cancellationToken) 
-        => throw new NotImplementedException();
+    public async Task<IReadOnlyList<Guid>> GetIdsListByIds(
+        List<Guid> ids, 
+        CancellationToken cancellationToken
+    ) => await _genres.AsNoTracking()
+        .Where(genre => ids.Contains(genre.Id))
+        .Select(genre => genre.Id)
+        .ToListAsync(cancellationToken);
 
-    public Task<IReadOnlyList<Genre>> GetListByIds(List<Guid> ids, CancellationToken cancellationToken) 
-        => throw new NotImplementedException();
+    public async Task<IReadOnlyList<Genre>> GetListByIds(
+        List<Guid> ids, 
+        CancellationToken cancellationToken
+    ) => await _genres.AsNoTracking()
+        .Where(genre => ids.Contains(genre.Id))
+        .ToListAsync(cancellationToken);
 }
