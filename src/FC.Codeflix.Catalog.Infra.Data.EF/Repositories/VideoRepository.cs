@@ -143,5 +143,13 @@ public class VideoRepository : IVideoRepository
         return video;
     }
 
-    public Task<SearchOutput<Video>> Search(SearchInput input, CancellationToken cancellationToken) => throw new NotImplementedException();
+    public async Task<SearchOutput<Video>> Search(SearchInput input, CancellationToken cancellationToken)
+    {
+        var items = await _videos.AsNoTracking().ToListAsync(cancellationToken);
+        return new(
+            input.Page, 
+            input.PerPage, 
+            items.Count,
+            items);
+    }
 }
