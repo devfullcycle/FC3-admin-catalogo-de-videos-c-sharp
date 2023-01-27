@@ -323,4 +323,29 @@ public class CastMemberRepositoryTest
             searchResult.Items[i].Type.Should().Be(orderedList[i].Type);
         }
     }
+
+
+    [Fact(DisplayName = nameof(GetIdsListByIds))]
+    [Trait("Integration/Infra.Data", "CastMemberRepository - Repositories")]
+    public async Task GetIdsListByIds()
+    {
+        var arrangeDbContext = _fixture.CreateDbContext();
+        var exampleList = _fixture.GetExampleCastMembersList(10);
+        await arrangeDbContext.AddRangeAsync(exampleList);
+        await arrangeDbContext.SaveChangesAsync(CancellationToken.None);
+        var actDbContext = _fixture.CreateDbContext(true);
+        var repository = new Repository.CastMemberRepository(actDbContext);
+        var idsToGet = new List<Guid>() {
+            exampleList[2].Id,
+            exampleList[3].Id
+        };
+
+        var result = await repository.GetIdsListByIds(
+            idsToGet,
+            CancellationToken.None
+        );
+
+        result.Should().HaveCount(idsToGet.Count);
+        result.ToList().Should().BeEquivalentTo(idsToGet);
+    }
 }
