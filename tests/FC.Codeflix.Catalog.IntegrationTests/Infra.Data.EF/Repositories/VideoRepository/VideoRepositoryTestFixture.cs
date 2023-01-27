@@ -16,9 +16,9 @@ public class VideoRepositoryTestFixtureCollection
 
 public class VideoRepositoryTestFixture : BaseFixture
 {
-    public Video GetExampleVideo()
+    public Video GetExampleVideo(string? title = null)
         =>  new (
-            GetValidTitle(),
+            title ?? GetValidTitle(),
             GetValidDescription(),
             GetValidYearLaunched(),
             GetRandomBoolean(),
@@ -29,6 +29,9 @@ public class VideoRepositoryTestFixture : BaseFixture
 
     public List<Video> GetExampleVideosList(int count = 10)
         => Enumerable.Range(1, count).Select(_ => GetExampleVideo()).ToList();
+
+    public List<Video> GetExampleVideosListByTitles(List<string> titles)
+        => titles.Select(title => GetExampleVideo(title: title)).ToList();
 
     public Rating GetRandomRating()
     {

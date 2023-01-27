@@ -575,4 +575,59 @@ public class VideoRepositoryTest
             resultItem.Description.Should().Be(exampleVideo.Description);
         });
     }
+    
+    [Theory(DisplayName = nameof(SearchByTitle))]
+    [Trait("Integration/Infra.Data", "Video Repository - Repositories")]
+    [InlineData("Action", 1, 5, 1, 1)]
+    [InlineData("Horror", 1, 5, 3, 3)]
+    [InlineData("Horror", 2, 5, 0, 3)]
+    [InlineData("Sci-fi", 1, 5, 4, 4)]
+    [InlineData("Sci-fi", 1, 2, 2, 4)]
+    [InlineData("Sci-fi", 2, 3, 1, 4)]
+    [InlineData("Sci-fi Other", 1, 3, 0, 0)]
+    [InlineData("Robots", 1, 5, 2, 2)]
+    public async Task SearchByTitle(
+        string search,
+        int page,
+        int perPage,
+        int expectedQuantityItemsReturned,
+        int expectedQuantityTotalItems
+    )
+    {
+        var exampleVideosList = _fixture.GetExampleVideosListByTitles(
+            new() {
+                "Action",
+                "Horror",
+                "Horror - Robots",
+                "Horror - Based on Real Facts",
+                "Drama",
+                "Sci-fi IA",
+                "Sci-fi Space",
+                "Sci-fi Robots",
+                "Sci-fi Future" });
+        using(var arrangeDbContext = _fixture.CreateDbContext())
+        {
+            await arrangeDbContext.Videos.AddRangeAsync(exampleVideosList);
+            await arrangeDbContext.SaveChangesAsync();
+        }
+        var actDbContext = _fixture.CreateDbContext(true);
+        var videoRepository = new Repository.VideoRepository(actDbContext);
+        var searchInput = new SearchInput(page, perPage, search, "", default);
+
+        var result = await videoRepository.Search(searchInput, CancellationToken.None);
+
+        result.CurrentPage.Should().Be(searchInput.Page);
+        result.PerPage.Should().Be(searchInput.PerPage);
+        result.Total.Should().Be(expectedQuantityTotalItems);
+        result.Items.Should().NotBeNull();
+        result.Items.Should().HaveCount(expectedQuantityItemsReturned);
+        result.Items.ToList().ForEach(resultItem => {
+            var exampleVideo = exampleVideosList
+                .FirstOrDefault(x => x.Id == resultItem.Id);
+            exampleVideosList.Should().NotBeNull();
+            resultItem!.Id.Should().Be(exampleVideo!.Id);
+            resultItem.Title.Should().Be(exampleVideo.Title);
+            resultItem.Description.Should().Be(exampleVideo.Description);
+        });
+    }
 }
