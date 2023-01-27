@@ -518,4 +518,21 @@ public class VideoRepositoryTest
 
         });
     }
+    
+    [Fact(DisplayName = nameof(SearchReturnsEmptyWhenEmpty))]
+    [Trait("Integration/Infra.Data", "Video Repository - Repositories")]
+    public async Task SearchReturnsEmptyWhenEmpty()
+    {
+        var actDbContext = _fixture.CreateDbContext();
+        var videoRepository = new Repository.VideoRepository(actDbContext);
+        var searchInput = new SearchInput(1, 20, "", "", default);
+
+        var result = await videoRepository.Search(searchInput, CancellationToken.None);
+
+        result.CurrentPage.Should().Be(searchInput.Page);
+        result.PerPage.Should().Be(searchInput.PerPage);
+        result.Total.Should().Be(0);
+        result.Items.Should().NotBeNull();
+        result.Items.Should().HaveCount(0);
+    }
 }
