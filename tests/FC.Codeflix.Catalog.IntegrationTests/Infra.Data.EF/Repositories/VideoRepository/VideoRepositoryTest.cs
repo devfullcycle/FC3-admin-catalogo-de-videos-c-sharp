@@ -535,4 +535,44 @@ public class VideoRepositoryTest
         result.Items.Should().NotBeNull();
         result.Items.Should().HaveCount(0);
     }
+    
+    [Theory(DisplayName = nameof(SearchPagination))]
+    [Trait("Integration/Infra.Data", "Video Repository - Repositories")]
+    [InlineData(10, 1, 5, 5)]
+    [InlineData(10, 2, 5, 5)]
+    [InlineData(7, 2, 5, 2)]
+    [InlineData(7, 3, 5, 0)]
+    public async Task SearchPagination(
+        int quantityToGenerate,
+        int page,
+        int perPage,
+        int expectedQuantityItems
+    )
+    {
+        var exampleVideosList = _fixture.GetExampleVideosList(quantityToGenerate);
+        using(var arrangeDbContext = _fixture.CreateDbContext())
+        {
+            await arrangeDbContext.Videos.AddRangeAsync(exampleVideosList);
+            await arrangeDbContext.SaveChangesAsync();
+        }
+        var actDbContext = _fixture.CreateDbContext(true);
+        var videoRepository = new Repository.VideoRepository(actDbContext);
+        var searchInput = new SearchInput(page, perPage, "", "", default);
+
+        var result = await videoRepository.Search(searchInput, CancellationToken.None);
+
+        result.CurrentPage.Should().Be(searchInput.Page);
+        result.PerPage.Should().Be(searchInput.PerPage);
+        result.Total.Should().Be(exampleVideosList.Count);
+        result.Items.Should().NotBeNull();
+        result.Items.Should().HaveCount(expectedQuantityItems);
+        result.Items.ToList().ForEach(resultItem => {
+            var exampleVideo = exampleVideosList
+                .FirstOrDefault(x => x.Id == resultItem.Id);
+            exampleVideosList.Should().NotBeNull();
+            resultItem!.Id.Should().Be(exampleVideo!.Id);
+            resultItem.Title.Should().Be(exampleVideo.Title);
+            resultItem.Description.Should().Be(exampleVideo.Description);
+        });
+    }
 }
