@@ -324,7 +324,6 @@ public class CastMemberRepositoryTest
         }
     }
 
-
     [Fact(DisplayName = nameof(GetIdsListByIds))]
     [Trait("Integration/Infra.Data", "CastMemberRepository - Repositories")]
     public async Task GetIdsListByIds()
@@ -347,5 +346,38 @@ public class CastMemberRepositoryTest
 
         result.Should().HaveCount(idsToGet.Count);
         result.ToList().Should().BeEquivalentTo(idsToGet);
+    }
+
+    [Fact(DisplayName = nameof(GetIdsListByIdsRetrurnsOnlyTheIdsThatMatch))]
+    [Trait("Integration/Infra.Data", "CastMemberRepository - Repositories")]
+    public async Task GetIdsListByIdsRetrurnsOnlyTheIdsThatMatch()
+    {
+        var arrangeDbContext = _fixture.CreateDbContext();
+        var exampleList = _fixture.GetExampleCastMembersList(10);
+        await arrangeDbContext.AddRangeAsync(exampleList);
+        await arrangeDbContext.SaveChangesAsync(CancellationToken.None);
+        var actDbContext = _fixture.CreateDbContext(true);
+        var repository = new Repository.CastMemberRepository(actDbContext);
+        var idsToGet = new List<Guid>() {
+            exampleList[2].Id,
+            exampleList[3].Id,
+            exampleList[4].Id,
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            Guid.NewGuid()
+        };
+        var expectedIds = new List<Guid>() {
+            exampleList[2].Id,
+            exampleList[3].Id,
+            exampleList[4].Id
+        };
+
+        var result = await repository.GetIdsListByIds(
+            idsToGet,
+            CancellationToken.None
+        );
+
+        result.Should().HaveCount(expectedIds.Count);
+        result.ToList().Should().BeEquivalentTo(expectedIds);
     }
 }
