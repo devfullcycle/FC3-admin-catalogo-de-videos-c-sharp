@@ -145,11 +145,17 @@ public class VideoRepository : IVideoRepository
 
     public async Task<SearchOutput<Video>> Search(SearchInput input, CancellationToken cancellationToken)
     {
-        var items = await _videos.AsNoTracking().ToListAsync(cancellationToken);
+        var toSkip = (input.Page - 1) * input.PerPage;
+        var query = _videos.AsNoTracking();
+
+        var count = query.Count();
+        var items = await query.Skip(toSkip).Take(input.PerPage)
+            .ToListAsync(cancellationToken);
+        
         return new(
             input.Page, 
             input.PerPage, 
-            items.Count,
+            count,
             items);
     }
 }
