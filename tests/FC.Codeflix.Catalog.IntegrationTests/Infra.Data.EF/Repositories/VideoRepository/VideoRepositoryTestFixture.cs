@@ -27,6 +27,8 @@ public class VideoRepositoryTestFixture : BaseFixture
             GetRandomRating()
         );
 
+    public List<Video> GetExampleVideosList(int count = 10)
+        => Enumerable.Range(1, count).Select(_ => GetExampleVideo()).ToList();
 
     public Rating GetRandomRating()
     {

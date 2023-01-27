@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using FC.Codeflix.Catalog.Domain.Enum;
 using FC.Codeflix.Catalog.Domain.Entity;
 using FC.Codeflix.Catalog.Application.Exceptions;
+using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 
 namespace FC.Codeflix.Catalog.IntegrationTests.Infra.Data.EF.Repositories.VideoRepository;
 
@@ -470,5 +471,51 @@ public class VideoRepositoryTest
 
         await action.Should().ThrowAsync<NotFoundException>()
             .WithMessage($"Video '{id}' not found.");
+    }
+    
+    [Fact(DisplayName = nameof(Search))]
+    [Trait("Integration/Infra.Data", "Video Repository - Repositories")]
+    public async Task Search()
+    {
+        var exampleVideosList = _fixture.GetExampleVideosList();
+        using(var arrangeDbContext = _fixture.CreateDbContext())
+        {
+            await arrangeDbContext.Videos.AddRangeAsync(exampleVideosList);
+            await arrangeDbContext.SaveChangesAsync();
+        }
+        var actDbContext = _fixture.CreateDbContext(true);
+        var videoRepository = new Repository.VideoRepository(actDbContext);
+        var searchInput = new SearchInput(1, 20, "", "", default);
+
+        var result = await videoRepository.Search(searchInput, CancellationToken.None);
+
+        result.CurrentPage.Should().Be(searchInput.Page);
+        result.PerPage.Should().Be(searchInput.PerPage);
+        result.Total.Should().Be(exampleVideosList.Count);
+        result.Items.Should().NotBeNull();
+        result.Items.Should().HaveCount(exampleVideosList.Count);
+        result.Items.ToList().ForEach(resultItem => {
+            var exampleVideo = exampleVideosList
+                .FirstOrDefault(x => x.Id == resultItem.Id);
+            exampleVideosList.Should().NotBeNull();
+            resultItem!.Id.Should().Be(exampleVideo!.Id);
+            resultItem.Title.Should().Be(exampleVideo.Title);
+            resultItem.Description.Should().Be(exampleVideo.Description);
+            resultItem.YearLaunched.Should().Be(exampleVideo.YearLaunched);
+            resultItem.Opened.Should().Be(exampleVideo.Opened);
+            resultItem.Published.Should().Be(exampleVideo.Published);
+            resultItem.Duration.Should().Be(exampleVideo.Duration);
+            resultItem.CreatedAt.Should().BeCloseTo(exampleVideo.CreatedAt, TimeSpan.FromSeconds(1));
+            resultItem.Rating.Should().Be(exampleVideo.Rating);
+            resultItem.Thumb.Should().BeNull();
+            resultItem.ThumbHalf.Should().BeNull();
+            resultItem.Banner.Should().BeNull();
+            resultItem.Media.Should().BeNull();
+            resultItem.Trailer.Should().BeNull();
+            resultItem.Genres.Should().BeEmpty();
+            resultItem.Categories.Should().BeEmpty();
+            resultItem.CastMembers.Should().BeEmpty();
+
+        });
     }
 }
