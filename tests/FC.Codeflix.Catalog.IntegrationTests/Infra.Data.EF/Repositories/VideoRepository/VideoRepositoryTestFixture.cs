@@ -1,5 +1,6 @@
 ﻿using FC.Codeflix.Catalog.Domain.Entity;
 using FC.Codeflix.Catalog.Domain.Enum;
+using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using FC.Codeflix.Catalog.IntegrationTests.Base;
 using System;
 using System.Collections.Generic;
@@ -154,5 +155,25 @@ public class VideoRepositoryTestFixture : BaseFixture
         };
         var random = new Random();
         return exampleMedias[random.Next(exampleMedias.Length)];
+    }
+
+    public List<Video> CloneListOrdered(
+        List<Video> exampleVideosList,
+        SearchInput input)
+    {
+        var listClone = new List<Video>(exampleVideosList);
+        var orderedEnumerable = (input.OrderBy.ToLower(), input.Order) switch
+        {
+            ("title", SearchOrder.Asc) => listClone.OrderBy(x => x.Title)
+                .ThenBy(x => x.Id),
+            ("title", SearchOrder.Desc) => listClone.OrderByDescending(x => x.Title)
+                .ThenByDescending(x => x.Id),
+            ("id", SearchOrder.Asc) => listClone.OrderBy(x => x.Id),
+            ("id", SearchOrder.Desc) => listClone.OrderByDescending(x => x.Id),
+            ("createdat", SearchOrder.Asc) => listClone.OrderBy(x => x.CreatedAt),
+            ("createdat", SearchOrder.Desc) => listClone.OrderByDescending(x => x.CreatedAt),
+            _ => listClone.OrderBy(x => x.Title).ThenBy(x => x.Id),
+        };
+        return orderedEnumerable.ToList();
     }
 }

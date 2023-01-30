@@ -632,4 +632,48 @@ public class VideoRepositoryTest
             resultItem.Description.Should().Be(exampleVideo.Description);
         });
     }
+    
+
+    [Theory(DisplayName = nameof(SearchOrdered))]
+    [Trait("Integration/Infra.Data", "Video Repository - Repositories")]
+    [InlineData("title", "asc")]
+    [InlineData("title", "desc")]
+    [InlineData("id", "asc")]
+    [InlineData("id", "desc")]
+    [InlineData("createdAt", "asc")]
+    [InlineData("createdAt", "desc")]
+    [InlineData("", "asc")]
+    public async Task SearchOrdered(
+        string orderBy,
+        string order
+    )
+    {
+        var exampleVideosList = _fixture.GetExampleVideosList(10);
+        using(var arrangeDbContext = _fixture.CreateDbContext())
+        {
+            await arrangeDbContext.Videos.AddRangeAsync(exampleVideosList);
+            await arrangeDbContext.SaveChangesAsync();
+        }
+        var actDbContext = _fixture.CreateDbContext(true);
+        var videoRepository = new Repository.VideoRepository(actDbContext);
+        var searchOrder = order.ToLower() == "asc" ? SearchOrder.Asc : SearchOrder.Desc;
+        var searchInput = new SearchInput(1, 20, "", orderBy, searchOrder);
+
+        var result = await videoRepository.Search(searchInput, CancellationToken.None);
+        
+        var orderedList = _fixture.CloneListOrdered(exampleVideosList, searchInput);
+        result.CurrentPage.Should().Be(searchInput.Page);
+        result.PerPage.Should().Be(searchInput.PerPage);
+        result.Total.Should().Be(exampleVideosList.Count);
+        result.Items.Should().NotBeNull();
+        result.Items.Should().HaveCount(exampleVideosList.Count);
+        for(int index = 0; index < orderedList.Count; index++)
+        {
+            var resultItem = result.Items[index];
+            var exampleVideo = orderedList[index];
+            resultItem!.Id.Should().Be(exampleVideo!.Id);
+            resultItem.Title.Should().Be(exampleVideo.Title);
+            resultItem.Description.Should().Be(exampleVideo.Description);
+        }
+    }
 }
