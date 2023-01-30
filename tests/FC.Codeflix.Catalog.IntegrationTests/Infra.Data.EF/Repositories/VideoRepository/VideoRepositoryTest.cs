@@ -586,6 +586,8 @@ public class VideoRepositoryTest
     [InlineData("Sci-fi", 2, 3, 1, 4)]
     [InlineData("Sci-fi Other", 1, 3, 0, 0)]
     [InlineData("Robots", 1, 5, 2, 2)]
+    [InlineData("", 1, 5, 5, 9)]
+    [InlineData("test-no-items", 1, 5, 0, 0)]
     public async Task SearchByTitle(
         string search,
         int page,

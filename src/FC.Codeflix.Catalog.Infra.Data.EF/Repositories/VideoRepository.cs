@@ -148,6 +148,9 @@ public class VideoRepository : IVideoRepository
         var toSkip = (input.Page - 1) * input.PerPage;
         var query = _videos.AsNoTracking();
 
+        if(!string.IsNullOrWhiteSpace(input.Search))
+            query = query.Where(video => video.Title.Contains(input.Search));
+
         var count = query.Count();
         var items = await query.Skip(toSkip).Take(input.PerPage)
             .ToListAsync(cancellationToken);
