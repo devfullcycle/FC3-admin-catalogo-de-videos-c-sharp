@@ -150,15 +150,34 @@ public class VideoRepository : IVideoRepository
 
         if(!string.IsNullOrWhiteSpace(input.Search))
             query = query.Where(video => video.Title.Contains(input.Search));
+        query = InsertOrderBy(input, query);
 
         var count = query.Count();
         var items = await query.Skip(toSkip).Take(input.PerPage)
             .ToListAsync(cancellationToken);
-        
+
         return new(
-            input.Page, 
-            input.PerPage, 
+            input.Page,
+            input.PerPage,
             count,
             items);
     }
+
+    private static IQueryable<Video> InsertOrderBy(SearchInput input, IQueryable<Video> query)
+        => input switch
+        {
+            { Order: SearchOrder.Asc } when input.OrderBy.ToLower() is "title"
+                => query.OrderBy(video => video.Title).ThenBy(video => video.Id),
+            { Order: SearchOrder.Desc } when input.OrderBy.ToLower() is "title"
+                => query.OrderByDescending(video => video.Title).ThenByDescending(video => video.Id),
+            { Order: SearchOrder.Asc } when input.OrderBy.ToLower() is "id"
+                => query.OrderBy(video => video.Id),
+            { Order: SearchOrder.Desc } when input.OrderBy.ToLower() is "id"
+                => query.OrderByDescending(video => video.Id),
+            { Order: SearchOrder.Asc } when input.OrderBy.ToLower() is "createdat"
+                => query.OrderBy(video => video.CreatedAt),
+            { Order: SearchOrder.Desc } when input.OrderBy.ToLower() is "createdat"
+                => query.OrderByDescending(video => video.CreatedAt),
+            _ => query = query.OrderBy(video => video.Title).ThenBy(video => video.Id)
+        };
 }
