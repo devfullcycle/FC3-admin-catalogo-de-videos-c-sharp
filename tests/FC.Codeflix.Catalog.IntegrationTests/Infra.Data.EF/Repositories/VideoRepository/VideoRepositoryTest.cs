@@ -518,7 +518,61 @@ public class VideoRepositoryTest
 
         });
     }
-    
+
+
+    [Fact(DisplayName = nameof(SearchReturnsAllRelations))]
+    [Trait("Integration/Infra.Data", "Video Repository - Repositories")]
+    public async Task SearchReturnsAllRelations()
+    {
+        var exampleVideosList = _fixture.GetExampleVideosList();
+        using(var arrangeDbContext = _fixture.CreateDbContext())
+        {
+            foreach(var exampleVideo in exampleVideosList)
+            {
+                var castMembers = _fixture.GetRandomCastMembersList();
+                var categories = _fixture.GetRandomCategoriesList();
+                var genres = _fixture.GetRandomGenresList();
+                castMembers.ToList().ForEach(castMember => {
+                    exampleVideo.AddCastMember(castMember.Id);
+                    arrangeDbContext.VideosCastMembers.Add(new(castMember.Id, exampleVideo.Id));
+                });
+                categories.ToList().ForEach(category => {
+                    exampleVideo.AddCategory(category.Id);
+                    arrangeDbContext.VideosCategories.Add(new(category.Id, exampleVideo.Id));
+                });
+                genres.ToList().ForEach(genre =>
+                {
+                    exampleVideo.AddGenre(genre.Id);
+                    arrangeDbContext.VideosGenres.Add(new(genre.Id, exampleVideo.Id));
+                });
+                await arrangeDbContext.CastMembers.AddRangeAsync(castMembers);
+                await arrangeDbContext.Categories.AddRangeAsync(categories);
+                await arrangeDbContext.Genres.AddRangeAsync(genres);
+            }
+            await arrangeDbContext.Videos.AddRangeAsync(exampleVideosList);
+            await arrangeDbContext.SaveChangesAsync();
+        }
+        var actDbContext = _fixture.CreateDbContext(true);
+        var videoRepository = new Repository.VideoRepository(actDbContext);
+        var searchInput = new SearchInput(1, 20, "", "", default);
+
+        var result = await videoRepository.Search(searchInput, CancellationToken.None);
+
+        result.CurrentPage.Should().Be(searchInput.Page);
+        result.PerPage.Should().Be(searchInput.PerPage);
+        result.Total.Should().Be(exampleVideosList.Count);
+        result.Items.Should().NotBeNull();
+        result.Items.Should().HaveCount(exampleVideosList.Count);
+        result.Items.ToList().ForEach(resultItem => {
+            var exampleVideo = exampleVideosList
+                .FirstOrDefault(x => x.Id == resultItem.Id);
+            exampleVideo.Should().NotBeNull();
+            resultItem.Genres.Should().BeEquivalentTo(exampleVideo!.Genres);
+            resultItem.Categories.Should().BeEquivalentTo(exampleVideo.Categories);
+            resultItem.CastMembers.Should().BeEquivalentTo(exampleVideo.CastMembers);
+        });
+    }
+
     [Fact(DisplayName = nameof(SearchReturnsEmptyWhenEmpty))]
     [Trait("Integration/Infra.Data", "Video Repository - Repositories")]
     public async Task SearchReturnsEmptyWhenEmpty()
@@ -633,7 +687,6 @@ public class VideoRepositoryTest
         });
     }
     
-
     [Theory(DisplayName = nameof(SearchOrdered))]
     [Trait("Integration/Infra.Data", "Video Repository - Repositories")]
     [InlineData("title", "asc")]
