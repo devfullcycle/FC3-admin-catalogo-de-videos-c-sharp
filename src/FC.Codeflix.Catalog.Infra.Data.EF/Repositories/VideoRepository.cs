@@ -156,11 +156,64 @@ public class VideoRepository : IVideoRepository
         var items = await query.Skip(toSkip).Take(input.PerPage)
             .ToListAsync(cancellationToken);
 
+        var videosIds = items.Select(video => video.Id).ToList();
+        await AddCategoriesToVideos(items, videosIds);
+        await AddGenresToVideos(items, videosIds);
+        await AddCastMembersToVideos(items, videosIds);
+        
         return new(
             input.Page,
             input.PerPage,
             count,
             items);
+    }
+
+    private async Task AddCategoriesToVideos(List<Video> items, List<Guid> videosIds)
+    {
+        var categoriesRelations = await _videosCategories
+            .Where(relation => videosIds.Contains(relation.VideoId))
+            .ToListAsync();
+        var relationsWithCategoriesByVideoId =
+            categoriesRelations.GroupBy(x => x.VideoId).ToList();
+        relationsWithCategoriesByVideoId.ForEach(relationGroup =>
+        {
+            var video = items.Find(video => video.Id == relationGroup.Key);
+            if(video is null) return;
+            relationGroup.ToList()
+                .ForEach(relation => video.AddCategory(relation.CategoryId));
+        });
+    }
+
+    private async Task AddGenresToVideos(List<Video> items, List<Guid> videosIds)
+    {
+        var genresRelations = await _videosGenres
+            .Where(relation => videosIds.Contains(relation.VideoId))
+            .ToListAsync();
+        var relationsWithGenresByVideoId =
+            genresRelations.GroupBy(x => x.VideoId).ToList();
+        relationsWithGenresByVideoId.ForEach(relationGroup =>
+        {
+            var video = items.Find(video => video.Id == relationGroup.Key);
+            if(video is null) return;
+            relationGroup.ToList()
+                .ForEach(relation => video.AddGenre(relation.GenreId));
+        });
+    }
+
+    private async Task AddCastMembersToVideos(List<Video> items, List<Guid> videosIds)
+    {
+        var castMembersRelations = await _videosCastMembers
+            .Where(relation => videosIds.Contains(relation.VideoId))
+            .ToListAsync();
+        var relationsWithCastMembersByVideoId =
+            castMembersRelations.GroupBy(x => x.VideoId).ToList();
+        relationsWithCastMembersByVideoId.ForEach(relationGroup =>
+        {
+            var video = items.Find(video => video.Id == relationGroup.Key);
+            if(video is null) return;
+            relationGroup.ToList()
+                .ForEach(relation => video.AddCastMember(relation.CastMemberId));
+        });
     }
 
     private static IQueryable<Video> InsertOrderBy(SearchInput input, IQueryable<Video> query)
