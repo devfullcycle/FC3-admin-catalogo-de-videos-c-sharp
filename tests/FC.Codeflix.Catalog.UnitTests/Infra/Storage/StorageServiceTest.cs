@@ -13,6 +13,8 @@ using Xunit;
 using GcpData = Google.Apis.Storage.v1.Data;
 
 namespace FC.Codeflix.Catalog.UnitTests.Infra.Storage;
+
+[Collection(nameof(StorageServiceTestFixture))]
 public class StorageServiceTest
 {
     private readonly StorageServiceTestFixture _fixture;
