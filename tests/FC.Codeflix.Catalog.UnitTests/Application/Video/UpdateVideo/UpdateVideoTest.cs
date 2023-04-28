@@ -708,6 +708,7 @@ public class UpdateVideoTest
                 input.Banner!.Extension))
             ),
             It.IsAny<MemoryStream>(),
+            It.IsAny<string>(),
             It.IsAny<CancellationToken>())
         ).ReturnsAsync(bannerPath);
 
@@ -771,7 +772,8 @@ public class UpdateVideoTest
         _videoRepository.VerifyAll();
         _storageService.Verify(x => x.Upload(
             It.IsAny<string>(), 
-            It.IsAny<Stream>(), 
+            It.IsAny<Stream>(),
+            It.IsAny<string>(),
             It.IsAny<CancellationToken>())
         , Times.Never);
         _videoRepository.Verify(repository => repository.Update(
@@ -810,6 +812,7 @@ public class UpdateVideoTest
                 input.Thumb!.Extension))
             ),
             It.IsAny<MemoryStream>(),
+            It.IsAny<string>(),
             It.IsAny<CancellationToken>())
         ).ReturnsAsync(path);
 
@@ -874,6 +877,7 @@ public class UpdateVideoTest
         _storageService.Verify(x => x.Upload(
             It.IsAny<string>(),
             It.IsAny<Stream>(),
+            It.IsAny<string>(),
             It.IsAny<CancellationToken>())
         , Times.Never);
         _videoRepository.Verify(repository => repository.Update(
@@ -912,6 +916,7 @@ public class UpdateVideoTest
                 input.ThumbHalf!.Extension))
             ),
             It.IsAny<MemoryStream>(),
+            It.IsAny<string>(),
             It.IsAny<CancellationToken>())
         ).ReturnsAsync(path);
 
@@ -976,6 +981,7 @@ public class UpdateVideoTest
         _storageService.Verify(x => x.Upload(
             It.IsAny<string>(),
             It.IsAny<Stream>(),
+            It.IsAny<string>(),
             It.IsAny<CancellationToken>())
         , Times.Never);
         _videoRepository.Verify(repository => repository.Update(
