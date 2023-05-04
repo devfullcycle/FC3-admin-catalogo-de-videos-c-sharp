@@ -16,6 +16,6 @@ public class DomainEventPublisher : IDomainEventPublisher
             .GetServices<IDomainEventHandler<TDomainEvent>>();
         if (handlers is null || !handlers.Any()) return;
         foreach (var handler in handlers)
-            await handler.Handle(domainEvent, cancellationToken);
+            await handler.HandleAsync(domainEvent, cancellationToken);
     }
 }
