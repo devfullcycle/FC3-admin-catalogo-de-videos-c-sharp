@@ -1,10 +1,7 @@
-﻿using FC.Codeflix.Catalog.Domain.SeedWork;
+﻿using FC.Codeflix.Catalog.Application;
+using FC.Codeflix.Catalog.Domain.SeedWork;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -25,13 +22,13 @@ public class DomainEventPublisherTest
         serviceCollection.AddSingleton(eventHandlerMock3.Object);
         var serviceProvider = serviceCollection.BuildServiceProvider();
         var domainEventPublisher = new DomainEventPublisher(serviceProvider);
-        var @event = new DomainEventToBeHandledFake();
+        DomainEvent @event = new DomainEventToBeHandledFake();
 
-        await domainEventPublisher.PublishAsync(@event);
+        await domainEventPublisher.PublishAsync((dynamic)@event, CancellationToken.None);
 
-        eventHandlerMock1.Verify(x => x.Handle(@event, It.IsAny<CancellationToken>()),
+        eventHandlerMock1.Verify(x => x.Handle((DomainEventToBeHandledFake)@event, It.IsAny<CancellationToken>()),
             Times.Once);
-        eventHandlerMock2.Verify(x => x.Handle(@event, It.IsAny<CancellationToken>()),
+        eventHandlerMock2.Verify(x => x.Handle((DomainEventToBeHandledFake)@event, It.IsAny<CancellationToken>()),
             Times.Once);
         eventHandlerMock3.Verify(x => x.Handle(
             It.IsAny<DomainEventToNotBeHandledFake>(),
@@ -52,7 +49,7 @@ public class DomainEventPublisherTest
         var domainEventPublisher = new DomainEventPublisher(serviceProvider);
         var @event = new DomainEventToBeHandledFake();
 
-        await domainEventPublisher.PublishAsync(@event);
+        await domainEventPublisher.PublishAsync(@event, CancellationToken.None);
 
         eventHandlerMock1.Verify(x => x.Handle(
             It.IsAny<DomainEventToNotBeHandledFake>(),
