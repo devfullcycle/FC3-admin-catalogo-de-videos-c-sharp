@@ -10,6 +10,9 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using FC.Codeflix.Catalog.Application.Exceptions;
 using FC.Codeflix.Catalog.Domain.Exceptions;
+using FC.Codeflix.Catalog.Application;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace FC.Codeflix.Catalog.IntegrationTests.Application.UseCases.Category.UpdateCategory;
 
@@ -39,7 +42,13 @@ public class UpdateCategoryTest
         dbContext.SaveChanges();
         trackingInfo.State = EntityState.Detached;
         var repository = new CategoryRepository(dbContext);
-        var unitOfWork = new UnitOfWork(dbContext);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var eventPublisher = new DomainEventPublisher(serviceProvider);
+        var unitOfWork = new UnitOfWork(dbContext,
+            eventPublisher,
+            serviceProvider.GetRequiredService<ILogger<UnitOfWork>>());
         var useCase = new ApplicationUseCase.UpdateCategory(repository, unitOfWork);
 
         var output = await useCase.Handle(input, CancellationToken.None);
@@ -80,7 +89,13 @@ public class UpdateCategoryTest
         dbContext.SaveChanges();
         trackingInfo.State = EntityState.Detached;
         var repository = new CategoryRepository(dbContext);
-        var unitOfWork = new UnitOfWork(dbContext);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var eventPublisher = new DomainEventPublisher(serviceProvider);
+        var unitOfWork = new UnitOfWork(dbContext,
+            eventPublisher,
+            serviceProvider.GetRequiredService<ILogger<UnitOfWork>>());
         var useCase = new ApplicationUseCase.UpdateCategory(repository, unitOfWork);
 
         var output = await useCase.Handle(input, CancellationToken.None);
@@ -120,7 +135,13 @@ public class UpdateCategoryTest
         dbContext.SaveChanges();
         trackingInfo.State = EntityState.Detached;
         var repository = new CategoryRepository(dbContext);
-        var unitOfWork = new UnitOfWork(dbContext);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var eventPublisher = new DomainEventPublisher(serviceProvider);
+        var unitOfWork = new UnitOfWork(dbContext,
+            eventPublisher,
+            serviceProvider.GetRequiredService<ILogger<UnitOfWork>>());
         var useCase = new ApplicationUseCase.UpdateCategory(repository, unitOfWork);
 
         var output = await useCase.Handle(input, CancellationToken.None);
@@ -147,7 +168,13 @@ public class UpdateCategoryTest
         await dbContext.AddRangeAsync(_fixture.GetExampleCategoriesList());
         dbContext.SaveChanges();
         var repository = new CategoryRepository(dbContext);
-        var unitOfWork = new UnitOfWork(dbContext);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var eventPublisher = new DomainEventPublisher(serviceProvider);
+        var unitOfWork = new UnitOfWork(dbContext,
+            eventPublisher,
+            serviceProvider.GetRequiredService<ILogger<UnitOfWork>>());
         var useCase = new ApplicationUseCase.UpdateCategory(repository, unitOfWork);
 
         var task = async () 
@@ -174,7 +201,13 @@ public class UpdateCategoryTest
         await dbContext.AddRangeAsync(exampleCategories);
         dbContext.SaveChanges();
         var repository = new CategoryRepository(dbContext);
-        var unitOfWork = new UnitOfWork(dbContext);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var eventPublisher = new DomainEventPublisher(serviceProvider);
+        var unitOfWork = new UnitOfWork(dbContext,
+            eventPublisher,
+            serviceProvider.GetRequiredService<ILogger<UnitOfWork>>());
         var useCase = new ApplicationUseCase.UpdateCategory(repository, unitOfWork);
         input.Id = exampleCategories[0].Id;
 

@@ -5,6 +5,9 @@ using System.Threading;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using FluentAssertions;
+using FC.Codeflix.Catalog.Application;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace FC.Codeflix.Catalog.IntegrationTests.Infra.Data.EF.UnitOfWork;
 
@@ -23,7 +26,13 @@ public class UnitOfWorkTest
         var dbContext = _fixture.CreateDbContext();
         var examplecategoriesList = _fixture.GetExampleCategoriesList();
         await dbContext.AddRangeAsync(examplecategoriesList);
-        var unitOfWork = new UnitOfWorkInfra.UnitOfWork(dbContext);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var eventPublisher = new DomainEventPublisher(serviceProvider);
+        var unitOfWork = new UnitOfWorkInfra.UnitOfWork(dbContext,
+            eventPublisher,
+            serviceProvider.GetRequiredService<ILogger<UnitOfWorkInfra.UnitOfWork>>());
 
         await unitOfWork.Commit(CancellationToken.None);
 
@@ -40,7 +49,13 @@ public class UnitOfWorkTest
     public async Task Rollback()
     {
         var dbContext = _fixture.CreateDbContext();
-        var unitOfWork = new UnitOfWorkInfra.UnitOfWork(dbContext);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var eventPublisher = new DomainEventPublisher(serviceProvider);
+        var unitOfWork = new UnitOfWorkInfra.UnitOfWork(dbContext,
+            eventPublisher,
+            serviceProvider.GetRequiredService<ILogger<UnitOfWorkInfra.UnitOfWork>>());
 
         var task = async () 
             => await unitOfWork.Rollback(CancellationToken.None);

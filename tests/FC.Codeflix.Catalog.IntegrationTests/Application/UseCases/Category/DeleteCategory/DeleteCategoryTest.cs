@@ -9,6 +9,9 @@ using System.Threading;
 using FluentAssertions;
 using System;
 using FC.Codeflix.Catalog.Application.Exceptions;
+using FC.Codeflix.Catalog.Application;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace FC.Codeflix.Catalog.IntegrationTests.Application.UseCases.Category.DeleteCategory;
 
@@ -32,7 +35,13 @@ public class DeleteCategoryTest
         await dbContext.SaveChangesAsync();
         tracking.State = EntityState.Detached;
         var repository = new CategoryRepository(dbContext);
-        var unitOfWork = new UnitOfWork(dbContext);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var eventPublisher = new DomainEventPublisher(serviceProvider);
+        var unitOfWork = new UnitOfWork(dbContext,
+            eventPublisher,
+            serviceProvider.GetRequiredService<ILogger<UnitOfWork>>());
         var useCase = new ApplicationUseCase.DeleteCategory(
             repository, unitOfWork
         );
@@ -58,7 +67,13 @@ public class DeleteCategoryTest
         await dbContext.AddRangeAsync(exampleList);
         await dbContext.SaveChangesAsync();
         var repository = new CategoryRepository(dbContext);
-        var unitOfWork = new UnitOfWork(dbContext);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var eventPublisher = new DomainEventPublisher(serviceProvider);
+        var unitOfWork = new UnitOfWork(dbContext,
+            eventPublisher,
+            serviceProvider.GetRequiredService<ILogger<UnitOfWork>>());
         var useCase = new ApplicationUseCase.DeleteCategory(
             repository, unitOfWork
         );
