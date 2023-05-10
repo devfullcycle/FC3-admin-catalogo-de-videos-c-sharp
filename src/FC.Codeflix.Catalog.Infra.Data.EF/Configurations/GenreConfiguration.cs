@@ -9,5 +9,6 @@ internal class GenreConfiguration
     public void Configure(EntityTypeBuilder<Genre> builder)
     {
         builder.HasKey(genre => genre.Id);
+        builder.Ignore(genre => genre.Events);
     }
 }
