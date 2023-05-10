@@ -20,8 +20,27 @@ public class UnitOfWork
         _logger = logger;
     }
 
-    public Task Commit(CancellationToken cancellationToken)
-        => _context.SaveChangesAsync(cancellationToken);
+    public async Task Commit(CancellationToken cancellationToken)
+    {
+        var aggregateRoots = _context.ChangeTracker
+            .Entries<AggregateRoot>()
+            .Where(entry => entry.Entity.Events.Any())
+            .Select(entry => entry.Entity);
+
+        _logger.LogInformation(
+            $"Commit: {aggregateRoots.Count()} aggregate roots with events.");
+
+        var events = aggregateRoots
+            .SelectMany(aggregate => aggregate.Events);
+
+        _logger.LogInformation(
+            $"Commit: {events.Count()} events raised.");
+
+        foreach (var @event in events)
+            await _publisher.PublishAsync(@event, cancellationToken);
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 
     public Task Rollback(CancellationToken cancellationToken)
         => Task.CompletedTask;
