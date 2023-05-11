@@ -28,16 +28,20 @@ public class UnitOfWork
             .Select(entry => entry.Entity);
 
         _logger.LogInformation(
-            $"Commit: {aggregateRoots.Count()} aggregate roots with events.");
+            "Commit: {AggregatesCount} aggregate roots with events.",
+            aggregateRoots.Count());
 
         var events = aggregateRoots
             .SelectMany(aggregate => aggregate.Events);
 
         _logger.LogInformation(
-            $"Commit: {events.Count()} events raised.");
+            "Commit: {EventsCount} events raised.", events.Count());
 
         foreach (var @event in events)
-            await _publisher.PublishAsync(@event, cancellationToken);
+            await _publisher.PublishAsync((dynamic)@event, cancellationToken);
+
+        foreach (var aggregate in aggregateRoots)
+            aggregate.ClearEvents();
 
         await _context.SaveChangesAsync(cancellationToken);
     }
