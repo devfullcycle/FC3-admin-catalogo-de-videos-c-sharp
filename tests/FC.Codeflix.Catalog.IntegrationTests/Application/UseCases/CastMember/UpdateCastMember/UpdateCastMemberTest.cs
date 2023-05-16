@@ -8,6 +8,9 @@ using FC.Codeflix.Catalog.IntegrationTests.Application.UseCases.CastMember.Commo
 using FluentAssertions;
 using UseCase = FC.Codeflix.Catalog.Application.UseCases.CastMember.UpdateCastMember;
 using Xunit;
+using FC.Codeflix.Catalog.Application;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace FC.Codeflix.Catalog.IntegrationTests.Application.UseCases.CastMember.UpdateCastMember;
 
@@ -32,7 +35,13 @@ public class UpdateCastMemberTest
         var newType = _fixture.GetRandomCastMemberType();
         var actDbContext = _fixture.CreateDbContext(true);
         var repository = new CastMemberRepository(actDbContext);
-        var uow = new UnitOfWork(actDbContext);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var eventPublisher = new DomainEventPublisher(serviceProvider);
+        var uow = new UnitOfWork(actDbContext,
+            eventPublisher,
+            serviceProvider.GetRequiredService<ILogger<UnitOfWork>>());
         var useCase = new UseCase.UpdateCastMember(repository, uow);
         var input = new UseCase.UpdateCastMemberInput(example.Id, newName, newType);
 
@@ -59,7 +68,13 @@ public class UpdateCastMemberTest
         var newType = _fixture.GetRandomCastMemberType();
         var actDbContext = _fixture.CreateDbContext(true);
         var repository = new CastMemberRepository(actDbContext);
-        var uow = new UnitOfWork(actDbContext);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var eventPublisher = new DomainEventPublisher(serviceProvider);
+        var uow = new UnitOfWork(actDbContext,
+            eventPublisher,
+            serviceProvider.GetRequiredService<ILogger<UnitOfWork>>());
         var useCase = new UseCase.UpdateCastMember(repository, uow);
         var input = new UseCase.UpdateCastMemberInput(randomGuid, newName, newType);
 

@@ -5,6 +5,11 @@ using System.Threading;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using FluentAssertions;
+using FC.Codeflix.Catalog.Application;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Moq;
+using FC.Codeflix.Catalog.Domain.SeedWork;
 
 namespace FC.Codeflix.Catalog.IntegrationTests.Infra.Data.EF.UnitOfWork;
 
@@ -21,9 +26,20 @@ public class UnitOfWorkTest
     public async Task Commit()
     {
         var dbContext = _fixture.CreateDbContext();
-        var examplecategoriesList = _fixture.GetExampleCategoriesList();
-        await dbContext.AddRangeAsync(examplecategoriesList);
-        var unitOfWork = new UnitOfWorkInfra.UnitOfWork(dbContext);
+        var exampleCategoriesList = _fixture.GetExampleCategoriesList();
+        var categoryWithEvent = exampleCategoriesList.First();
+        var @event = new DomainEventFake();
+        categoryWithEvent.RaiseEvent(@event);
+        var eventHandlerMock = new Mock<IDomainEventHandler<DomainEventFake>>();
+        await dbContext.AddRangeAsync(exampleCategoriesList);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        serviceCollection.AddSingleton(eventHandlerMock.Object);
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var eventPublisher = new DomainEventPublisher(serviceProvider);
+        var unitOfWork = new UnitOfWorkInfra.UnitOfWork(dbContext,
+            eventPublisher,
+            serviceProvider.GetRequiredService<ILogger<UnitOfWorkInfra.UnitOfWork>>());
 
         await unitOfWork.Commit(CancellationToken.None);
 
@@ -31,7 +47,11 @@ public class UnitOfWorkTest
         var savedCategories = assertDbContext.Categories
             .AsNoTracking().ToList();
         savedCategories.Should()
-            .HaveCount(examplecategoriesList.Count);
+            .HaveCount(exampleCategoriesList.Count);
+        eventHandlerMock.Verify(x =>
+            x.HandleAsync(@event, It.IsAny<CancellationToken>()),
+            Times.Once);
+        categoryWithEvent.Events.Should().BeEmpty();
     }
 
 
@@ -40,7 +60,13 @@ public class UnitOfWorkTest
     public async Task Rollback()
     {
         var dbContext = _fixture.CreateDbContext();
-        var unitOfWork = new UnitOfWorkInfra.UnitOfWork(dbContext);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var eventPublisher = new DomainEventPublisher(serviceProvider);
+        var unitOfWork = new UnitOfWorkInfra.UnitOfWork(dbContext,
+            eventPublisher,
+            serviceProvider.GetRequiredService<ILogger<UnitOfWorkInfra.UnitOfWork>>());
 
         var task = async () 
             => await unitOfWork.Rollback(CancellationToken.None);

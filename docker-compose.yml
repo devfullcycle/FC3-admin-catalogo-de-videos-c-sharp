@@ -10,6 +10,17 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: C0D3fl1X.@
 
+  rabbitmq:
+    container_name: adm_videos_rabbitmq
+    image: rabbitmq:3-management
+    hostname: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=adm_videos
+      - RABBITMQ_DEFAULT_PASS=123456
+    ports:
+      - 15672:15672
+      - 5672:5672
+
 networks:
   default:
     name: service_catalog

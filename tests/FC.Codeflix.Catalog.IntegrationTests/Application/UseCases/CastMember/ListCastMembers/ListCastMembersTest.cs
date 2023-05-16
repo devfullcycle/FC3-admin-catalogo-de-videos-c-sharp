@@ -178,6 +178,11 @@ public class ListCastMembersTest
             orderBy, searchOrder
         );
         for (int i = 0; i < orderedList.Count(); i++)
-            output.Items[i].Should().BeEquivalentTo(orderedList[i]);
+        {
+            output.Items[i].Id.Should().Be(orderedList[i].Id);
+            output.Items[i].Name.Should().Be(orderedList[i].Name);
+            output.Items[i].Type.Should().Be(orderedList[i].Type);
+            output.Items[i].CreatedAt.Should().Be(orderedList[i].CreatedAt);
+        }
     }
 }

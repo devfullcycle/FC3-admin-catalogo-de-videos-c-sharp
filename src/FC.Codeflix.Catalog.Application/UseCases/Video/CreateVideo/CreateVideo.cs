@@ -5,6 +5,7 @@ using FC.Codeflix.Catalog.Application.UseCases.Video.Common;
 using FC.Codeflix.Catalog.Domain.Exceptions;
 using FC.Codeflix.Catalog.Domain.Repository;
 using FC.Codeflix.Catalog.Domain.Validation;
+using System.Reflection;
 using DomainEntities = FC.Codeflix.Catalog.Domain.Entity;
 
 namespace FC.Codeflix.Catalog.Application.UseCases.Video.CreateVideo;
@@ -94,6 +95,7 @@ public class CreateVideo : ICreateVideo
             var thumbUrl = await _storageService.Upload(
                 fileName,
                 input.Thumb.FileStream,
+                input.Thumb.ContentType,
                 cancellationToken);
             video.UpdateThumb(thumbUrl);
         }
@@ -104,6 +106,7 @@ public class CreateVideo : ICreateVideo
             var bannerUrl = await _storageService.Upload(
                 fileName,
                 input.Banner.FileStream,
+                input.Banner.ContentType,
                 cancellationToken);
             video.UpdateBanner(bannerUrl);
         }
@@ -114,6 +117,7 @@ public class CreateVideo : ICreateVideo
             var thumbHalfUrl = await _storageService.Upload(
                 fileName,
                 input.ThumbHalf.FileStream,
+                input.ThumbHalf.ContentType,
                 cancellationToken);
             video.UpdateThumbHalf(thumbHalfUrl);
         }
@@ -127,6 +131,7 @@ public class CreateVideo : ICreateVideo
             var mediaUrl = await _storageService.Upload(
                 fileName,
                 input.Media.FileStream,
+                input.Media.ContentType,
                 cancellationToken);
             video.UpdateMedia(mediaUrl);
         }
@@ -136,6 +141,7 @@ public class CreateVideo : ICreateVideo
             var mediaUrl = await _storageService.Upload(
                 fileName,
                 input.Trailer.FileStream,
+                input.Trailer.ContentType,
                 cancellationToken);
             video.UpdateTrailer(mediaUrl);
         }

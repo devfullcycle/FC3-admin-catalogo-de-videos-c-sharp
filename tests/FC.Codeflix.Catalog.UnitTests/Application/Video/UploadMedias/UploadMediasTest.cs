@@ -54,6 +54,7 @@ public class UploadMediasTest
             .Setup(x => x.Upload(
                 It.IsAny<string>(),
                 It.IsAny<Stream>(),
+                It.IsAny<string>(),
                 It.IsAny<CancellationToken>())
             ).ReturnsAsync(Guid.NewGuid().ToString());
 
@@ -64,6 +65,7 @@ public class UploadMediasTest
             x.Upload(
                 It.Is<string>(x => fileNames.Contains(x)),
                 It.IsAny<Stream>(),
+                It.IsAny<string>(),
                 It.IsAny<CancellationToken>()),
             Times.Exactly(2)
         );
@@ -89,12 +91,14 @@ public class UploadMediasTest
             .Setup(x => x.Upload(
                 It.Is<string>(x => x == videoFileName),
                 It.IsAny<Stream>(),
+                It.IsAny<string>(),
                 It.IsAny<CancellationToken>())
             ).ReturnsAsync(videoStoragePath);
         _storageServiceMock
             .Setup(x => x.Upload(
                 It.Is<string>(x => x == trailerFileName),
                 It.IsAny<Stream>(),
+                It.IsAny<string>(),
                 It.IsAny<CancellationToken>())
             ).ThrowsAsync(new Exception("Something went wrong with the upload"));
 
@@ -108,6 +112,7 @@ public class UploadMediasTest
             x.Upload(
                 It.Is<string>(x => fileNames.Contains(x)),
                 It.IsAny<Stream>(),
+                It.IsAny<string>(),
                 It.IsAny<CancellationToken>()),
             Times.Exactly(2)
         );
@@ -141,12 +146,14 @@ public class UploadMediasTest
             .Setup(x => x.Upload(
                 It.Is<string>(x => x == videoFileName),
                 It.IsAny<Stream>(),
+                It.IsAny<string>(),
                 It.IsAny<CancellationToken>())
             ).ReturnsAsync(videoStoragePath);
         _storageServiceMock
             .Setup(x => x.Upload(
                 It.Is<string>(x => x == trailerFileName),
                 It.IsAny<Stream>(),
+                It.IsAny<string>(),
                 It.IsAny<CancellationToken>())
             ).ReturnsAsync(trailerStoragePath);
         _unitOfWorkMock.Setup(x => x.Commit(It.IsAny<CancellationToken>()))
@@ -162,6 +169,7 @@ public class UploadMediasTest
             x.Upload(
                 It.Is<string>(x => fileNames.Contains(x)),
                 It.IsAny<Stream>(),
+                It.IsAny<string>(),
                 It.IsAny<CancellationToken>()),
             Times.Exactly(2)
         );
@@ -193,12 +201,14 @@ public class UploadMediasTest
             .Setup(x => x.Upload(
                 It.IsAny<string>(),
                 It.IsAny<Stream>(),
+                It.IsAny<string>(),
                 It.IsAny<CancellationToken>())
             ).ReturnsAsync(Guid.NewGuid().ToString());
         _storageServiceMock
             .Setup(x => x.Upload(
                 It.Is<string>(x => x == videoFileName),
                 It.IsAny<Stream>(),
+                It.IsAny<string>(),
                 It.IsAny<CancellationToken>())
             ).ReturnsAsync(videoStoragePath);
         _unitOfWorkMock.Setup(x => x.Commit(It.IsAny<CancellationToken>()))
@@ -214,6 +224,7 @@ public class UploadMediasTest
             x.Upload(
                 It.Is<string>(x => x == videoFileName),
                 It.IsAny<Stream>(),
+                It.IsAny<string>(),
                 It.IsAny<CancellationToken>()),
             Times.Exactly(1)
         );
@@ -221,6 +232,7 @@ public class UploadMediasTest
             x.Upload(
                 It.IsAny<string>(),
                 It.IsAny<Stream>(),
+                It.IsAny<string>(),
                 It.IsAny<CancellationToken>()),
             Times.Exactly(1)
         );

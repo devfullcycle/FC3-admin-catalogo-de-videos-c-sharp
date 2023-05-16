@@ -1,6 +1,7 @@
 ﻿using FC.Codeflix.Catalog.Domain.Entity;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace FC.Codeflix.Catalog.Infra.Data.EF.Configurations;
 
@@ -31,7 +32,8 @@ internal class VideoConfiguration
             banner.Property(image => image.Path).HasColumnName("bannerPath")
         );
 
-        builder.HasOne(x => x.Media).WithOne().HasForeignKey<Media>();
-        builder.HasOne(x => x.Trailer).WithOne().HasForeignKey<Media>();
+        builder.HasOne(video => video.Media).WithOne().HasForeignKey<Media>();
+        builder.HasOne(video => video.Trailer).WithOne().HasForeignKey<Media>();
+        builder.Ignore(video => video.Events);
     }
 }
