@@ -1,4 +1,5 @@
 ﻿using FC.Codeflix.Catalog.Domain.Enum;
+using FC.Codeflix.Catalog.Domain.Events;
 using FC.Codeflix.Catalog.Domain.Exceptions;
 using FC.Codeflix.Catalog.Domain.SeedWork;
 using FC.Codeflix.Catalog.Domain.Validation;
@@ -89,8 +90,11 @@ public class Video : AggregateRoot
         => Banner = new Image(path);
 
     public void UpdateMedia(string path)
-        => Media = new Media(path);
-    
+    {
+        Media = new Media(path);
+        RaiseEvent(new VideoUploadedEvent(Id, path));
+    }
+
     public void UpdateTrailer(string path)
         => Trailer = new Media(path);
 

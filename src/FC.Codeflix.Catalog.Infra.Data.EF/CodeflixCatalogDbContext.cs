@@ -30,6 +30,7 @@ public class CodeflixCatalogDbContext
         builder.ApplyConfiguration(new CategoryConfiguration());
         builder.ApplyConfiguration(new GenreConfiguration());
         builder.ApplyConfiguration(new VideoConfiguration());
+        builder.ApplyConfiguration(new CastMemberConfiguration());
 
         builder.ApplyConfiguration(new GenresCategoriesConfiguration());
         builder.ApplyConfiguration(new VideosCategoriesConfiguration());

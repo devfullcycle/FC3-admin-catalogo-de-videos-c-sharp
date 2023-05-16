@@ -1,4 +1,5 @@
-﻿using FC.Codeflix.Catalog.Application.Exceptions;
+﻿using FC.Codeflix.Catalog.Application;
+using FC.Codeflix.Catalog.Application.Exceptions;
 using FC.Codeflix.Catalog.Application.UseCases.Genre.Common;
 using FC.Codeflix.Catalog.Application.UseCases.Genre.UpdateGenre;
 using FC.Codeflix.Catalog.Infra.Data.EF;
@@ -6,6 +7,8 @@ using FC.Codeflix.Catalog.Infra.Data.EF.Models;
 using FC.Codeflix.Catalog.Infra.Data.EF.Repositories;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,9 +39,16 @@ public class UpdateGenreTest
         await arrangeDbContext.AddRangeAsync(exampleGenres);
         await arrangeDbContext.SaveChangesAsync();
         CodeflixCatalogDbContext actDbContext = _fixture.CreateDbContext(true);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var eventPublisher = new DomainEventPublisher(serviceProvider);
+        var unitOfWork = new UnitOfWork(actDbContext,
+            eventPublisher,
+            serviceProvider.GetRequiredService<ILogger<UnitOfWork>>());
         UseCase.UpdateGenre updateGenre = new UseCase.UpdateGenre(
             new GenreRepository(actDbContext),
-            new UnitOfWork(actDbContext),
+            unitOfWork,
             new CategoryRepository(actDbContext)
         );
         UpdateGenreInput input = new UpdateGenreInput(
@@ -84,9 +94,16 @@ public class UpdateGenreTest
         await arrangeDbContext.AddRangeAsync(relations);
         await arrangeDbContext.SaveChangesAsync();
         CodeflixCatalogDbContext actDbContext = _fixture.CreateDbContext(true);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var eventPublisher = new DomainEventPublisher(serviceProvider);
+        var unitOfWork = new UnitOfWork(actDbContext,
+            eventPublisher,
+            serviceProvider.GetRequiredService<ILogger<UnitOfWork>>());
         UseCase.UpdateGenre updateGenre = new UseCase.UpdateGenre(
             new GenreRepository(actDbContext),
-            new UnitOfWork(actDbContext),
+            unitOfWork,
             new CategoryRepository(actDbContext)
         );
         UpdateGenreInput input = new UpdateGenreInput(
@@ -142,9 +159,16 @@ public class UpdateGenreTest
         await arrangeDbContext.AddRangeAsync(relations);
         await arrangeDbContext.SaveChangesAsync();
         CodeflixCatalogDbContext actDbContext = _fixture.CreateDbContext(true);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var eventPublisher = new DomainEventPublisher(serviceProvider);
+        var unitOfWork = new UnitOfWork(actDbContext,
+            eventPublisher,
+            serviceProvider.GetRequiredService<ILogger<UnitOfWork>>());
         UseCase.UpdateGenre updateGenre = new UseCase.UpdateGenre(
             new GenreRepository(actDbContext),
-            new UnitOfWork(actDbContext),
+            unitOfWork,
             new CategoryRepository(actDbContext)
         );
         UpdateGenreInput input = new UpdateGenreInput(
@@ -201,9 +225,16 @@ public class UpdateGenreTest
         await arrangeDbContext.AddRangeAsync(relations);
         await arrangeDbContext.SaveChangesAsync();
         CodeflixCatalogDbContext actDbContext = _fixture.CreateDbContext(true);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var eventPublisher = new DomainEventPublisher(serviceProvider);
+        var unitOfWork = new UnitOfWork(actDbContext,
+            eventPublisher,
+            serviceProvider.GetRequiredService<ILogger<UnitOfWork>>());
         UseCase.UpdateGenre updateGenre = new UseCase.UpdateGenre(
             new GenreRepository(actDbContext),
-            new UnitOfWork(actDbContext),
+            unitOfWork,
             new CategoryRepository(actDbContext)
         );
         UpdateGenreInput input = new UpdateGenreInput(
@@ -260,9 +291,16 @@ public class UpdateGenreTest
         await arrangeDbContext.AddRangeAsync(relations);
         await arrangeDbContext.SaveChangesAsync();
         CodeflixCatalogDbContext actDbContext = _fixture.CreateDbContext(true);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var eventPublisher = new DomainEventPublisher(serviceProvider);
+        var unitOfWork = new UnitOfWork(actDbContext,
+            eventPublisher,
+            serviceProvider.GetRequiredService<ILogger<UnitOfWork>>());
         UseCase.UpdateGenre updateGenre = new UseCase.UpdateGenre(
             new GenreRepository(actDbContext),
-            new UnitOfWork(actDbContext),
+            unitOfWork,
             new CategoryRepository(actDbContext)
         );
         List<Guid> categoryIdsToRelate = newRelatedCategories
@@ -295,9 +333,16 @@ public class UpdateGenreTest
         await arrangeDbContext.AddRangeAsync(exampleGenres);
         await arrangeDbContext.SaveChangesAsync();
         CodeflixCatalogDbContext actDbContext = _fixture.CreateDbContext(true);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var eventPublisher = new DomainEventPublisher(serviceProvider);
+        var unitOfWork = new UnitOfWork(actDbContext,
+            eventPublisher,
+            serviceProvider.GetRequiredService<ILogger<UnitOfWork>>());
         UseCase.UpdateGenre updateGenre = new UseCase.UpdateGenre(
             new GenreRepository(actDbContext),
-            new UnitOfWork(actDbContext),
+            unitOfWork,
             new CategoryRepository(actDbContext)
         );
         Guid randomGuid = Guid.NewGuid();
