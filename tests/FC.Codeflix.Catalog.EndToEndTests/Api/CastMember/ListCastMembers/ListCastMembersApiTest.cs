@@ -10,6 +10,7 @@ using FC.Codeflix.Catalog.EndToEndTests.Models;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace FC.Codeflix.Catalog.EndToEndTests.Api.CastMember.ListCastMembers;
 
@@ -17,9 +18,12 @@ namespace FC.Codeflix.Catalog.EndToEndTests.Api.CastMember.ListCastMembers;
 public class ListCastMembersApiTest : IDisposable
 {
     private readonly CastMemberApiBaseFixture _fixture;
-
-    public ListCastMembersApiTest(CastMemberApiBaseFixture fixture) 
-        => _fixture = fixture;
+    private readonly ITestOutputHelper _output;
+    public ListCastMembersApiTest(CastMemberApiBaseFixture fixture, ITestOutputHelper output)
+    {
+        _fixture = fixture;
+        _output = output;
+    }
 
     [Fact(DisplayName = nameof(List))]
     [Trait("EndToEnd/API", "CastMembers/List")]
@@ -181,6 +185,11 @@ public class ListCastMembersApiTest : IDisposable
                     Dir = order
                 }
             );
+
+        _output.WriteLine("Examples:");
+        _output.WriteLine(string.Join("\n", examples));
+        _output.WriteLine("Output:");
+        _output.WriteLine(string.Join("\n", output!.Data!));
 
         response.Should().NotBeNull();
         response!.StatusCode.Should().Be((HttpStatusCode)StatusCodes.Status200OK);

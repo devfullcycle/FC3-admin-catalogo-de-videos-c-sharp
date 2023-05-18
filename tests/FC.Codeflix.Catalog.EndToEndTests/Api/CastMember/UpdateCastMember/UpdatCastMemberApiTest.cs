@@ -14,7 +14,7 @@ using Xunit;
 namespace FC.Codeflix.Catalog.EndToEndTests.Api.CastMember.UpdateCastMember;
 
 [Collection(nameof(CastMemberApiBaseFixture))]
-public class UpdateCastMemberApiTest
+public class UpdateCastMemberApiTest : IDisposable
 {
     private readonly CastMemberApiBaseFixture _fixture;
 
@@ -96,4 +96,6 @@ public class UpdateCastMemberApiTest
         output!.Title.Should().Be("One or more validation errors ocurred");
         output.Detail.Should().Be($"Name should not be empty or null");
     }
+
+    public void Dispose() => _fixture.CleanPersistence();
 }

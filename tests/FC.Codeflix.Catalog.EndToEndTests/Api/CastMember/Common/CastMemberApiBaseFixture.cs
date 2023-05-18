@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using FC.Codeflix.Catalog.Domain.Enum;
 using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using FC.Codeflix.Catalog.EndToEndTests.Base;
@@ -35,8 +36,10 @@ public class CastMemberApiBaseFixture : BaseFixture
     public List<DomainEntity.CastMember> GetExampleCastMembersList(int quantity)
         => Enumerable
             .Range(1, quantity)
-            .Select(_ => GetExampleCastMember())
-            .ToList();
+            .Select(_ => {
+                Thread.Sleep(1);
+                return GetExampleCastMember();
+            }).ToList();
 
     public List<DomainEntity.CastMember> GetExampleCastMembersListByNames(List<string> names)
         => names
