@@ -59,7 +59,8 @@ public static class UseCasesConfiguration
             {
                 HostName = config.Hostname,
                 UserName = config.Username,
-                Password = config.Password
+                Password = config.Password,
+                Port = config.Port
             };
             return factory.CreateConnection();
         });
