@@ -7,6 +7,11 @@ using System.Text;
 using System;
 using Xunit;
 using FC.Codeflix.Catalog.Domain.Extensions;
+using System.Collections.Generic;
+using System.Linq;
+using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
+using System.Threading;
+using FC.Codeflix.Catalog.EndToEndTests.Api.CastMember.Common;
 
 namespace FC.Codeflix.Catalog.EndToEndTests.Api.Video.Common;
 
@@ -19,10 +24,13 @@ public class VideoBaseFixture
     : GenreBaseFixture
 {
     public readonly VideoPersistence VideoPersistence;
+    public readonly CastMemberPersistence CastMemberPersistence;
     public VideoBaseFixture() :base() {
         VideoPersistence = new VideoPersistence(DbContext);
+        CastMemberPersistence = new CastMemberPersistence(DbContext);
     }
 
+    #region Video
     public CreateVideoApiInput GetBasicCreateVideoInput()
     {
         return new CreateVideoApiInput
@@ -97,4 +105,24 @@ public class VideoBaseFixture
 
     public DomainEntity.Media GetValidMedia()
         => new(GetValidMediaPath());
+    #endregion
+
+    #region CastMember
+    public DomainEntity.CastMember GetExampleCastMember()
+        => new(GetValidName(), GetRandomCastMemberType());
+
+    public string GetValidName()
+        => Faker.Name.FullName();
+
+    public CastMemberType GetRandomCastMemberType()
+        => (CastMemberType)(new Random()).Next(1, 2);
+
+    public List<DomainEntity.CastMember> GetExampleCastMembersList(int quantity = 10)
+        => Enumerable
+            .Range(1, quantity)
+            .Select(_ => {
+                Thread.Sleep(1);
+                return GetExampleCastMember();
+            }).ToList();
+    #endregion
 }

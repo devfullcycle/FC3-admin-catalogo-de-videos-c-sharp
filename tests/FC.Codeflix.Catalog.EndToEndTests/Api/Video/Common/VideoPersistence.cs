@@ -20,7 +20,7 @@ public class VideoPersistence
         => await _context.Videos.AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
 
-    public async Task<List<VideosCastMembers>> GetVideosCaseMembers(Guid videoId)
+    public async Task<List<VideosCastMembers>> GetVideosCastMembers(Guid videoId)
         => await _context.VideosCastMembers.AsNoTracking()
             .Where(relation => relation.VideoId == videoId)
             .ToListAsync();
