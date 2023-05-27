@@ -34,4 +34,33 @@ public class VideoPersistence
         => await _context.VideosCategories.AsNoTracking()
             .Where(relation => relation.VideoId == videoId)
             .ToListAsync();
+
+    public async Task InsertList(List<DomainEntity.Video> videos)
+    {
+        await _context.Videos.AddRangeAsync(videos);
+        foreach (var video in videos)
+        {
+            var videosCategories = video.Categories?
+                .Select(categoryId => new VideosCategories(categoryId, video.Id));
+            if (videosCategories != null && videosCategories.Any())
+            {
+                await _context.VideosCategories.AddRangeAsync(videosCategories);
+            }
+
+            var videosGenres = video.Genres?
+                .Select(genreId => new VideosGenres(genreId, video.Id));
+            if (videosGenres != null && videosGenres.Any())
+            {
+                await _context.VideosGenres.AddRangeAsync(videosGenres);
+            }
+
+            var videosCastMembers = video.CastMembers?
+                .Select(castMemberId => new VideosCastMembers(castMemberId, video.Id));
+            if (videosCastMembers != null && videosCastMembers.Any())
+            {
+                await _context.VideosCastMembers.AddRangeAsync(videosCastMembers);
+            }
+        }
+        await _context.SaveChangesAsync();
+    }
 }
