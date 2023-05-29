@@ -45,6 +45,36 @@ public class VideoBaseFixture
         };
     }
 
+    public DomainEntity.Video GetValidVideoWithAllProperties()
+    {
+        var video = new DomainEntity.Video(
+            GetValidTitle(),
+            GetValidDescription(),
+            GetValidYearLaunched(),
+            GetRandomBoolean(),
+            GetRandomBoolean(),
+            GetValidDuration(),
+            GetRandomRating()
+        );
+
+        video.UpdateBanner(GetValidImagePath());
+        video.UpdateThumb(GetValidImagePath());
+        video.UpdateThumbHalf(GetValidImagePath());
+
+        video.UpdateMedia(GetValidMediaPath());
+        video.UpdateTrailer(GetValidMediaPath());
+
+        return video;
+    }
+
+    public List<DomainEntity.Video> GetVideoCollection(int count = 10)
+        => Enumerable
+            .Range(1, count)
+            .Select(_ => {
+                Thread.Sleep(1);
+                return GetValidVideoWithAllProperties();
+            }).ToList();
+
     public Rating GetRandomRating()
     {
         var enumValue = Enum.GetValues<Rating>();
