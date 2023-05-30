@@ -1,6 +1,7 @@
 ﻿using FC.Codeflix.Catalog.Application.UseCases.Video.Common;
 using FC.Codeflix.Catalog.Application.UseCases.Video.ListVideos;
 using FC.Codeflix.Catalog.Domain.Extensions;
+using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using FC.Codeflix.Catalog.EndToEndTests.Api.Video.Common;
 using FC.Codeflix.Catalog.EndToEndTests.Models;
 using FluentAssertions;
@@ -161,5 +162,43 @@ public class ListVideosApiTest : IDisposable
         });
     }
 
-    public void Dispose() => _fixture.CleanPersistence();
+    [Theory(DisplayName = nameof(ListOrdered))]
+    [Trait("EndToEnd/Api", "Video/ListVideos - Endpoints")]
+    [InlineData("title", "asc")]
+    [InlineData("title", "desc")]
+    [InlineData("id", "asc")]
+    [InlineData("id", "desc")]
+    [InlineData("createdAt", "asc")]
+    [InlineData("createdAt", "desc")]
+    [InlineData("", "asc")]
+    public async Task ListOrdered(
+        string orderBy,
+        string order
+    )
+    {
+        var exampleVideos = _fixture.GetVideoCollection(10);
+        await _fixture.VideoPersistence.InsertList(exampleVideos);
+
+        var input = new ListVideosInput
+        {
+            Page = 1,
+            PerPage = exampleVideos.Count,
+            Sort = orderBy,
+            Dir = order == "asc" ? SearchOrder.Asc : SearchOrder.Desc
+        };
+
+        var (response, output) = await _fixture.ApiClient
+            .Get<TestApiResponseList<VideoModelOutput>>("/videos", input);
+
+        response.Should().NotBeNull();
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        output.Should().NotBeNull();
+        output!.Meta.Should().NotBeNull();
+        output.Data.Should().NotBeNull();
+        var expectedVideos = _fixture.CloneVideosOrdered(
+            exampleVideos, orderBy, input.Dir);
+        output.Data.Should().Equal(expectedVideos, (v1, v2) => v1.Id == v2.Id);
+    }
+
+        public void Dispose() => _fixture.CleanPersistence();
 }

@@ -12,6 +12,8 @@ using System.Linq;
 using DomainEntity = FC.Codeflix.Catalog.Domain.Entity;
 using System.Threading;
 using FC.Codeflix.Catalog.EndToEndTests.Api.CastMember.Common;
+using System.Threading.Tasks;
+using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 
 namespace FC.Codeflix.Catalog.EndToEndTests.Api.Video.Common;
 
@@ -74,6 +76,27 @@ public class VideoBaseFixture
                 Thread.Sleep(1);
                 return GetValidVideoWithAllProperties();
             }).ToList();
+
+    public IEnumerable<DomainEntity.Video> CloneVideosOrdered(
+        List<DomainEntity.Video> videos,
+        string orderBy,
+        SearchOrder searchOrder)
+    {
+        var clone = new List<DomainEntity.Video>(videos);
+        return (orderBy.ToLower(), searchOrder) switch
+        {
+            ("title", SearchOrder.Asc) => clone.OrderBy(x => x.Title)
+                .ThenBy(x => x.Id),
+            ("title", SearchOrder.Desc) => clone.OrderByDescending(x => x.Title)
+                .ThenByDescending(x => x.Id),
+            ("id", SearchOrder.Asc) => clone.OrderBy(x => x.Id),
+            ("id", SearchOrder.Desc) => clone.OrderByDescending(x => x.Id),
+            ("createdat", SearchOrder.Asc) => clone.OrderBy(x => x.CreatedAt),
+            ("createdat", SearchOrder.Desc) => clone
+                .OrderByDescending(x => x.CreatedAt),
+            _ => clone.OrderBy(x => x.Title).ThenBy(x => x.Id)
+        };
+    }
 
     public Rating GetRandomRating()
     {
