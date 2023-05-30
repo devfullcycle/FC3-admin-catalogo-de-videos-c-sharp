@@ -4,6 +4,7 @@ using FC.Codeflix.Catalog.Domain.Extensions;
 using FC.Codeflix.Catalog.EndToEndTests.Api.Video.Common;
 using FC.Codeflix.Catalog.EndToEndTests.Models;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -110,6 +111,54 @@ public class ListVideosApiTest : IDisposable
         output.Meta!.PerPage.Should().Be(input.PerPage);
         output!.Data.Should().NotBeNull();
         output!.Data.Should().BeEmpty();
+    }
+
+    [Theory(DisplayName = nameof(ListPaginated))]
+    [Trait("EndToEnd/Api", "Video/ListVideos - Endpoints")]
+    [InlineData(10, 1, 5, 5)]
+    [InlineData(10, 2, 5, 5)]
+    [InlineData(7, 2, 5, 2)]
+    [InlineData(7, 3, 5, 0)]
+    public async Task ListPaginated(
+        int quantityToGenerate,
+        int page,
+        int perPage,
+        int expectedQuantityItems)
+    {
+        var exampleVideos = _fixture.GetVideoCollection(quantityToGenerate);
+        await _fixture.VideoPersistence.InsertList(exampleVideos);
+        var input = new ListVideosInput
+        {
+            Page = page,
+            PerPage = perPage
+        };
+
+        var (response, output) = await _fixture.ApiClient
+            .Get<TestApiResponseList<VideoModelOutput>>("/videos", input);
+
+        response.Should().NotBeNull();
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        output.Should().NotBeNull();
+        output!.Meta.Should().NotBeNull();
+        output.Data.Should().NotBeNull();
+        output.Meta!.Total.Should().Be(quantityToGenerate);
+        output.Meta.CurrentPage.Should().Be(input.Page);
+        output.Meta.PerPage.Should().Be(input.PerPage);
+        output.Data!.Count.Should().Be(expectedQuantityItems);
+        output.Data.ForEach(outputItem =>
+        {
+            var exampleItem = exampleVideos
+                .Find(x => x.Id == outputItem.Id);
+            exampleItem.Should().NotBeNull();
+            outputItem.Id.Should().Be(exampleItem!.Id);
+            outputItem.Title.Should().Be(exampleItem!.Title);
+            outputItem.Description.Should().Be(exampleItem!.Description);
+            outputItem.YearLaunched.Should().Be(exampleItem!.YearLaunched);
+            outputItem.Opened.Should().Be(exampleItem!.Opened);
+            outputItem.Published.Should().Be(exampleItem!.Published);
+            outputItem.Duration.Should().Be(exampleItem!.Duration);
+            outputItem.Rating.Should().Be(exampleItem!.Rating.ToStringSignal());
+        });
     }
 
     public void Dispose() => _fixture.CleanPersistence();
