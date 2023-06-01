@@ -47,10 +47,10 @@ public class VideoBaseFixture
         };
     }
 
-    public DomainEntity.Video GetValidVideoWithAllProperties()
+    public DomainEntity.Video GetValidVideoWithAllProperties(string? title = null)
     {
         var video = new DomainEntity.Video(
-            GetValidTitle(),
+            title ?? GetValidTitle(),
             GetValidDescription(),
             GetValidYearLaunched(),
             GetRandomBoolean(),
@@ -75,6 +75,13 @@ public class VideoBaseFixture
             .Select(_ => {
                 Thread.Sleep(1);
                 return GetValidVideoWithAllProperties();
+            }).ToList();
+
+    public List<DomainEntity.Video> GetVideoCollection(IEnumerable<string> titles)
+        => titles
+            .Select(title => {
+                Thread.Sleep(1);
+                return GetValidVideoWithAllProperties(title);
             }).ToList();
 
     public IEnumerable<DomainEntity.Video> CloneVideosOrdered(

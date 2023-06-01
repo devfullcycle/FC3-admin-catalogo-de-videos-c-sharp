@@ -200,5 +200,53 @@ public class ListVideosApiTest : IDisposable
         output.Data.Should().Equal(expectedVideos, (v1, v2) => v1.Id == v2.Id);
     }
 
-        public void Dispose() => _fixture.CleanPersistence();
+    [Theory(DisplayName = nameof(SearchVideos))]
+    [Trait("EndToEnd/Api", "Video/ListVideos - Endpoints")]
+    [InlineData("007", 1, 2, 2, 4)]
+    [InlineData("st", 2, 2, 1, 3)]
+    [InlineData("007: Casino", 1, 2, 1, 1)]
+    [InlineData("Terminator", 1, 5, 0, 0)]
+    public async Task SearchVideos(
+        string searchTerm,
+        int page,
+        int perPage,
+        int expectedReturnedItems,
+        int expectedTotalItems)
+    {
+        var moviesNames = new[] {
+            "007: Dr. No",
+            "007: Casino Royale",
+            "007: GoldFinger",
+            "007: Skyfall",
+            "Star Wars: Return of the Jedi",
+            "Star Wars: The Empire Strikes Back",
+            "Interstellar"
+        };
+        var exampleVideos = _fixture.GetVideoCollection(moviesNames);
+
+        await _fixture.VideoPersistence.InsertList(exampleVideos);
+        var input = new ListVideosInput
+        {
+            Page = page,
+            PerPage = perPage,
+            Search = searchTerm
+        };
+
+        var (response, output) = await _fixture.ApiClient
+            .Get<TestApiResponseList<VideoModelOutput>>("/videos", input);
+
+        response.Should().NotBeNull();
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        output.Should().NotBeNull();
+        output!.Meta.Should().NotBeNull();
+        output.Data.Should().NotBeNull();
+        output.Meta!.Total.Should().Be(expectedTotalItems);
+        output.Meta.CurrentPage.Should().Be(input.Page);
+        output.Meta.PerPage.Should().Be(input.PerPage);
+        output.Data!.Count.Should().Be(expectedReturnedItems);
+        output.Data.Should().AllSatisfy(video 
+            => video.Title.Contains(searchTerm, StringComparison.CurrentCultureIgnoreCase));
+    }
+
+    public void Dispose() => _fixture.CleanPersistence();
 }
