@@ -244,8 +244,11 @@ public class ListVideosApiTest : IDisposable
         output.Meta.CurrentPage.Should().Be(input.Page);
         output.Meta.PerPage.Should().Be(input.PerPage);
         output.Data!.Count.Should().Be(expectedReturnedItems);
-        output.Data.Should().AllSatisfy(video 
-            => video.Title.Contains(searchTerm, StringComparison.CurrentCultureIgnoreCase));
+        if (output.Data.Any())
+        {
+            output.Data.Should().AllSatisfy(video
+                => video.Title.Contains(searchTerm, StringComparison.CurrentCultureIgnoreCase));
+        }
     }
 
     public void Dispose() => _fixture.CleanPersistence();
