@@ -3,6 +3,7 @@ using FC.Codeflix.Catalog.Domain.Extensions;
 using FC.Codeflix.Catalog.EndToEndTests.Api.Video.Common;
 using FC.Codeflix.Catalog.EndToEndTests.Models;
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
 using System.Net;
@@ -71,6 +72,24 @@ public class GetVideoApiTest : IDisposable
             .Select(castMember => new VideoModelOutputRelatedAggregate(
                 castMember.Id, null));
         output.Data.CastMembers.Should().BeEquivalentTo(expectedCastMembers);
+    }
+
+    [Fact(DisplayName = nameof(Error404WhenIdNotFound))]
+    [Trait("EndToEnd/Api", "Video/GetVideo - Endpoints")]
+    public async Task Error404WhenIdNotFound()
+    {
+        var exampleVideos = _fixture.GetVideoCollection(10);
+        await _fixture.VideoPersistence.InsertList(exampleVideos);
+        var exampleVideoId = Guid.NewGuid();
+
+        var (response, output) = await _fixture.ApiClient
+            .Get<ProblemDetails>($"/videos/{exampleVideoId}");
+
+        response.Should().NotBeNull();
+        response!.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        output.Should().NotBeNull();
+        output!.Type.Should().Be("NotFound");
+        output.Detail.Should().Be($"Video '{exampleVideoId}' not found.");
     }
 
     public void Dispose() => _fixture.CleanPersistence();
