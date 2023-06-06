@@ -1,6 +1,9 @@
 ﻿using FC.Codeflix.Catalog.Api.ApiModels.Response;
 using FC.Codeflix.Catalog.Api.ApiModels.Video;
+using FC.Codeflix.Catalog.Application.UseCases.Genre.Common;
+using FC.Codeflix.Catalog.Application.UseCases.Genre.GetGenre;
 using FC.Codeflix.Catalog.Application.UseCases.Video.Common;
+using FC.Codeflix.Catalog.Application.UseCases.Video.GetVideo;
 using FC.Codeflix.Catalog.Application.UseCases.Video.ListVideos;
 using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using MediatR;
@@ -55,5 +58,17 @@ public class VideosController : ControllerBase
         return Ok(
             new ApiResponseList<VideoModelOutput>(output)
         );
+    }
+
+    [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(ApiResponse<VideoModelOutput>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetById(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken
+    )
+    {
+        var output = await _mediator.Send(new GetVideoInput(id), cancellationToken);
+        return Ok(new ApiResponse<VideoModelOutput>(output));
     }
 }
