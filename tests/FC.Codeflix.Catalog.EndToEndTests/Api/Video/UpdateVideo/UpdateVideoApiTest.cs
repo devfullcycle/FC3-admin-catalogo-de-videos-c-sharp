@@ -4,6 +4,7 @@ using FC.Codeflix.Catalog.Domain.Extensions;
 using FC.Codeflix.Catalog.EndToEndTests.Api.Video.Common;
 using FC.Codeflix.Catalog.EndToEndTests.Models;
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
 using System.Net;
@@ -169,6 +170,35 @@ public class UpdateVideoApiTest : IDisposable
             .GetVideosCastMembers(targetVideoId);
         var castMembersIdsFromDb = castMembersFromDb.Select(x => x.CastMemberId);
         input.CastMembersIds.Should().BeEquivalentTo(castMembersIdsFromDb);
+    }
+
+    [Fact(DisplayName = nameof(Error404WhenVideoIdNotFound))]
+    [Trait("EndToEnd/Api", "Video/UpdateVideo - Endpoints")]
+    public async Task Error404WhenVideoIdNotFound()
+    {
+        var exampleVideos = _fixture.GetVideoCollection(10);
+        await _fixture.VideoPersistence.InsertList(exampleVideos);
+
+        var videoId = Guid.NewGuid();
+        var input = new UpdateVideoApiInput
+        {
+            Title = _fixture.GetValidTitle(),
+            Description = _fixture.GetValidDescription(),
+            Duration = _fixture.GetValidDuration(),
+            Opened = _fixture.GetRandomBoolean(),
+            Published = _fixture.GetRandomBoolean(),
+            Rating = _fixture.GetRandomRating().ToStringSignal(),
+            YearLaunched = _fixture.GetValidYearLaunched()
+        };
+
+        var (response, output) = await _fixture.ApiClient
+            .Put<ProblemDetails>($"/videos/{videoId}", input);
+
+        response.Should().NotBeNull();
+        response!.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        output.Should().NotBeNull();
+        output!.Type.Should().Be("NotFound");
+        output.Detail.Should().Be($"Video '{videoId}' not found.");
     }
 
     public void Dispose() => _fixture.CleanPersistence();
