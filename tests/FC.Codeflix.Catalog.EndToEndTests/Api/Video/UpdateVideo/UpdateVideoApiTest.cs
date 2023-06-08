@@ -1,4 +1,5 @@
 ﻿using FC.Codeflix.Catalog.Api.ApiModels.Video;
+using FC.Codeflix.Catalog.Application.UseCases.Category.Common;
 using FC.Codeflix.Catalog.Application.UseCases.Video.Common;
 using FC.Codeflix.Catalog.Domain.Extensions;
 using FC.Codeflix.Catalog.EndToEndTests.Api.Video.Common;
@@ -6,6 +7,7 @@ using FC.Codeflix.Catalog.EndToEndTests.Models;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -199,6 +201,37 @@ public class UpdateVideoApiTest : IDisposable
         output.Should().NotBeNull();
         output!.Type.Should().Be("NotFound");
         output.Detail.Should().Be($"Video '{videoId}' not found.");
+    }
+
+    [Fact(DisplayName = nameof(Error422WhenCategoryIdNotFound))]
+    [Trait("EndToEnd/Api", "Video/UpdateVideo - Endpoints")]
+    public async Task Error422WhenCategoryIdNotFound()
+    {
+        var exampleVideos = _fixture.GetVideoCollection(10);
+        await _fixture.VideoPersistence.InsertList(exampleVideos);
+
+        var videoId = exampleVideos.ElementAt(4).Id;
+        var categoryId = Guid.NewGuid();
+        var input = new UpdateVideoApiInput
+        {
+            Title = _fixture.GetValidTitle(),
+            Description = _fixture.GetValidDescription(),
+            Duration = _fixture.GetValidDuration(),
+            Opened = _fixture.GetRandomBoolean(),
+            Published = _fixture.GetRandomBoolean(),
+            Rating = _fixture.GetRandomRating().ToStringSignal(),
+            YearLaunched = _fixture.GetValidYearLaunched(),
+            CategoriesIds = new List<Guid> { categoryId }
+        };
+
+        var (response, output) = await _fixture.ApiClient
+            .Put<ProblemDetails>($"/videos/{videoId}", input);
+
+        response.Should().NotBeNull();
+        response!.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        output.Should().NotBeNull();
+        output!.Type.Should().Be("RelatedAggregate");
+        output.Detail.Should().Be($"Related category id (or ids) not found: {categoryId}.");
     }
 
     public void Dispose() => _fixture.CleanPersistence();
