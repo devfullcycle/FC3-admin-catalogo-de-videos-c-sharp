@@ -1,4 +1,7 @@
-﻿namespace FC.Codeflix.Catalog.Api.ApiModels.Video;
+﻿using FC.Codeflix.Catalog.Application.UseCases.Video.UpdateVideo;
+using FC.Codeflix.Catalog.Domain.Extensions;
+
+namespace FC.Codeflix.Catalog.Api.ApiModels.Video;
 
 public class UpdateVideoApiInput
 {
@@ -12,4 +15,18 @@ public class UpdateVideoApiInput
     public List<Guid>? CategoriesIds { get; set; }
     public List<Guid>? GenresIds { get; set; }
     public List<Guid>? CastMembersIds { get; set; }
+
+    public UpdateVideoInput ToInput(Guid id)
+        => new UpdateVideoInput(
+            id,
+            Title,
+            Description,
+            YearLaunched,
+            Opened,
+            Published,
+            Duration,
+            Rating.ToRating(),
+            GenresIds,
+            CategoriesIds,
+            CastMembersIds);
 }

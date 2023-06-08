@@ -71,4 +71,19 @@ public class VideosController : ControllerBase
         var output = await _mediator.Send(new GetVideoInput(id), cancellationToken);
         return Ok(new ApiResponse<VideoModelOutput>(output));
     }
+
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(ApiResponse<VideoModelOutput>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> UpdateVideo(
+        [FromRoute] Guid id,
+        [FromBody] UpdateVideoApiInput apiInput,
+        CancellationToken cancellationToken)
+    {
+        var output = await _mediator.Send(
+            apiInput.ToInput(id),
+            cancellationToken);
+        return Ok(new ApiResponse<VideoModelOutput>(output));
+    }
 }

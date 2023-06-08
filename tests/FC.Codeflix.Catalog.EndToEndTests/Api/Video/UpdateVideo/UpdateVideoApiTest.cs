@@ -143,7 +143,7 @@ public class UpdateVideoApiTest : IDisposable
         output.Data.Duration.Should().Be(input.Duration);
         var expectedCategories = targetCategories
             .Select(category => new VideoModelOutputRelatedAggregate(category.Id));
-        output.Data.Categories.Should().BeEquivalentTo(exampleCategories);
+        output.Data.Categories.Should().BeEquivalentTo(expectedCategories);
         var expectedGenres = targetGenres
             .Select(genre => new VideoModelOutputRelatedAggregate(genre.Id));
         output.Data.Genres.Should().BeEquivalentTo(expectedGenres);
