@@ -3,6 +3,7 @@ using FC.Codeflix.Catalog.Api.ApiModels.Video;
 using FC.Codeflix.Catalog.Application.UseCases.Genre.Common;
 using FC.Codeflix.Catalog.Application.UseCases.Genre.GetGenre;
 using FC.Codeflix.Catalog.Application.UseCases.Video.Common;
+using FC.Codeflix.Catalog.Application.UseCases.Video.DeleteVideo;
 using FC.Codeflix.Catalog.Application.UseCases.Video.GetVideo;
 using FC.Codeflix.Catalog.Application.UseCases.Video.ListVideos;
 using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
@@ -85,5 +86,16 @@ public class VideosController : ControllerBase
             apiInput.ToInput(id),
             cancellationToken);
         return Ok(new ApiResponse<VideoModelOutput>(output));
+    }
+
+    [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteVideo(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        await _mediator.Send(new DeleteVideoInput(id), cancellationToken);
+        return NoContent();
     }
 }
