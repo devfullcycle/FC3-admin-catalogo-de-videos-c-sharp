@@ -25,15 +25,17 @@ public class DeleteVideo : IDeleteVideo
         CancellationToken cancellationToken)
     {
         var video = await _repository.Get(input.VideoId, cancellationToken);
-        
+        var trailerFilePath = video.Trailer?.FilePath;
+        var mediaFilePath = video.Media?.FilePath;
+
         await _repository.Delete(video, cancellationToken);
         await _unitOfWork.Commit(cancellationToken);
 
-        if (video.Trailer is not null)
-            await _storageService.Delete(video.Trailer.FilePath, cancellationToken);
+        if (trailerFilePath is not null)
+            await _storageService.Delete(trailerFilePath, cancellationToken);
 
-        if (video.Media is not null)
-            await _storageService.Delete(video.Media.FilePath, cancellationToken);
+        if (mediaFilePath is not null)
+            await _storageService.Delete(mediaFilePath, cancellationToken);
 
         return Unit.Value;
     }
