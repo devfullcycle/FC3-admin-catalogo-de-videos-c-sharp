@@ -35,7 +35,10 @@ public class DeleteVideoApiTest : IDisposable
         var allMedias = new[]
         {
             video.Trailer!.FilePath,
-            video.Media!.FilePath
+            video.Media!.FilePath,
+            video.Banner!.Path,
+            video.Thumb!.Path,
+            video.ThumbHalf!.Path
         };
 
         var (response, output) = await _fixture.ApiClient
@@ -56,7 +59,14 @@ public class DeleteVideoApiTest : IDisposable
                 It.Is<string>(fileName => allMedias.Contains(fileName)),
                 It.IsAny<DeleteObjectOptions>(),
                 It.IsAny<CancellationToken>()),
-            Times.Exactly(2));
+            Times.Exactly(5));
+        _fixture.WebAppFactory.StorageClient!.Verify(
+            x => x.DeleteObjectAsync(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<DeleteObjectOptions>(),
+                It.IsAny<CancellationToken>()),
+            Times.Exactly(5));
     }
 
     [Fact(DisplayName = nameof(DeleteVideoWithRelationships))]
@@ -89,7 +99,10 @@ public class DeleteVideoApiTest : IDisposable
         var allMedias = new[]
         {
             video.Trailer!.FilePath,
-            video.Media!.FilePath
+            video.Media!.FilePath,
+            video.Banner!.Path,
+            video.Thumb!.Path,
+            video.ThumbHalf!.Path
         };
 
         var (response, output) = await _fixture.ApiClient
@@ -119,7 +132,14 @@ public class DeleteVideoApiTest : IDisposable
                 It.Is<string>(fileName => allMedias.Contains(fileName)),
                 It.IsAny<DeleteObjectOptions>(),
                 It.IsAny<CancellationToken>()),
-            Times.Exactly(2));
+            Times.Exactly(5));
+        _fixture.WebAppFactory.StorageClient!.Verify(
+            x => x.DeleteObjectAsync(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<DeleteObjectOptions>(),
+                It.IsAny<CancellationToken>()),
+            Times.Exactly(5));
     }
 
     [Fact(DisplayName = nameof(Error404WhenVideoIdNotFound))]
