@@ -98,4 +98,8 @@ public class VideosController : ControllerBase
         await _mediator.Send(new DeleteVideoInput(id), cancellationToken);
         return NoContent();
     }
+
+    // POST {id:guid}/medias/{type}
+    // type:video,trailer,banner,thumbnail,thumbnail_half
+    // content-type: multipart/form-data - media_file
 }
