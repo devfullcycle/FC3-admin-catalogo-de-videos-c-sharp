@@ -14,6 +14,10 @@ using System.Threading;
 using FC.Codeflix.Catalog.EndToEndTests.Api.CastMember.Common;
 using System.Threading.Tasks;
 using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
+using RabbitMQ.Client;
+using FC.Codeflix.Catalog.Domain.Events;
+using System.Text.Json;
+using FC.Codeflix.Catalog.Infra.Messaging.JsonPolicies;
 
 namespace FC.Codeflix.Catalog.EndToEndTests.Api.Video.Common;
 
@@ -27,9 +31,44 @@ public class VideoBaseFixture
 {
     public readonly VideoPersistence VideoPersistence;
     public readonly CastMemberPersistence CastMemberPersistence;
+    private const string VideoCreatedQueue = "video.create.queue";
+    private const string RoutingKey = "video.created";
     public VideoBaseFixture() :base() {
         VideoPersistence = new VideoPersistence(DbContext);
         CastMemberPersistence = new CastMemberPersistence(DbContext);
+    }
+
+    public void SetupRabbitMQ()
+    {
+        var channel = WebAppFactory.RabbitMQChannel!;
+        var exchange = WebAppFactory.RabbitMQConfiguration!.Exchange;
+        channel.ExchangeDeclare(exchange, "direct", true, false, null);
+        channel.QueueDeclare(VideoCreatedQueue, true, false, false, null);
+        channel.QueueBind(VideoCreatedQueue, exchange, RoutingKey, null);
+    }
+
+    public void TearDownRabbitMQ()
+    {
+        var channel = WebAppFactory.RabbitMQChannel!;
+        var exchange = WebAppFactory.RabbitMQConfiguration!.Exchange;
+        channel.QueueUnbind(VideoCreatedQueue, exchange, RoutingKey, null);
+        channel.QueueDelete(VideoCreatedQueue, false, false);
+        channel.ExchangeDelete(exchange, false);
+    }
+
+    public (VideoUploadedEvent?, uint) ReadMessageFromRabbitMQ()
+    {
+        var consumingResult = WebAppFactory.RabbitMQChannel!
+            .BasicGet(VideoCreatedQueue, true);
+        var rawMessage = consumingResult.Body.ToArray();
+        var stringMessage = Encoding.UTF8.GetString(rawMessage);
+        var jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = new JsonSnakeCasePolicy()
+        };
+        var @event = JsonSerializer.Deserialize<VideoUploadedEvent>(
+            stringMessage, jsonOptions);
+        return (@event, consumingResult.MessageCount);
     }
 
     #region Video
