@@ -7,6 +7,6 @@ public record UploadMediasInput(
     Guid VideoId,
     FileInput? VideoFile, 
     FileInput? TrailerFile,
-    FileInput? Banner,
-    FileInput? Thumb,
-    FileInput? ThumbHalf) : IRequest;
+    FileInput? BannerFile,
+    FileInput? ThumbFile,
+    FileInput? ThumbHalfFile) : IRequest;
