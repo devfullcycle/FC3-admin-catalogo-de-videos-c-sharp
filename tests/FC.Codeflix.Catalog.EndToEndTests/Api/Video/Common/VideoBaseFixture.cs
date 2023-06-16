@@ -29,9 +29,9 @@ public class VideoBaseFixtureCollection
 public class VideoBaseFixture
     : GenreBaseFixture
 {
-    public readonly VideoPersistence VideoPersistence;
-    public readonly CastMemberPersistence CastMemberPersistence;
-    private const string VideoCreatedQueue = "video.create.queue";
+    public VideoPersistence VideoPersistence { get; private set; }
+    public CastMemberPersistence CastMemberPersistence { get; private set; }
+    private const string VideoCreatedQueue = "video.created.queue";
     private const string RoutingKey = "video.created";
     public VideoBaseFixture() :base() {
         VideoPersistence = new VideoPersistence(DbContext);
