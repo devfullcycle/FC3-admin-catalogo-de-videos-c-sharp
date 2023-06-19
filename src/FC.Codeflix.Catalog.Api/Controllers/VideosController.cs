@@ -99,7 +99,18 @@ public class VideosController : ControllerBase
         return NoContent();
     }
 
-    // POST {id:guid}/medias/{type}
-    // type:video,trailer,banner,thumbnail,thumbnail_half
-    // content-type: multipart/form-data - media_file
+    [HttpPost("{id:guid}/medias/{type}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UploadMedia(
+        [FromRoute] Guid id,
+        [FromRoute] string type,
+        [FromForm] UploadMediaApiInput apiInput,
+        CancellationToken cancellationToken)
+    {
+        var input = apiInput.ToUploadMediasInput(id, type);
+        await _mediator.Send(input, cancellationToken);
+        return NoContent();
+    }
 }

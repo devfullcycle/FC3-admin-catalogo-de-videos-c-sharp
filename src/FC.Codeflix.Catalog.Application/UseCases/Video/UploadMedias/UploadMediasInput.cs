@@ -5,8 +5,8 @@ namespace FC.Codeflix.Catalog.Application.UseCases.Video.UploadMedias;
 
 public record UploadMediasInput(
     Guid VideoId,
-    FileInput? VideoFile, 
-    FileInput? TrailerFile,
-    FileInput? BannerFile,
-    FileInput? ThumbFile,
-    FileInput? ThumbHalfFile) : IRequest;
+    FileInput? VideoFile = null, 
+    FileInput? TrailerFile = null,
+    FileInput? BannerFile = null,
+    FileInput? ThumbFile = null,
+    FileInput? ThumbHalfFile = null) : IRequest;

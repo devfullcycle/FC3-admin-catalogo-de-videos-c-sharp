@@ -23,6 +23,7 @@ public class ChannelManager
             if (_channel == null || _channel.IsClosed)
             {
                 _channel = _connection.CreateModel();
+                _channel.ConfirmSelect();
             }
             return _channel;
         }
