@@ -1,4 +1,5 @@
 ﻿using FC.Codeflix.Catalog.Application.Exceptions;
+using FC.Codeflix.Catalog.Application.UseCases.Video.Common;
 using FC.Codeflix.Catalog.Domain.Entity;
 using FC.Codeflix.Catalog.Domain.Repository;
 using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
@@ -93,6 +94,33 @@ public class VideoRepository : IVideoRepository
                     video.Id
                 ));
             await _videosCastMembers.AddRangeAsync(relations);
+        }
+
+        DeleteOrphanMedias(video);
+    }
+
+    private void DeleteOrphanMedias(Video video)
+    {
+        if (_context.Entry(video).Reference(v => v.Trailer).IsModified)
+        {
+            var oldTrailerId = _context.Entry(video)
+                .OriginalValues.GetValue<Guid?>($"{nameof(Video.Trailer)}Id");
+            if (oldTrailerId != null && oldTrailerId != video.Trailer?.Id)
+            {
+                var oldTrailer = _medias.Find(oldTrailerId);
+                _medias.Remove(oldTrailer!);
+            }
+        }
+
+        if (_context.Entry(video).Reference(v => v.Media).IsModified)
+        {
+            var oldMediaId = _context.Entry(video)
+                .OriginalValues.GetValue<Guid?>($"{nameof(Video.Media)}Id");
+            if (oldMediaId != null && oldMediaId != video.Media?.Id)
+            {
+                var oldMedia = _medias.Find(oldMediaId);
+                _medias.Remove(oldMedia!);
+            }
         }
     }
 

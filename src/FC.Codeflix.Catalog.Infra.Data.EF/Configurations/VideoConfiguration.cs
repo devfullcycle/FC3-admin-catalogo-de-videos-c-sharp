@@ -32,8 +32,12 @@ internal class VideoConfiguration
             banner.Property(image => image.Path).HasColumnName("bannerPath")
         );
 
-        builder.HasOne(video => video.Media).WithOne().HasForeignKey<Media>();
-        builder.HasOne(video => video.Trailer).WithOne().HasForeignKey<Media>();
+        builder.HasOne(video => video.Media)
+            .WithOne()
+            .HasForeignKey<Video>("MediaId");
+        builder.HasOne(video => video.Trailer)
+            .WithOne()
+            .HasForeignKey<Video>("TrailerId");
         builder.Ignore(video => video.Events);
     }
 }

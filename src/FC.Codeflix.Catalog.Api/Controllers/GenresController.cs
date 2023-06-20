@@ -99,8 +99,8 @@ public class GenresController : ControllerBase
         var input = new ListGenresInput();
         if (page is not null) input.Page = page.Value;
         if (perPage is not null) input.PerPage = perPage.Value;
-        if (!String.IsNullOrWhiteSpace(search)) input.Search = search;
-        if (!String.IsNullOrWhiteSpace(sort)) input.Sort = sort;
+        if (!string.IsNullOrWhiteSpace(search)) input.Search = search;
+        if (!string.IsNullOrWhiteSpace(sort)) input.Sort = sort;
         if (dir is not null) input.Dir = dir.Value;
 
         var output = await _mediator.Send(input, cancellationToken);

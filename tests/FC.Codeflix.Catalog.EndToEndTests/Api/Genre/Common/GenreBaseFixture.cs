@@ -10,15 +10,16 @@ namespace FC.Codeflix.Catalog.EndToEndTests.Api.Genre.Common;
 public class GenreBaseFixture
     : BaseFixture
 {
-    public GenrePersistence Persistence { get; set; }
+    protected CodeflixCatalogDbContext DbContext;
+    public GenrePersistence GenrePersistence { get; set; }
     public CategoryPersistence CategoryPersistence { get; set; }
 
     public GenreBaseFixture()
         : base()
     {
-        CodeflixCatalogDbContext dbContext = CreateDbContext();
-        Persistence = new GenrePersistence(dbContext);
-        CategoryPersistence = new CategoryPersistence(dbContext);
+        DbContext = CreateDbContext();
+        GenrePersistence = new GenrePersistence(DbContext);
+        CategoryPersistence = new CategoryPersistence(DbContext);
     }
 
     public string GetValidGenreName()

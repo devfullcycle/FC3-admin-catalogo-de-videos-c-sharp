@@ -40,7 +40,7 @@ public class CreateGenreApiTest : IDisposable
         output.Data.Name.Should().Be(apiInput.Name);
         output.Data.IsActive.Should().Be(apiInput.IsActive);
         output.Data.Categories.Should().HaveCount(0);
-        var genreFromDb = await _fixture.Persistence.GetById(output.Data.Id);
+        var genreFromDb = await _fixture.GenrePersistence.GetById(output.Data.Id);
         genreFromDb.Should().NotBeNull();
         genreFromDb!.Name.Should().Be(apiInput.Name);
         genreFromDb.IsActive.Should().Be(apiInput.IsActive);
@@ -74,11 +74,11 @@ public class CreateGenreApiTest : IDisposable
         output.Data.Categories.Should().HaveCount(relatedCategories.Count);
         var outputRelatedCategoryIds = output.Data.Categories.Select(x => x.Id).ToList();
         outputRelatedCategoryIds.Should().BeEquivalentTo(relatedCategories);
-        var genreFromDb = await _fixture.Persistence.GetById(output.Data.Id);
+        var genreFromDb = await _fixture.GenrePersistence.GetById(output.Data.Id);
         genreFromDb.Should().NotBeNull();
         genreFromDb!.Name.Should().Be(apiInput.Name);
         genreFromDb.IsActive.Should().Be(apiInput.IsActive);
-        var relationsFromDb = await _fixture.Persistence
+        var relationsFromDb = await _fixture.GenrePersistence
             .GetGenresCategoriesRelationsByGenreId(output.Data.Id);
         relationsFromDb.Should().NotBeNull();
         relationsFromDb.Should().HaveCount(relatedCategories.Count);

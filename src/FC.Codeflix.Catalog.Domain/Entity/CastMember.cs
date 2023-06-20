@@ -27,4 +27,9 @@ public class CastMember : AggregateRoot
 
     private void Validate()
         => DomainValidation.NotNullOrEmpty(Name, nameof(Name));
+
+    public override string ToString()
+    {
+        return $"[Id] = {Id}, [Name] = {Name}, [CreatedAt] = {CreatedAt:HHmmfffffff}"; 
+    }
 }

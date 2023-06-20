@@ -44,7 +44,10 @@ public class UploadMediasTest
         var validInput = _fixture.GetValidInput(videoId: video.Id);
         var fileNames = new List<string>() {
             StorageFileName.Create(video.Id, nameof(video.Media), validInput.VideoFile!.Extension),
-            StorageFileName.Create(video.Id, nameof(video.Trailer), validInput.TrailerFile!.Extension)
+            StorageFileName.Create(video.Id, nameof(video.Trailer), validInput.TrailerFile!.Extension),
+            StorageFileName.Create(video.Id, nameof(video.Banner), validInput.BannerFile!.Extension),
+            StorageFileName.Create(video.Id, nameof(video.Thumb), validInput.ThumbFile!.Extension),
+            StorageFileName.Create(video.Id, nameof(video.ThumbHalf), validInput.ThumbHalfFile!.Extension)
         };
         _repositoryMock.Setup(x => x.Get(
             It.Is<Guid>(x => x == video.Id),
@@ -67,7 +70,7 @@ public class UploadMediasTest
                 It.IsAny<Stream>(),
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>()),
-            Times.Exactly(2)
+            Times.Exactly(5)
         );
         _unitOfWorkMock.Verify(x => x.Commit(It.IsAny<CancellationToken>()));
     }
@@ -132,12 +135,33 @@ public class UploadMediasTest
     {
         var video = _fixture.GetValidVideo();
         var validInput = _fixture.GetValidInput(videoId: video.Id);
+        
         var videoFileName = StorageFileName.Create(video.Id, nameof(video.Media), validInput.VideoFile!.Extension);
         var trailerFileName = StorageFileName.Create(video.Id, nameof(video.Trailer), validInput.TrailerFile!.Extension);
+        var bannerFileName = StorageFileName.Create(video.Id, nameof(video.Banner), validInput.BannerFile!.Extension);
+        var thumbFileName = StorageFileName.Create(video.Id, nameof(video.Thumb), validInput.ThumbFile!.Extension);
+        var thumbHalfFileName = StorageFileName.Create(video.Id, nameof(video.ThumbHalf), validInput.ThumbHalfFile!.Extension);
+
         var videoStoragePath = $"storage/{videoFileName}";
         var trailerStoragePath = $"storage/{trailerFileName}";
-        var fileNames = new List<string>() { videoFileName, trailerFileName };
-        var filePathNames = new List<string>() { videoStoragePath, trailerStoragePath };
+        var bannerStoragePath = $"storage/{bannerFileName}";
+        var thumbStoragePath = $"storage/{thumbFileName}";
+        var thumbHalfStoragePath = $"storage/{thumbHalfFileName}";
+        
+        var fileNames = new List<string>() {
+            videoFileName,
+            trailerFileName,
+            bannerFileName,
+            thumbFileName,
+            thumbHalfFileName
+        };
+        var filePathNames = new List<string>() {
+            videoStoragePath,
+            trailerStoragePath,
+            bannerStoragePath,
+            thumbStoragePath,
+            thumbHalfStoragePath
+        };
         _repositoryMock.Setup(x => x.Get(
             It.Is<Guid>(x => x == video.Id),
             It.IsAny<CancellationToken>())
@@ -156,6 +180,27 @@ public class UploadMediasTest
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>())
             ).ReturnsAsync(trailerStoragePath);
+        _storageServiceMock
+            .Setup(x => x.Upload(
+                It.Is<string>(x => x == bannerFileName),
+                It.IsAny<Stream>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>())
+            ).ReturnsAsync(bannerStoragePath);
+        _storageServiceMock
+            .Setup(x => x.Upload(
+                It.Is<string>(x => x == thumbFileName),
+                It.IsAny<Stream>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>())
+            ).ReturnsAsync(thumbStoragePath);
+        _storageServiceMock
+            .Setup(x => x.Upload(
+                It.Is<string>(x => x == thumbHalfFileName),
+                It.IsAny<Stream>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>())
+            ).ReturnsAsync(thumbHalfStoragePath);
         _unitOfWorkMock.Setup(x => x.Commit(It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Something went wrong with the commit"));
 
@@ -171,26 +216,30 @@ public class UploadMediasTest
                 It.IsAny<Stream>(),
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>()),
-            Times.Exactly(2)
+            Times.Exactly(5)
         );
         _storageServiceMock.Verify(x =>
             x.Delete(
                 It.Is<string>(fileName => filePathNames.Contains(fileName)),
                 It.IsAny<CancellationToken>()
-            ), Times.Exactly(2));
+            ), Times.Exactly(5));
         _storageServiceMock.Verify(x =>
             x.Delete(It.IsAny<string>(), It.IsAny<CancellationToken>()),
-                Times.Exactly(2));
+                Times.Exactly(5));
     }
 
-    [Fact(DisplayName = nameof(ClearStorageInCommitErrorCase))]
+    [Fact(DisplayName = nameof(ClearOnlyOneFileInStorageInCommitErrorCaseIfProvidedOnlyOneFile))]
     [Trait("Application", "UploadMedias - Use Cases")]
     public async Task ClearOnlyOneFileInStorageInCommitErrorCaseIfProvidedOnlyOneFile()
     {
         var video = _fixture.GetValidVideo();
         video.UpdateTrailer(_fixture.GetValidMediaPath());
         video.UpdateMedia(_fixture.GetValidMediaPath());
-        var validInput = _fixture.GetValidInput(videoId: video.Id, withTrailerFile: false);
+        var validInput = _fixture.GetValidInput(videoId: video.Id, 
+            withTrailerFile: false,
+            withBannerFile: false,
+            withThumbFile: false,
+            withThumbHalfFile: false);
         var videoFileName = StorageFileName.Create(video.Id, nameof(video.Media), validInput.VideoFile!.Extension);
         var videoStoragePath = $"storage/{videoFileName}";
         _repositoryMock.Setup(x => x.Get(

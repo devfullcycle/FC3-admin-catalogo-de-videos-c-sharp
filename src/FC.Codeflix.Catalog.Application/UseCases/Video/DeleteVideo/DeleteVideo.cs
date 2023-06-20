@@ -1,6 +1,7 @@
 ﻿using FC.Codeflix.Catalog.Application.Interfaces;
 using FC.Codeflix.Catalog.Domain.Repository;
 using MediatR;
+using System.ComponentModel;
 
 namespace FC.Codeflix.Catalog.Application.UseCases.Video.DeleteVideo;
 
@@ -25,16 +26,51 @@ public class DeleteVideo : IDeleteVideo
         CancellationToken cancellationToken)
     {
         var video = await _repository.Get(input.VideoId, cancellationToken);
-        
+        var trailerFilePath = video.Trailer?.FilePath;
+        var mediaFilePath = video.Media?.FilePath;
+
         await _repository.Delete(video, cancellationToken);
         await _unitOfWork.Commit(cancellationToken);
 
-        if (video.Trailer is not null)
-            await _storageService.Delete(video.Trailer.FilePath, cancellationToken);
+        await ClearVideoMedias(
+            mediaFilePath,
+            trailerFilePath,
+            cancellationToken);
 
-        if (video.Media is not null)
-            await _storageService.Delete(video.Media.FilePath, cancellationToken);
+        await ClearImageMedias(
+            video!.Banner?.Path,
+            video!.Thumb?.Path,
+            video!.ThumbHalf?.Path,
+            cancellationToken);
 
         return Unit.Value;
+    }
+
+    private async Task ClearImageMedias(
+        string? bannerFilePath,
+        string? thumbFilePath,
+        string? thumbHalfFilePath,
+        CancellationToken cancellationToken)
+    {
+        if (bannerFilePath is not null)
+            await _storageService.Delete(bannerFilePath, cancellationToken);
+
+        if (thumbFilePath is not null)
+            await _storageService.Delete(thumbFilePath, cancellationToken);
+
+        if (thumbHalfFilePath is not null)
+            await _storageService.Delete(thumbHalfFilePath, cancellationToken);
+    }
+
+    private async Task ClearVideoMedias(
+        string? mediaFilePath,
+        string? trailerFilePath,
+        CancellationToken cancellationToken)
+    {
+        if (trailerFilePath is not null)
+            await _storageService.Delete(trailerFilePath, cancellationToken);
+
+        if (mediaFilePath is not null)
+            await _storageService.Delete(mediaFilePath, cancellationToken);
     }
 }
