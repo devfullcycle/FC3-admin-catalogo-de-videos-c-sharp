@@ -26,7 +26,7 @@ public class DeleteGenreTestApi : IDisposable
     {
         List<DomainEntity.Genre> exampleGenres = _fixture.GetExampleListGenres(10);
         var targetGenre = exampleGenres[5];
-        await _fixture.Persistence.InsertList(exampleGenres);
+        await _fixture.GenrePersistence.InsertList(exampleGenres);
 
         var (response, output) = await _fixture.ApiClient
             .Delete<object>($"/genres/{targetGenre.Id}");
@@ -34,7 +34,7 @@ public class DeleteGenreTestApi : IDisposable
         response.Should().NotBeNull();
         response!.StatusCode.Should().Be((HttpStatusCode)StatusCodes.Status204NoContent);
         output.Should().BeNull();
-        DomainEntity.Genre? genreDb = await _fixture.Persistence.GetById(targetGenre.Id);
+        DomainEntity.Genre? genreDb = await _fixture.GenrePersistence.GetById(targetGenre.Id);
         genreDb.Should().BeNull();
     }
 
@@ -44,7 +44,7 @@ public class DeleteGenreTestApi : IDisposable
     {
         List<DomainEntity.Genre> exampleGenres = _fixture.GetExampleListGenres(10);
         var randomGuid = Guid.NewGuid();
-        await _fixture.Persistence.InsertList(exampleGenres);
+        await _fixture.GenrePersistence.InsertList(exampleGenres);
 
         var (response, output) = await _fixture.ApiClient
             .Delete<ProblemDetails>($"/genres/{randomGuid}");
@@ -84,9 +84,9 @@ public class DeleteGenreTestApi : IDisposable
                 )
             )
         );
-        await _fixture.Persistence.InsertList(exampleGenres);
+        await _fixture.GenrePersistence.InsertList(exampleGenres);
         await _fixture.CategoryPersistence.InsertList(exampleCategories);
-        await _fixture.Persistence.InsertGenresCategoriesRelationsList(genresCategories);
+        await _fixture.GenrePersistence.InsertGenresCategoriesRelationsList(genresCategories);
 
         var (response, output) = await _fixture.ApiClient
             .Delete<object>($"/genres/{targetGenre.Id}");
@@ -94,9 +94,9 @@ public class DeleteGenreTestApi : IDisposable
         response.Should().NotBeNull();
         response!.StatusCode.Should().Be((HttpStatusCode)StatusCodes.Status204NoContent);
         output.Should().BeNull();
-        DomainEntity.Genre? genreDb = await _fixture.Persistence.GetById(targetGenre.Id);
+        DomainEntity.Genre? genreDb = await _fixture.GenrePersistence.GetById(targetGenre.Id);
         genreDb.Should().BeNull();
-        List<GenresCategories> relations = await _fixture.Persistence.GetGenresCategoriesRelationsByGenreId(targetGenre.Id);
+        List<GenresCategories> relations = await _fixture.GenrePersistence.GetGenresCategoriesRelationsByGenreId(targetGenre.Id);
         relations.Should().HaveCount(0);
     }
     public void Dispose() => _fixture.CleanPersistence();

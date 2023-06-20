@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using FC.Codeflix.Catalog.Application.UseCases.CastMember.Common;
 using FC.Codeflix.Catalog.Application.UseCases.CastMember.CreateCastMember;
@@ -12,7 +13,7 @@ using Xunit;
 namespace FC.Codeflix.Catalog.EndToEndTests.Api.CastMember.CreateCastMember;
 
 [Collection(nameof(CastMemberApiBaseFixture))]
-public class CreateCastMemberApiTest
+public class CreateCastMemberApiTest : IDisposable
 {
     private readonly CastMemberApiBaseFixture _fixture;
 
@@ -61,4 +62,6 @@ public class CreateCastMemberApiTest
         output!.Title.Should().Be("One or more validation errors ocurred");
         output.Detail.Should().Be("Name should not be empty or null");
     }
+
+    public void Dispose() => _fixture.CleanPersistence();
 }

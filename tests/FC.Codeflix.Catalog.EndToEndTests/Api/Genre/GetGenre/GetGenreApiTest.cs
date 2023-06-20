@@ -28,7 +28,7 @@ public class GetGenreApiTest : IDisposable
     {
         List<DomainEntity.Genre> exampleGenres = _fixture.GetExampleListGenres(10);
         var targetGenre = exampleGenres[5];
-        await _fixture.Persistence.InsertList(exampleGenres);
+        await _fixture.GenrePersistence.InsertList(exampleGenres);
 
         var (response, output) = await _fixture.ApiClient
             .Get<ApiResponse<GenreModelOutput>>($"/genres/{targetGenre.Id}");
@@ -47,7 +47,7 @@ public class GetGenreApiTest : IDisposable
     {
         List<DomainEntity.Genre> exampleGenres = _fixture.GetExampleListGenres(10);
         var randomGuid = Guid.NewGuid();
-        await _fixture.Persistence.InsertList(exampleGenres);
+        await _fixture.GenrePersistence.InsertList(exampleGenres);
 
         var (response, output) = await _fixture.ApiClient
             .Get<ProblemDetails>($"/genres/{randomGuid}");
@@ -86,9 +86,9 @@ public class GetGenreApiTest : IDisposable
                 )
             )
         );
-        await _fixture.Persistence.InsertList(exampleGenres);
+        await _fixture.GenrePersistence.InsertList(exampleGenres);
         await _fixture.CategoryPersistence.InsertList(exampleCategories);
-        await _fixture.Persistence.InsertGenresCategoriesRelationsList(genresCategories);
+        await _fixture.GenrePersistence.InsertGenresCategoriesRelationsList(genresCategories);
 
         var (response, output) = await _fixture.ApiClient
             .Get<ApiResponse<GenreModelOutput>>($"/genres/{targetGenre.Id}");

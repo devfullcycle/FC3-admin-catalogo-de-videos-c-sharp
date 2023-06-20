@@ -29,4 +29,9 @@ public class CastMemberModelOutput
             castMember.Type,
             castMember.CreatedAt
         );
+
+    public override string ToString()
+    {
+        return $"[Id] = {Id}, [Name] = {Name}, [CreatedAt] = {CreatedAt:HHmmfffffff}";
+    }
 }

@@ -191,6 +191,7 @@ public class VideoRepositoryTest
     {
         var dbContextArrange = _fixture.CreateDbContext();
         var exampleVideo = _fixture.GetExampleVideo();
+        exampleVideo.UpdateTrailer(_fixture.GetValidMediaPath());
         await dbContextArrange.AddAsync(exampleVideo);
         await dbContextArrange.SaveChangesAsync();
         var updatedThumb = _fixture.GetValidImagePath();

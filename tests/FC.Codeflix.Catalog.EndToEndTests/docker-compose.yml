@@ -9,3 +9,14 @@ services:
       - 33060:3306
     environment:
       MYSQL_ROOT_PASSWORD: C0D3fl1X.@
+
+  rabbitmq:
+    container_name: adm_videos_rabbitmq_e2e
+    image: rabbitmq:3-management
+    hostname: rabbitmqe2e
+    environment:
+      - RABBITMQ_DEFAULT_USER=adm_videos
+      - RABBITMQ_DEFAULT_PASS=123456
+    ports:
+      - 25672:15672
+      - 56720:5672
