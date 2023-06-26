@@ -17,4 +17,10 @@ public class UpdateMediaStatusTestFixture : VideoTestFixtureBase
             videoId,
             MediaStatus.Completed,
             EncodedPath: GetValidMediaPath());
+
+    public UpdateMediaStatusInput GetFailedEncodingInput(Guid videoId)
+        => new UpdateMediaStatusInput(
+            videoId,
+            MediaStatus.Error,
+            ErrorMessage: "There was an error while trying to encode video.");
 }
