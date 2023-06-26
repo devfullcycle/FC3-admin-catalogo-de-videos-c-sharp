@@ -23,4 +23,10 @@ public class UpdateMediaStatusTestFixture : VideoTestFixtureBase
             videoId,
             MediaStatus.Error,
             ErrorMessage: "There was an error while trying to encode video.");
+
+    public UpdateMediaStatusInput GetInvalidStatusInput(Guid videoId)
+        => new UpdateMediaStatusInput(
+            videoId,
+            MediaStatus.Processing,
+            ErrorMessage: "There was an error while trying to encode video.");
 }

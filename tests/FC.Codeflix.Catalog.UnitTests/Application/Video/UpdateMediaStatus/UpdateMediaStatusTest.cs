@@ -1,6 +1,7 @@
 ﻿using FC.Codeflix.Catalog.Application.Interfaces;
 using FC.Codeflix.Catalog.Application.UseCases.Video.Common;
 using FC.Codeflix.Catalog.Domain.Enum;
+using FC.Codeflix.Catalog.Domain.Exceptions;
 using FC.Codeflix.Catalog.Domain.Extensions;
 using FC.Codeflix.Catalog.Domain.Repository;
 using FluentAssertions;
@@ -94,5 +95,31 @@ public class UpdateMediaStatusTest
         _videoRepository.Verify(x => x.Update(
             exampleVideo, It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWork.Verify(x => x.Commit(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact(DisplayName = nameof(HandleWhenInvalidInput))]
+    [Trait("Application", "UpdateMediaStatus - Use Cases")]
+    public async Task HandleWhenInvalidInput()
+    {
+        var exampleVideo = _fixture.GetValidVideoWithAllProperties();
+        var expectedEncodedPath = exampleVideo.Media!.EncodedPath;
+        var expectedStatus = exampleVideo!.Media.Status;
+        var expectedErrorMessage = "Invalid media status";
+        var input = _fixture.GetInvalidStatusInput(exampleVideo.Id);
+        _videoRepository.Setup(x => x.Get(
+            exampleVideo.Id,
+            It.IsAny<CancellationToken>()))
+        .ReturnsAsync(exampleVideo);
+
+        var action = async() => await _useCase.Handle(input, CancellationToken.None);
+
+        await action.Should().ThrowAsync<EntityValidationException>()
+            .WithMessage(expectedErrorMessage);
+        exampleVideo.Media!.Status.Should().Be(expectedStatus);
+        exampleVideo.Media!.EncodedPath.Should().Be(expectedEncodedPath);
+        _videoRepository.VerifyAll();
+        _videoRepository.Verify(x => x.Update(
+            exampleVideo, It.IsAny<CancellationToken>()), Times.Never);
+        _unitOfWork.Verify(x => x.Commit(It.IsAny<CancellationToken>()), Times.Never);
     }
 }
