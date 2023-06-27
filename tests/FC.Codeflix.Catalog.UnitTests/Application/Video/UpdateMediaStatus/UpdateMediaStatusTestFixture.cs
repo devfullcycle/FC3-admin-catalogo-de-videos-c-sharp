@@ -1,4 +1,5 @@
-﻿using FC.Codeflix.Catalog.Domain.Enum;
+﻿using FC.Codeflix.Catalog.Application.UseCases.Video.UpdateMediaStatus;
+using FC.Codeflix.Catalog.Domain.Enum;
 using FC.Codeflix.Catalog.UnitTests.Common.Fixtures;
 using System;
 using Xunit;
