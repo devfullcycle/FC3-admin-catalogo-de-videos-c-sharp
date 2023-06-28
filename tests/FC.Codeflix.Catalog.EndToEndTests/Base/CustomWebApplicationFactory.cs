@@ -16,9 +16,10 @@ public class CustomWebApplicationFactory<TStartup>
     : WebApplicationFactory<TStartup>, IDisposable
     where TStartup : class
 {
-    private const string VideoCreatedQueue = "video.created.queue";
-    private const string RoutingKey = "video.created";
+    private const string VideoCreatedRoutingKey = "video.created";
+    private const string VideoEncodedRoutingKey = "video.encoded";
     public Mock<StorageClient> StorageClient { get; private set; }
+    public string VideoCreatedQueue => "video.created.queue";
     public IModel RabbitMQChannel { get; private set; }
     public RabbitMQConfiguration RabbitMQConfiguration { get; private set; }
     protected override void ConfigureWebHost(
@@ -62,15 +63,22 @@ public class CustomWebApplicationFactory<TStartup>
         var exchange = RabbitMQConfiguration!.Exchange;
         channel.ExchangeDeclare(exchange, "direct", true, false, null);
         channel.QueueDeclare(VideoCreatedQueue, true, false, false, null);
-        channel.QueueBind(VideoCreatedQueue, exchange, RoutingKey, null);
+        channel.QueueBind(VideoCreatedQueue, exchange, VideoCreatedRoutingKey, null);
+        channel.QueueDeclare(RabbitMQConfiguration.VideoEncodedQueue,
+            true, false, false, null);
+        channel.QueueBind(RabbitMQConfiguration.VideoEncodedQueue,
+            exchange, VideoEncodedRoutingKey, null);
     }
 
     private void TearDownRabbitMQ()
     {
         var channel = RabbitMQChannel!;
         var exchange = RabbitMQConfiguration!.Exchange;
-        channel.QueueUnbind(VideoCreatedQueue, exchange, RoutingKey, null);
+        channel.QueueUnbind(VideoCreatedQueue, exchange, VideoCreatedRoutingKey, null);
         channel.QueueDelete(VideoCreatedQueue, false, false);
+        channel.QueueUnbind(RabbitMQConfiguration.VideoEncodedQueue,
+            exchange, VideoEncodedRoutingKey, null);
+        channel.QueueDelete(RabbitMQConfiguration.VideoEncodedQueue, false, false);
         channel.ExchangeDelete(exchange, false);
     }
 

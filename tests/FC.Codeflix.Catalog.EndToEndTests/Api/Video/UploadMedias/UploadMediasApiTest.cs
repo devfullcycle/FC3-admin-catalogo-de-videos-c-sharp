@@ -209,6 +209,7 @@ public class UploadMediasApiTest : IDisposable
         @event!.FilePath.Should().Be(expectedFileName);
         @event.ResourceId.Should().Be(videoId);
         @event.OccuredOn.Should().NotBe(default);
+        _fixture.PurgeRabbitMQQueues();
     }
 
     [Fact(DisplayName = nameof(Error422WhenMediaTypeIsInvalid))]
