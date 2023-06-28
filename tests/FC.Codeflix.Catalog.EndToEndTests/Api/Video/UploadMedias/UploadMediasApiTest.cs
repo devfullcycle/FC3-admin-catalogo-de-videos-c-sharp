@@ -175,7 +175,6 @@ public class UploadMediasApiTest : IDisposable
     {
         var exampleVideos = _fixture.GetVideoCollection(5);
         await _fixture.VideoPersistence.InsertList(exampleVideos);
-        _fixture.SetupRabbitMQ();
 
         var videoId = exampleVideos[2].Id;
         var mediaType = "video";
@@ -210,7 +209,6 @@ public class UploadMediasApiTest : IDisposable
         @event!.FilePath.Should().Be(expectedFileName);
         @event.ResourceId.Should().Be(videoId);
         @event.OccuredOn.Should().NotBe(default);
-        _fixture.TearDownRabbitMQ();
     }
 
     [Fact(DisplayName = nameof(Error422WhenMediaTypeIsInvalid))]

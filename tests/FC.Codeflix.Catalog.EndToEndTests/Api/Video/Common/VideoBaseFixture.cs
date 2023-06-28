@@ -38,24 +38,6 @@ public class VideoBaseFixture
         CastMemberPersistence = new CastMemberPersistence(DbContext);
     }
 
-    public void SetupRabbitMQ()
-    {
-        var channel = WebAppFactory.RabbitMQChannel!;
-        var exchange = WebAppFactory.RabbitMQConfiguration!.Exchange;
-        channel.ExchangeDeclare(exchange, "direct", true, false, null);
-        channel.QueueDeclare(VideoCreatedQueue, true, false, false, null);
-        channel.QueueBind(VideoCreatedQueue, exchange, RoutingKey, null);
-    }
-
-    public void TearDownRabbitMQ()
-    {
-        var channel = WebAppFactory.RabbitMQChannel!;
-        var exchange = WebAppFactory.RabbitMQConfiguration!.Exchange;
-        channel.QueueUnbind(VideoCreatedQueue, exchange, RoutingKey, null);
-        channel.QueueDelete(VideoCreatedQueue, false, false);
-        channel.ExchangeDelete(exchange, false);
-    }
-
     public (VideoUploadedEvent?, uint) ReadMessageFromRabbitMQ()
     {
         var consumingResult = WebAppFactory.RabbitMQChannel!
