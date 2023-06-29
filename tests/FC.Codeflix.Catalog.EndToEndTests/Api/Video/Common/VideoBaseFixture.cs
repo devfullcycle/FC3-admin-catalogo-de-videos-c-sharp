@@ -35,7 +35,7 @@ public class VideoBaseFixture
         CastMemberPersistence = new CastMemberPersistence(DbContext);
     }
 
-    public (VideoUploadedEvent?, uint) ReadMessageFromRabbitMQ()
+    public (T?, uint) ReadMessageFromRabbitMQ<T>()
     {
         var consumingResult = WebAppFactory.RabbitMQChannel!
             .BasicGet(WebAppFactory.VideoCreatedQueue, true);
@@ -45,7 +45,7 @@ public class VideoBaseFixture
         {
             PropertyNamingPolicy = new JsonSnakeCasePolicy()
         };
-        var @event = JsonSerializer.Deserialize<VideoUploadedEvent>(
+        var @event = JsonSerializer.Deserialize<T>(
             stringMessage, jsonOptions);
         return (@event, consumingResult.MessageCount);
     }
