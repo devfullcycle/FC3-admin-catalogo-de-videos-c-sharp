@@ -17,9 +17,9 @@ public class CustomWebApplicationFactory<TStartup>
     where TStartup : class
 {
     private const string VideoCreatedRoutingKey = "video.created";
-    private const string VideoEncodedRoutingKey = "video.encoded";
-    public Mock<StorageClient> StorageClient { get; private set; }
+    public string VideoEncodedRoutingKey => "video.encoded";
     public string VideoCreatedQueue => "video.created.queue";
+    public Mock<StorageClient> StorageClient { get; private set; }
     public IModel RabbitMQChannel { get; private set; }
     public RabbitMQConfiguration RabbitMQConfiguration { get; private set; }
     protected override void ConfigureWebHost(

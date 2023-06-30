@@ -6,6 +6,7 @@ using FC.Codeflix.Catalog.Domain.Extensions;
 using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using FC.Codeflix.Catalog.EndToEndTests.Api.CastMember.Common;
 using FC.Codeflix.Catalog.EndToEndTests.Api.Genre.Common;
+using FC.Codeflix.Catalog.Infra.Messaging.DTOs;
 using FC.Codeflix.Catalog.Infra.Messaging.JsonPolicies;
 using RabbitMQ.Client;
 using System;
@@ -35,10 +36,27 @@ public class VideoBaseFixture
         CastMemberPersistence = new CastMemberPersistence(DbContext);
     }
 
+    internal void PublishMessageToRabbitMQ(object exampleEvent)
+    {
+        var exchange = WebAppFactory.RabbitMQConfiguration.Exchange;
+        var jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = new JsonSnakeCasePolicy()
+        };
+        var message = JsonSerializer.SerializeToUtf8Bytes(
+            exampleEvent, jsonOptions);
+        WebAppFactory.RabbitMQChannel.BasicPublish(
+            exchange: exchange,
+            routingKey: WebAppFactory.VideoEncodedRoutingKey,
+            body: message);
+    }
+
     public (T?, uint) ReadMessageFromRabbitMQ<T>()
+        where T: class
     {
         var consumingResult = WebAppFactory.RabbitMQChannel!
             .BasicGet(WebAppFactory.VideoCreatedQueue, true);
+        if (consumingResult == null) return (null, 0);
         var rawMessage = consumingResult.Body.ToArray();
         var stringMessage = Encoding.UTF8.GetString(rawMessage);
         var jsonOptions = new JsonSerializerOptions
@@ -209,5 +227,6 @@ public class VideoBaseFixture
                 Thread.Sleep(1);
                 return GetExampleCastMember();
             }).ToList();
+
     #endregion
 }

@@ -1,5 +1,6 @@
 ﻿using FC.Codeflix.Catalog.Domain.Enum;
 using FC.Codeflix.Catalog.EndToEndTests.Api.Video.Common;
+using FC.Codeflix.Catalog.Infra.Messaging.DTOs;
 using FluentAssertions;
 using System;
 using System.Collections.Generic;
@@ -31,12 +32,12 @@ public class VideoEncodedEventConsumerTest : IDisposable
             Video = new VideoEncodedMetadataDTO
             {
                 EncodedVideoFolder = encodedFilePath,
-                FilePath = video.Media.FilePath,
-                ResourceId = video.Id
+                FilePath = video.Media!.FilePath,
+                ResourceId = video.Id.ToString()
             }
         };
 
-        _fixure.PublishMessageToRabbitMQ(exampleEvent);
+        _fixture.PublishMessageToRabbitMQ(exampleEvent);
 
         await Task.Delay(800);
         var videoFromDB = await _fixture.VideoPersistence.GetById(video.Id);
@@ -46,6 +47,61 @@ public class VideoEncodedEventConsumerTest : IDisposable
         (object? @event, uint count) = _fixture.ReadMessageFromRabbitMQ<object>();
         @event.Should().BeNull();
         count.Should().Be(0);   
+    }
+
+    [Fact(DisplayName = nameof(EncodingFailedEventReceived))]
+    [Trait("End2End/Worker", "Video Encoded - Event Handler")]
+    public async Task EncodingFailedEventReceived()
+    {
+        var exampleVideos = _fixture.GetVideoCollection(5);
+        await _fixture.VideoPersistence.InsertList(exampleVideos);
+        var video = exampleVideos[2];
+        var encodedFilePath = _fixture.GetValidMediaPath();
+        var exampleEvent = new VideoEncodedMessageDTO
+        {
+            Message = new VideoEncodedMetadataDTO
+            {
+                FilePath = video.Media!.FilePath,
+                ResourceId = video.Id.ToString()
+            },
+            Error = "There was an error on processing the video."
+        };
+
+        _fixture.PublishMessageToRabbitMQ(exampleEvent);
+
+        await Task.Delay(800);
+        var videoFromDB = await _fixture.VideoPersistence.GetById(video.Id);
+        videoFromDB.Should().NotBeNull();
+        videoFromDB!.Media!.Status.Should().Be(MediaStatus.Error);
+        videoFromDB!.Media!.FilePath.Should().BeNull();
+        (object? @event, uint count) = _fixture.ReadMessageFromRabbitMQ<object>();
+        @event.Should().BeNull();
+        count.Should().Be(0);
+    }
+
+    [Fact(DisplayName = nameof(InvalidMessageEventReceived))]
+    [Trait("End2End/Worker", "Video Encoded - Event Handler")]
+    public async Task InvalidMessageEventReceived()
+    {
+        var exampleVideos = _fixture.GetVideoCollection(5);
+        await _fixture.VideoPersistence.InsertList(exampleVideos);
+        var encodedFilePath = _fixture.GetValidMediaPath();
+        var exampleEvent = new VideoEncodedMessageDTO
+        {
+            Message = new VideoEncodedMetadataDTO
+            {
+                FilePath = _fixture.GetValidMediaPath(),
+                ResourceId = Guid.NewGuid().ToString()
+            },
+            Error = "There was an error on processing the video."
+        };
+
+        _fixture.PublishMessageToRabbitMQ(exampleEvent);
+
+        await Task.Delay(800);
+        (object? @event, uint count) = _fixture.ReadMessageFromRabbitMQ<object>();
+        @event.Should().BeNull();
+        count.Should().Be(0);
     }
 
     public void Dispose()

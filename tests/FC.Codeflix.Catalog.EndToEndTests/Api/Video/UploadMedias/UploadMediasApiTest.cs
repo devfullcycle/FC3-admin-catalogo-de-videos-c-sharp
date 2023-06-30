@@ -1,4 +1,5 @@
 ﻿using FC.Codeflix.Catalog.Application.Common;
+using FC.Codeflix.Catalog.Domain.Events;
 using FC.Codeflix.Catalog.EndToEndTests.Api.Video.Common;
 using FC.Codeflix.Catalog.EndToEndTests.Extensions.Stream;
 using FluentAssertions;
@@ -203,7 +204,8 @@ public class UploadMediasApiTest : IDisposable
                 It.IsAny<CancellationToken>(),
                 It.IsAny<IProgress<IUploadProgress>>()),
             Times.Once);
-        var (@event, remainingMessages) = _fixture.ReadMessageFromRabbitMQ();
+        var (@event, remainingMessages) = _fixture
+            .ReadMessageFromRabbitMQ<VideoUploadedEvent>();
         remainingMessages.Should().Be(0);
         @event.Should().NotBeNull();
         @event!.FilePath.Should().Be(expectedFileName);
