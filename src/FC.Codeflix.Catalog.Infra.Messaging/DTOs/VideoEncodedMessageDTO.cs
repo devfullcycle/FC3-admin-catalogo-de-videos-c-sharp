@@ -11,4 +11,6 @@ public class VideoEncodedMetadataDTO
     public string? EncodedVideoFolder { get; set; }
     public string? FilePath { get; set; }
     public string? ResourceId { get; set; }
+
+    public string FullEncodedVideoFilePath => $"{EncodedVideoFolder}/{FilePath}";
 }
