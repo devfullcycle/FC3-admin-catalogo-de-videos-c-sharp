@@ -4,7 +4,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddAppConections(builder.Configuration)
-    .AddUseCases(builder.Configuration)
+    .AddUseCases()
+    .AddRabbitMQ(builder.Configuration)
+    .AddMessageProducer()
+    .AddMessageConsumer()
     .AddStorage(builder.Configuration)
     .AddAndConfigureControllers();
 

@@ -43,7 +43,7 @@ public class VideoEncodedEventConsumerTest : IDisposable
         var videoFromDB = await _fixture.VideoPersistence.GetById(video.Id);
         videoFromDB.Should().NotBeNull();
         videoFromDB!.Media!.Status.Should().Be(MediaStatus.Completed);
-        videoFromDB!.Media!.FilePath.Should().Be(encodedFilePath);
+        videoFromDB!.Media!.EncodedPath.Should().Be(exampleEvent.Video.FullEncodedVideoFilePath);
         (object? @event, uint count) = _fixture.ReadMessageFromRabbitMQ<object>();
         @event.Should().BeNull();
         count.Should().Be(0);   
@@ -73,7 +73,7 @@ public class VideoEncodedEventConsumerTest : IDisposable
         var videoFromDB = await _fixture.VideoPersistence.GetById(video.Id);
         videoFromDB.Should().NotBeNull();
         videoFromDB!.Media!.Status.Should().Be(MediaStatus.Error);
-        videoFromDB!.Media!.FilePath.Should().BeNull();
+        videoFromDB!.Media!.EncodedPath.Should().BeNull();
         (object? @event, uint count) = _fixture.ReadMessageFromRabbitMQ<object>();
         @event.Should().BeNull();
         count.Should().Be(0);

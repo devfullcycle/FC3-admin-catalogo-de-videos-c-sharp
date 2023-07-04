@@ -16,7 +16,7 @@ using System.Text;
 using System.Text.Json;
 
 namespace FC.Codeflix.Catalog.Infra.Messaging.Consumer;
-internal class VideoEncodedEventConsumer : BackgroundService
+public class VideoEncodedEventConsumer : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<VideoEncodedEventConsumer> _logger;
