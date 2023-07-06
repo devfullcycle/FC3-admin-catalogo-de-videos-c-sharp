@@ -22,4 +22,10 @@ public class Media : SeedWork.Entity
         Status = MediaStatus.Completed;
         EncodedPath = encodedExamplePath;
     }
+
+    public void UpdateAsEncodingError()
+    {
+        Status = MediaStatus.Error;
+        EncodedPath = null;
+    }
 }

@@ -6,7 +6,7 @@ using System;
 using System.Net.Http;
 
 namespace FC.Codeflix.Catalog.EndToEndTests.Base;
-public class BaseFixture
+public class BaseFixture : IDisposable
 {
     protected Faker Faker { get; set; }
 
@@ -45,5 +45,10 @@ public class BaseFixture
         var context = CreateDbContext();
         context.Database.EnsureDeleted();
         context.Database.EnsureCreated();
+    }
+
+    public void Dispose()
+    {
+        WebAppFactory.Dispose();
     }
 }
