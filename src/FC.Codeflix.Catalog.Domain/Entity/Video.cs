@@ -112,6 +112,13 @@ public class Video : AggregateRoot
         Media.UpdateAsEncoded(validEncodedPath);
     }
 
+    public void UpdateAsEncodingError()
+    {
+        if (Media is null)
+            throw new EntityValidationException("There is no Media");
+        Media.UpdateAsEncodingError();
+    }
+
     public void AddCategory(Guid categoryId)
         => _categories.Add(categoryId);
 
@@ -138,4 +145,6 @@ public class Video : AggregateRoot
 
     public void RemoveAllCastMembers()
         => _castMembers = new();
+
+    
 }

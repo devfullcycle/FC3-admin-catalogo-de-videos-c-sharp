@@ -9,12 +9,16 @@ using Moq;
 using RabbitMQ.Client;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FC.Codeflix.Catalog.EndToEndTests.Base;
 public class CustomWebApplicationFactory<TStartup>
-    : WebApplicationFactory<TStartup>
+    : WebApplicationFactory<TStartup>, IDisposable
     where TStartup : class
 {
+    private const string VideoCreatedRoutingKey = "video.created";
+    public string VideoEncodedRoutingKey => "video.encoded";
+    public string VideoCreatedQueue => "video.created.queue";
     public Mock<StorageClient> StorageClient { get; private set; }
     public IModel RabbitMQChannel { get; private set; }
     public RabbitMQConfiguration RabbitMQConfiguration { get; private set; }
@@ -42,6 +46,7 @@ public class CustomWebApplicationFactory<TStartup>
                 .ServiceProvider
                 .GetService<IOptions<RabbitMQConfiguration>>()!
                 .Value;
+            SetupRabbitMQ();
             var context = scope.ServiceProvider
                 .GetService<CodeflixCatalogDbContext>();
             ArgumentNullException.ThrowIfNull(context);
@@ -51,4 +56,36 @@ public class CustomWebApplicationFactory<TStartup>
 
         base.ConfigureWebHost(builder);
     }
+
+    public void SetupRabbitMQ()
+    {
+        var channel = RabbitMQChannel!;
+        var exchange = RabbitMQConfiguration!.Exchange;
+        channel.ExchangeDeclare(exchange, "direct", true, false, null);
+        channel.QueueDeclare(VideoCreatedQueue, true, false, false, null);
+        channel.QueueBind(VideoCreatedQueue, exchange, VideoCreatedRoutingKey, null);
+        channel.QueueDeclare(RabbitMQConfiguration.VideoEncodedQueue,
+            true, false, false, null);
+        channel.QueueBind(RabbitMQConfiguration.VideoEncodedQueue,
+            exchange, VideoEncodedRoutingKey, null);
+    }
+
+    private void TearDownRabbitMQ()
+    {
+        var channel = RabbitMQChannel!;
+        var exchange = RabbitMQConfiguration!.Exchange;
+        channel.QueueUnbind(VideoCreatedQueue, exchange, VideoCreatedRoutingKey, null);
+        channel.QueueDelete(VideoCreatedQueue, false, false);
+        channel.QueueUnbind(RabbitMQConfiguration.VideoEncodedQueue,
+            exchange, VideoEncodedRoutingKey, null);
+        channel.QueueDelete(RabbitMQConfiguration.VideoEncodedQueue, false, false);
+        channel.ExchangeDelete(exchange, false);
+    }
+
+    public override ValueTask DisposeAsync()
+    {
+        TearDownRabbitMQ();
+        return base.DisposeAsync();
+    }
 }
+
