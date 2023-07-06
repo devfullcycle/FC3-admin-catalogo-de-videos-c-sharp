@@ -8,12 +8,14 @@ using FC.Codeflix.Catalog.Application.UseCases.Video.GetVideo;
 using FC.Codeflix.Catalog.Application.UseCases.Video.ListVideos;
 using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FC.Codeflix.Catalog.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Authorize]
 public class VideosController : ControllerBase
 {
     private readonly IMediator _mediator;

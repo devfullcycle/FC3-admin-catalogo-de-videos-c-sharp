@@ -8,12 +8,14 @@ using FC.Codeflix.Catalog.Application.UseCases.Genre.ListGenres;
 using FC.Codeflix.Catalog.Application.UseCases.Genre.UpdateGenre;
 using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FC.Codeflix.Catalog.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Authorize]
 public class GenresController : ControllerBase
 {
     private readonly IMediator _mediator;
