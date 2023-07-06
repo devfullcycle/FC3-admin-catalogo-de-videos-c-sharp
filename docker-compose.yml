@@ -21,6 +21,26 @@ services:
       - 15672:15672
       - 5672:5672
 
+  keycloak:
+    container_name: adm_videos_keycloak
+    image: quay.io/keycloak/keycloak:20.0.3
+    hostname: keycloak
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_DB=mysql
+      - KC_DB_URL_HOST=catalogdb
+      - KC_DB_URL_PORT=3306
+      - KC_DB_SCHEMA=keycloak
+      - KC_DB_USERNAME=root
+      - KC_DB_PASSWORD=C0D3fl1X.@
+    ports:
+      - 8443:8080
+    command:
+      - start-dev
+    depends_on:
+      - fc.codeflix.catalog.fb
+
 networks:
   default:
     name: service_catalog
