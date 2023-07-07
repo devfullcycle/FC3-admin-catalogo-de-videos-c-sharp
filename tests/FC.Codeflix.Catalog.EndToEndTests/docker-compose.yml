@@ -20,3 +20,7 @@ services:
     ports:
       - 25672:15672
       - 56720:5672
+
+networks:
+  default:
+    name: service_catalog
