@@ -1,5 +1,6 @@
 using FC.Codeflix.Catalog.Api.ApiModels.Category;
 using FC.Codeflix.Catalog.Api.ApiModels.Response;
+using FC.Codeflix.Catalog.Api.Authorization;
 using FC.Codeflix.Catalog.Application.UseCases.Category.Common;
 using FC.Codeflix.Catalog.Application.UseCases.Category.CreateCategory;
 using FC.Codeflix.Catalog.Application.UseCases.Category.DeleteCategory;
@@ -15,7 +16,7 @@ namespace FC.Codeflix.Catalog.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[Authorize]
+[Authorize(Roles = $"{Roles.Categories},{Roles.Admin}")]
 public class CategoriesController : ControllerBase
 {
     private readonly IMediator _mediator;

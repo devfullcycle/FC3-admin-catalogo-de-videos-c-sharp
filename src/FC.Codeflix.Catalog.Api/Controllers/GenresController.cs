@@ -1,5 +1,6 @@
 using FC.Codeflix.Catalog.Api.ApiModels.Genre;
 using FC.Codeflix.Catalog.Api.ApiModels.Response;
+using FC.Codeflix.Catalog.Api.Authorization;
 using FC.Codeflix.Catalog.Application.UseCases.Genre.Common;
 using FC.Codeflix.Catalog.Application.UseCases.Genre.CreateGenre;
 using FC.Codeflix.Catalog.Application.UseCases.Genre.DeleteGenre;
@@ -15,7 +16,7 @@ namespace FC.Codeflix.Catalog.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[Authorize]
+[Authorize(Roles = $"{Roles.Genres},{Roles.Admin}")]
 public class GenresController : ControllerBase
 {
     private readonly IMediator _mediator;

@@ -1,5 +1,6 @@
 ﻿using FC.Codeflix.Catalog.Api.ApiModels;
 using FC.Codeflix.Catalog.Api.ApiModels.Response;
+using FC.Codeflix.Catalog.Api.Authorization;
 using FC.Codeflix.Catalog.Application.UseCases.CastMember.Common;
 using FC.Codeflix.Catalog.Application.UseCases.CastMember.CreateCastMember;
 using FC.Codeflix.Catalog.Application.UseCases.CastMember.DeleteCastMember;
@@ -15,7 +16,7 @@ namespace FC.Codeflix.Catalog.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[Authorize]
+[Authorize(Roles = $"{Roles.CastMembers},{Roles.Admin}")]
 public class CastMembersController : ControllerBase
 {
     private readonly IMediator _mediator;
