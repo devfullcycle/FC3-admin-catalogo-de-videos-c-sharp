@@ -40,6 +40,7 @@ services:
       - .docker/keycloak:/opt/keycloak/data/import
     ports:
       - 8444:8080
+    restart: unless-stopped
     command:
       - start-dev --import-realm
     depends_on:
