@@ -65,6 +65,9 @@ public class ApiClient
         return credentials!.AccessToken;
     }
 
+    public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
+        => await _httpClient.SendAsync(request);
+
     public async Task<(HttpResponseMessage?, TOutput?)> Post<TOutput>(
         string route,
         object payload
