@@ -1,22 +1,22 @@
 ﻿using FC.Codeflix.Catalog.Api.ApiModels;
-using FC.Codeflix.Catalog.Api.ApiModels.Category;
 using FC.Codeflix.Catalog.Api.ApiModels.Response;
+using FC.Codeflix.Catalog.Api.Authorization;
 using FC.Codeflix.Catalog.Application.UseCases.CastMember.Common;
 using FC.Codeflix.Catalog.Application.UseCases.CastMember.CreateCastMember;
 using FC.Codeflix.Catalog.Application.UseCases.CastMember.DeleteCastMember;
 using FC.Codeflix.Catalog.Application.UseCases.CastMember.GetCastMember;
 using FC.Codeflix.Catalog.Application.UseCases.CastMember.ListCastMembers;
 using FC.Codeflix.Catalog.Application.UseCases.CastMember.UpdateCastMember;
-using FC.Codeflix.Catalog.Application.UseCases.Category.Common;
-using FC.Codeflix.Catalog.Application.UseCases.Category.GetCategory;
 using FC.Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FC.Codeflix.Catalog.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Authorize(Roles = $"{Roles.CastMembers},{Roles.Admin}")]
 public class CastMembersController : ControllerBase
 {
     private readonly IMediator _mediator;

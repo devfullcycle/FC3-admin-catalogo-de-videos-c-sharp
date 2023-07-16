@@ -1,8 +1,11 @@
 ﻿using FC.Codeflix.Catalog.Application.UseCases.Video.Common;
 using FC.Codeflix.Catalog.Infra.Messaging.JsonPolicies;
+using Keycloak.AuthServices.Authentication;
 using Microsoft.AspNetCore.WebUtilities;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -15,8 +18,12 @@ public class ApiClient
 {
     private readonly HttpClient _httpClient;
     private readonly JsonSerializerOptions _defaultSerializeOptions;
+    private readonly KeycloakAuthenticationOptions _keycloakOptions;
+    private const string _adminUser = "admin";
+    private const string _adminPassword = "123456";
 
-    public ApiClient(HttpClient httpClient)
+    public ApiClient(HttpClient httpClient,
+        KeycloakAuthenticationOptions keycloakOptions)
     {
         _httpClient = httpClient;
         _defaultSerializeOptions = new JsonSerializerOptions
@@ -24,7 +31,42 @@ public class ApiClient
             PropertyNamingPolicy = new JsonSnakeCasePolicy(),
             PropertyNameCaseInsensitive = true
         };
+        _keycloakOptions = keycloakOptions;
+        AddAuthorizationHeader();
     }
+
+    private void AddAuthorizationHeader()
+    {
+        var accessToken = GetAccessTokenAsync(_adminUser, _adminPassword)
+            .GetAwaiter().GetResult();
+        _httpClient.DefaultRequestHeaders
+            .Authorization = new AuthenticationHeaderValue(
+                "Bearer", accessToken);
+    }
+
+    public async Task<string> GetAccessTokenAsync(string user, string password)
+    {
+        var client = new HttpClient();
+        var request = new HttpRequestMessage(
+            HttpMethod.Post,
+            $"{_keycloakOptions.KeycloakUrlRealm}/protocol/openid-connect/token");
+        var collection = new List<KeyValuePair<string, string>>
+        {
+            new("grant_type", "password"),
+            new("client_id", _keycloakOptions.Resource),
+            new("client_secret", _keycloakOptions.Credentials.Secret),
+            new("username", user),
+            new("password", password)
+        };
+        var content = new FormUrlEncodedContent(collection);
+        request.Content = content;
+        var response = await client.SendAsync(request);
+        var credentials = await GetOutput<Credentials>(response);
+        return credentials!.AccessToken;
+    }
+
+    public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
+        => await _httpClient.SendAsync(request);
 
     public async Task<(HttpResponseMessage?, TOutput?)> Post<TOutput>(
         string route,

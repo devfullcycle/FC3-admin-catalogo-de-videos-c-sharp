@@ -1,7 +1,9 @@
 ﻿using Bogus;
 using FC.Codeflix.Catalog.Infra.Data.EF;
+using Keycloak.AuthServices.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Net.Http;
 
@@ -20,11 +22,14 @@ public class BaseFixture : IDisposable
         Faker = new Faker("pt_BR");
         WebAppFactory = new CustomWebApplicationFactory<Program>();
         HttpClient = WebAppFactory.CreateClient();
-        ApiClient = new ApiClient(HttpClient);
         var configuration = WebAppFactory.Services
-            .GetService(typeof(IConfiguration));
+            .GetRequiredService<IConfiguration>();
+        var keycloakOptions = configuration
+            .GetSection(KeycloakAuthenticationOptions.Section)
+            .Get<KeycloakAuthenticationOptions>();
+        ApiClient = new ApiClient(HttpClient, keycloakOptions);
         ArgumentNullException.ThrowIfNull(configuration);
-        _dbConnectionString = ((IConfiguration)configuration)
+        _dbConnectionString = configuration
             .GetConnectionString("CatalogDb");
     }
 
