@@ -1,0 +1,40 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: CI do projeto FC3 Catalog Admin
+
+on:
+  push:
+    branches: [ "main", "ci" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+        
+    - name: Start containers
+      run: docker-compose -f "tests/FC.Codeflix.Catalog.EndToEndTests/docker-compose.yml" up -d --build
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --no-restore
+      
+    - name: Waits Keycloak
+      uses: iFaxity/wait-on-action@v1.1.0
+      with:
+        resource: http://localhost:8444/realms/fc3-codeflix/.well-known/openid-configuration
+      
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
