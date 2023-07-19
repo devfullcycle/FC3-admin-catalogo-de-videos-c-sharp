@@ -8,6 +8,7 @@ on:
     branches: [ "main", "ci" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 env:
   IMAGE_NAME: fc3-admin-catalogo-de-videos-c-sharp
