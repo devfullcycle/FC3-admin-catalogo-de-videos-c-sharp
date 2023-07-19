@@ -9,6 +9,9 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  IMAGE_NAME: fc3-admin-catalogo-de-videos-c-sharp
+
 jobs:
   tests:
     name: Tests
@@ -52,3 +55,39 @@ jobs:
         path: "**/test-results.trx"                            
         reporter: dotnet-trx
         fail-on-error: true
+
+  build:
+    name: Build and Publish
+    runs-on: ubuntu-latest
+    needs: tests
+    steps:
+    - uses: actions/checkout@v3
+  
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+
+    - name: Set BUILD_TAG
+      run: |
+          echo BUILD_TAG=$(echo ${{ github.head_ref || github.ref_name }} | sed "s,/,_,g")-${{ github.run_number }} >> $GITHUB_ENV
+    
+    - name: Print BUILD_TAG defined
+      run: |
+          echo "Branch     ---> ${{ github.head_ref || github.ref_name }}"
+          echo "Run number ---> ${{ github.run_number }}"
+          echo "Tag        ---> ${{ env.BUILD_TAG }}"
+
+    - name: Log in to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_HUB_USER }}
+        password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+    - name: Build and push Docker images
+      uses: docker/build-push-action@v4.1.1
+      with:
+        context: .
+        file: ./src/FC.Codeflix.Catalog.Api/Dockerfile
+        push: true
+        tags: ${{ secrets.DOCKER_HUB_USER}}/${{ env.IMAGE_NAME }}:${{ env.BUILD_TAG }},${{ secrets.DOCKER_HUB_USER}}/${{ env.IMAGE_NAME }}:latest
