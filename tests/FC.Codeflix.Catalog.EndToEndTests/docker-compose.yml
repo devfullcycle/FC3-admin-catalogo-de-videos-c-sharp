@@ -45,3 +45,7 @@ services:
       - start-dev --import-realm
     depends_on:
       - fc.codeflix.catalog.fb
+
+networks:
+  default:
+    name: service_catalog
