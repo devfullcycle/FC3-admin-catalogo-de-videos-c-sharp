@@ -1,6 +1,19 @@
 version: '3.4'
 
 services:
+  app:
+    container_name: adm_videos_app
+    image: igorgomes96/fc3-admin-catalogo-de-videos-c-sharp:latest
+    ports:
+      - 5000:80
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - fc.codeflix.catalog.fb
+      - rabbitmq
+      - keycloak
+
   fc.codeflix.catalog.fb:
     container_name: catalogdb
     hostname: catalogdb
