@@ -14,7 +14,7 @@ builder.Services
 
 var app = builder.Build();
 app.UseDocumentation();
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
