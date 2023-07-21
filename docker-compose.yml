@@ -18,6 +18,8 @@ services:
     container_name: catalogdb
     hostname: catalogdb
     image: mysql
+    volumes:
+      - .docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - 3306:3306
     environment:
@@ -27,6 +29,9 @@ services:
     container_name: adm_videos_rabbitmq
     image: rabbitmq:3-management
     hostname: rabbitmq
+    volumes:
+      - .docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - .docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
     environment:
       - RABBITMQ_DEFAULT_USER=adm_videos
       - RABBITMQ_DEFAULT_PASS=123456
@@ -38,6 +43,8 @@ services:
     container_name: adm_videos_keycloak
     image: quay.io/keycloak/keycloak:20.0.3
     hostname: keycloak
+    volumes:
+      - .docker/keycloak:/opt/keycloak/data/import
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
@@ -50,7 +57,7 @@ services:
     ports:
       - 8443:8080
     command:
-      - start-dev
+      - start-dev --import-realm
     depends_on:
       - fc.codeflix.catalog.fb
 

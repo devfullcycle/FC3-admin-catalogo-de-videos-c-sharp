@@ -13,6 +13,7 @@ builder.Services
     .AddAndConfigureControllers();
 
 var app = builder.Build();
+app.MigrateDatabase();
 app.UseDocumentation();
 //app.UseHttpsRedirection();
 app.UseAuthentication();

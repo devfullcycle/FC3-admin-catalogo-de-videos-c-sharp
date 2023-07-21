@@ -1,0 +1,76 @@
+{
+    "queues": [
+        {
+            "name": "video.created.queue",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "video.encoded.queue",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        }
+    ],
+    "exchanges": [
+        {
+            "name": "video.events",
+            "vhost": "/",
+            "type": "direct",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false,
+            "arguments": {}
+        }
+    ],
+    "bindings": [
+        {
+            "source": "video.events",
+            "vhost": "/",
+            "destination": "video.created.queue",
+            "destination_type": "queue",
+            "routing_key": "video.created",
+            "arguments": {}
+        },
+        {
+            "source": "video.events",
+            "vhost": "/",
+            "destination": "video.encoded.queue",
+            "destination_type": "queue",
+            "routing_key": "video.encoded",
+            "arguments": {}
+        }
+    ],
+    "users": [
+        {
+            "name": "adm_videos",
+            "password_hash": "BSfwKP0nn05JBsWV9CUSoBjVluZWOxUKdttzbXvU/oq+EsQm",
+            "hashing_algorithm": "rabbit_password_hashing_sha256",
+            "tags": [
+                "administrator"
+            ],
+            "limits": {}
+        }
+    ],
+    "vhosts": [
+        {
+            "name": "/"
+        }
+    ],
+    "permissions": [
+        {
+            "user": "adm_videos",
+            "vhost": "/",
+            "configure": ".*",
+            "write": ".*",
+            "read": ".*"
+        }
+    ]
+}
