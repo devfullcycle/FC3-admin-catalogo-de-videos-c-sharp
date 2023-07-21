@@ -4,11 +4,15 @@ services:
   app:
     container_name: adm_videos_app
     image: igorgomes96/fc3-admin-catalogo-de-videos-c-sharp:latest
+    restart: unless-stopped
+    volumes:
+      - ./src/FC.Codeflix.Catalog.Api/gcp_credentials.json:/app/gcp_credentials.json
     ports:
       - 5000:80
     environment:
       - ASPNETCORE_URLS=http://+:80
       - ASPNETCORE_ENVIRONMENT=Development
+      - GOOGLE_APPLICATION_CREDENTIALS=gcp_credentials.json
     depends_on:
       - fc.codeflix.catalog.fb
       - rabbitmq
@@ -43,6 +47,7 @@ services:
     container_name: adm_videos_keycloak
     image: quay.io/keycloak/keycloak:20.0.3
     hostname: keycloak
+    restart: unless-stopped
     volumes:
       - .docker/keycloak:/opt/keycloak/data/import
     environment:
