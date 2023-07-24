@@ -1,0 +1,94 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: CI do projeto FC3 Catalog Admin
+
+on:
+  push:
+    branches: [ "main", "ci" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: fc3-admin-catalogo-de-videos-c-sharp
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+      checks: write
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+        
+    - name: Start containers
+      run: docker-compose -f "tests/FC.Codeflix.Catalog.EndToEndTests/docker-compose.yml" up -d --build
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --no-restore
+      
+    - name: Waits Keycloak
+      uses: iFaxity/wait-on-action@v1.1.0
+      with:
+        resource: http://localhost:8444/realms/fc3-codeflix/.well-known/openid-configuration
+      
+    - name: Test
+      run: dotnet test --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+
+    - name: Test Report
+      uses: dorny/test-reporter@v1
+      if: always()
+      with:
+        name: Report Tests
+        path: "**/test-results.trx"                            
+        reporter: dotnet-trx
+        fail-on-error: true
+
+  build:
+    name: Build and Publish
+    runs-on: ubuntu-latest
+    needs: tests
+    steps:
+    - uses: actions/checkout@v3
+  
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+
+    - name: Set BUILD_TAG
+      run: |
+          echo BUILD_TAG=$(echo ${{ github.head_ref || github.ref_name }} | sed "s,/,_,g")-${{ github.run_number }} >> $GITHUB_ENV
+    
+    - name: Print BUILD_TAG defined
+      run: |
+          echo "Branch     ---> ${{ github.head_ref || github.ref_name }}"
+          echo "Run number ---> ${{ github.run_number }}"
+          echo "Tag        ---> ${{ env.BUILD_TAG }}"
+
+    - name: Log in to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_HUB_USER }}
+        password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+    - name: Build and push Docker images
+      uses: docker/build-push-action@v4.1.1
+      with:
+        context: .
+        file: ./src/FC.Codeflix.Catalog.Api/Dockerfile
+        push: true
+        tags: ${{ secrets.DOCKER_HUB_USER}}/${{ env.IMAGE_NAME }}:${{ env.BUILD_TAG }},${{ secrets.DOCKER_HUB_USER}}/${{ env.IMAGE_NAME }}:latest

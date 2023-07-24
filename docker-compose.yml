@@ -1,10 +1,29 @@
 version: '3.4'
 
 services:
+  app:
+    container_name: adm_videos_app
+    image: igorgomes96/fc3-admin-catalogo-de-videos-c-sharp:latest
+    restart: unless-stopped
+    volumes:
+      - ./src/FC.Codeflix.Catalog.Api/gcp_credentials.json:/app/gcp_credentials.json
+    ports:
+      - 5000:80
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_ENVIRONMENT=Development
+      - GOOGLE_APPLICATION_CREDENTIALS=gcp_credentials.json
+    depends_on:
+      - fc.codeflix.catalog.fb
+      - rabbitmq
+      - keycloak
+
   fc.codeflix.catalog.fb:
     container_name: catalogdb
     hostname: catalogdb
     image: mysql
+    volumes:
+      - .docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - 3306:3306
     environment:
@@ -14,6 +33,9 @@ services:
     container_name: adm_videos_rabbitmq
     image: rabbitmq:3-management
     hostname: rabbitmq
+    volumes:
+      - .docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - .docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
     environment:
       - RABBITMQ_DEFAULT_USER=adm_videos
       - RABBITMQ_DEFAULT_PASS=123456
@@ -25,6 +47,9 @@ services:
     container_name: adm_videos_keycloak
     image: quay.io/keycloak/keycloak:20.0.3
     hostname: keycloak
+    restart: unless-stopped
+    volumes:
+      - .docker/keycloak:/opt/keycloak/data/import
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
@@ -37,7 +62,7 @@ services:
     ports:
       - 8443:8080
     command:
-      - start-dev
+      - start-dev --import-realm
     depends_on:
       - fc.codeflix.catalog.fb
 

@@ -71,7 +71,8 @@ public class VideoEncodedEventConsumer : BackgroundService
             var message = JsonSerializer
                 .Deserialize<VideoEncodedMessageDTO>(messageString, jsonOptions);
             var input = GetUpdateMediaStatusInput(message!);
-            mediator.Send(input, CancellationToken.None).Wait();
+            mediator.Send(input, CancellationToken.None)
+                .GetAwaiter().GetResult();
             _channel.BasicAck(eventArgs.DeliveryTag, false);
         }
         catch (Exception ex)
