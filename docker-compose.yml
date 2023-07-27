@@ -20,6 +20,7 @@ services:
       - filebeat
     labels:
       filebeat_collector: true
+      decode_log_event_to_json_object: true
 
   fc.codeflix.catalog.fb:
     container_name: catalogdb
