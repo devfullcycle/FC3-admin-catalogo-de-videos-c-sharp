@@ -80,7 +80,7 @@ public class GenresController : ControllerBase
                 id,
                 apiInput.Name, 
                 apiInput.IsActive, 
-                apiInput.CategoriesIds
+                apiInput.CategoriesId
             ), 
             cancellationToken
         );

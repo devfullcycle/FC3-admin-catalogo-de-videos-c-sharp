@@ -8,14 +8,14 @@ public class CreateGenreInput:
     public CreateGenreInput(
         string name, 
         bool isActive,
-        List<Guid>? categoriesIds = null 
+        List<Guid>? categoriesId = null 
     ) {
         Name = name;
         IsActive = isActive;
-        CategoriesIds = categoriesIds;
+        CategoriesId = categoriesId;
     }
 
     public string Name { get; set; }
     public bool IsActive { get; set; }
-    public List<Guid>? CategoriesIds { get; set; }
+    public List<Guid>? CategoriesId { get; set; }
 }

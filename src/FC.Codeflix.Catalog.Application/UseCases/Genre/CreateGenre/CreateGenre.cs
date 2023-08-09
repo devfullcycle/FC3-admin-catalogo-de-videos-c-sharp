@@ -29,10 +29,10 @@ public class CreateGenre : ICreateGenre
             request.Name,
             request.IsActive
         );
-        if ((request.CategoriesIds?.Count ?? 0) > 0)
+        if ((request.CategoriesId?.Count ?? 0) > 0)
         {
             await ValidateCategoriesIds(request, cancellationToken);
-            request.CategoriesIds?.ForEach(genre.AddCategory);
+            request.CategoriesId?.ForEach(genre.AddCategory);
         }   
         await _genreRepository.Insert(genre, cancellationToken);
         await _unitOfWork.Commit(cancellationToken);
@@ -46,12 +46,12 @@ public class CreateGenre : ICreateGenre
     {
         var IdsInPersistence = await _categoryRepository
             .GetIdsListByIds(
-                request.CategoriesIds!,
+                request.CategoriesId!,
                 cancellationToken
             );
-        if (IdsInPersistence.Count < request.CategoriesIds!.Count)
+        if (IdsInPersistence.Count < request.CategoriesId!.Count)
         {
-            var notFoundIds = request.CategoriesIds
+            var notFoundIds = request.CategoriesId
                 .FindAll(x => !IdsInPersistence.Contains(x));
             var notFoundIdsAsString = String.Join(", ", notFoundIds);
             throw new RelatedAggregateException(
