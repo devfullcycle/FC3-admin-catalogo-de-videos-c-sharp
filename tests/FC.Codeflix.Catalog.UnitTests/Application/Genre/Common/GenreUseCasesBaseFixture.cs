@@ -83,6 +83,7 @@ public class GenreUseCasesBaseFixture
             GetRandomBoolean()
         );
 
-    public IEnumerable<DomainEntity.Category> GetExampleCategoriesList(int count = 5)
-        => Enumerable.Range(0, count).Select(_ => GetExampleCategory());
+    public List<DomainEntity.Category> GetExampleCategoriesList(int count = 5)
+        => Enumerable.Range(0, count).Select(_ => GetExampleCategory())
+            .ToList();
 }

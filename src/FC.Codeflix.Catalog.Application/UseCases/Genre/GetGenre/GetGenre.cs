@@ -17,14 +17,22 @@ public class GetGenre
     }
 
     public async Task<GenreModelOutput> Handle(
-        GetGenreInput request, 
+        GetGenreInput request,
         CancellationToken cancellationToken
     )
     {
         var genre = await _genreRepository
             .Get(request.Id, cancellationToken);
         var output = GenreModelOutput.FromGenre(genre);
-
+        if (output.Categories.Count > 0)
+        {
+            var categories = (await _categoryRepository
+                .GetListByIds(output.Categories
+                    .Select(x => x.Id).ToList(), cancellationToken))
+                        .ToDictionary(x => x.Id);
+            foreach (var category in output.Categories) 
+                category.Name = categories[category.Id].Name;
+        }
 
         return output;
     }

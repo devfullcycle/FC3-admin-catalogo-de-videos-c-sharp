@@ -4,9 +4,11 @@ using FC.Codeflix.Catalog.Application.UseCases.Genre.Common;
 using FluentAssertions;
 using Moq;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Xunit;
 using UseCase = FC.Codeflix.Catalog.Application.UseCases.Genre.GetGenre;
 
@@ -34,6 +36,9 @@ public class GetGenreTest
             It.Is<Guid>(x => x == exampleGenre.Id),
             It.IsAny<CancellationToken>()
         )).ReturnsAsync(exampleGenre);
+        categoryRepositoryMock.Setup(x => x.GetListByIds(
+            It.IsAny<List<Guid>>(), It.IsAny<CancellationToken>())
+        ).ReturnsAsync(exampleCategories);
         var useCase = new UseCase
             .GetGenre(genreRepositoryMock.Object, categoryRepositoryMock.Object);
         var input = new UseCase.GetGenreInput(exampleGenre.Id);
