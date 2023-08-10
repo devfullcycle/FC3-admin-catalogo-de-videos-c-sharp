@@ -6,9 +6,15 @@ public class GetGenre
     : IGetGenre
 {
     private readonly IGenreRepository _genreRepository;
+    private readonly ICategoryRepository _categoryRepository;
 
-    public GetGenre(IGenreRepository genreRepository) 
-        => _genreRepository = genreRepository;
+    public GetGenre(
+        IGenreRepository genreRepository,
+        ICategoryRepository categoryRepository)
+    {
+        _genreRepository = genreRepository;
+        _categoryRepository = categoryRepository;
+    }
 
     public async Task<GenreModelOutput> Handle(
         GetGenreInput request, 
@@ -17,6 +23,9 @@ public class GetGenre
     {
         var genre = await _genreRepository
             .Get(request.Id, cancellationToken);
-        return GenreModelOutput.FromGenre(genre);
+        var output = GenreModelOutput.FromGenre(genre);
+
+
+        return output;
     }
 }

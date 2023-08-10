@@ -55,4 +55,34 @@ public class GenreUseCasesBaseFixture
 
     public Mock<ICategoryRepository> GetCategoryRepositoryMock()
         => new();
+
+    public string GetValidCategoryName()
+    {
+        var categoryName = "";
+        while (categoryName.Length < 3)
+            categoryName = Faker.Commerce.Categories(1)[0];
+        if (categoryName.Length > 255)
+            categoryName = categoryName[..255];
+        return categoryName;
+    }
+
+    public string GetValidCategoryDescription()
+    {
+        var categoryDescription =
+            Faker.Commerce.ProductDescription();
+        if (categoryDescription.Length > 10_000)
+            categoryDescription =
+                categoryDescription[..10_000];
+        return categoryDescription;
+    }
+
+    public DomainEntity.Category GetExampleCategory()
+        => new(
+            GetValidCategoryName(),
+            GetValidCategoryDescription(),
+            GetRandomBoolean()
+        );
+
+    public IEnumerable<DomainEntity.Category> GetExampleCategoriesList(int count = 5)
+        => Enumerable.Range(0, count).Select(_ => GetExampleCategory());
 }
