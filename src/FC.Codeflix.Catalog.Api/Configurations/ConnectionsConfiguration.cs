@@ -29,4 +29,17 @@ public static class ConnectionsConfiguration
         );
         return services;
     }
+
+    public static WebApplication MigrateDatabase(
+        this WebApplication app)
+    {
+        var environment = Environment
+            .GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+        if (environment == "EndToEndTest") return app;
+        using var scope = app.Services.CreateScope();
+        var dbContext = scope.ServiceProvider
+            .GetRequiredService<CodeflixCatalogDbContext>();
+        dbContext.Database.Migrate();
+        return app;
+    }
 }

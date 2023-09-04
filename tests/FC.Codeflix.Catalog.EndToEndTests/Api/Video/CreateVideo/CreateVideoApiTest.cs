@@ -72,9 +72,9 @@ public class CreateVideoApiTest : IDisposable
         await _fixture.CastMemberPersistence.InsertList(castMembers);
 
         CreateVideoApiInput input = _fixture.GetBasicCreateVideoInput();
-        input.CategoriesIds = categories.Select(c => c.Id).ToList();
-        input.GenresIds = genres.Select(c => c.Id).ToList();
-        input.CastMembersIds = castMembers.Select(c => c.Id).ToList();
+        input.CategoriesId = categories.Select(c => c.Id).ToList();
+        input.GenresId = genres.Select(c => c.Id).ToList();
+        input.CastMembersId = castMembers.Select(c => c.Id).ToList();
 
         var (response, output) = await _fixture.ApiClient
             .Post<ApiResponse<VideoModelOutput>>("/videos", input);
@@ -94,13 +94,13 @@ public class CreateVideoApiTest : IDisposable
         output.Data.Rating.Should().Be(input.Rating);
         var outputCategoryIds = output.Data.Categories.Select(c => c.Id).ToList();
         outputCategoryIds.Should().NotBeEmpty();
-        outputCategoryIds.Should().BeEquivalentTo(input.CategoriesIds);
+        outputCategoryIds.Should().BeEquivalentTo(input.CategoriesId);
         var outputGenreIds = output.Data.Genres.Select(c => c.Id).ToList();
         outputGenreIds.Should().NotBeEmpty();
-        outputGenreIds.Should().BeEquivalentTo(input.GenresIds);
+        outputGenreIds.Should().BeEquivalentTo(input.GenresId);
         var outputCastMemberIds = output.Data.CastMembers.Select(c => c.Id).ToList();
         outputCastMemberIds.Should().NotBeEmpty();
-        outputCastMemberIds.Should().BeEquivalentTo(input.CastMembersIds);
+        outputCastMemberIds.Should().BeEquivalentTo(input.CastMembersId);
         var videoFromDb = await _fixture.VideoPersistence.GetById(output.Data.Id);
         videoFromDb.Should().NotBeNull();
         videoFromDb!.Id.Should().NotBeEmpty();
@@ -115,17 +115,17 @@ public class CreateVideoApiTest : IDisposable
             .GetVideosCategories(videoFromDb.Id);
         categoriesFromDb.Should().NotBeNull();
         var categoriesIdsFromDb = categoriesFromDb.Select(x => x.CategoryId);
-        categoriesIdsFromDb.Should().BeEquivalentTo(input.CategoriesIds);
+        categoriesIdsFromDb.Should().BeEquivalentTo(input.CategoriesId);
         var genresFromDb = await _fixture.VideoPersistence
             .GetVideosGenres(videoFromDb.Id);
         genresFromDb.Should().NotBeNull();
         var genresIdsFromDb = genresFromDb.Select(x => x.GenreId);
-        genresIdsFromDb.Should().BeEquivalentTo(input.GenresIds);
+        genresIdsFromDb.Should().BeEquivalentTo(input.GenresId);
         var castMembersFromDb = await _fixture.VideoPersistence
             .GetVideosCastMembers(videoFromDb.Id);
         castMembersFromDb.Should().NotBeNull();
         var castMembersIdsFromDb = castMembersFromDb.Select(x => x.CastMemberId);
-        castMembersIdsFromDb.Should().BeEquivalentTo(input.CastMembersIds);
+        castMembersIdsFromDb.Should().BeEquivalentTo(input.CastMembersId);
     }
 
     [Fact(DisplayName = nameof(CreateVideoWithInvalidGenreId))]
@@ -134,7 +134,7 @@ public class CreateVideoApiTest : IDisposable
     {
         var invalidGenreId = Guid.NewGuid();
         CreateVideoApiInput input = _fixture.GetBasicCreateVideoInput();
-        input.GenresIds = new List<Guid> { invalidGenreId };
+        input.GenresId = new List<Guid> { invalidGenreId };
 
         var (response, output) = await _fixture.ApiClient
             .Post<ProblemDetails>("/videos", input);
@@ -152,7 +152,7 @@ public class CreateVideoApiTest : IDisposable
     {
         var invalidCategoryId = Guid.NewGuid();
         CreateVideoApiInput input = _fixture.GetBasicCreateVideoInput();
-        input.CategoriesIds = new List<Guid> { invalidCategoryId };
+        input.CategoriesId = new List<Guid> { invalidCategoryId };
 
         var (response, output) = await _fixture.ApiClient
             .Post<ProblemDetails>("/videos", input);
@@ -170,7 +170,7 @@ public class CreateVideoApiTest : IDisposable
     {
         var invalidCastMemberId = Guid.NewGuid();
         CreateVideoApiInput input = _fixture.GetBasicCreateVideoInput();
-        input.CastMembersIds = new List<Guid> { invalidCastMemberId };
+        input.CastMembersId = new List<Guid> { invalidCastMemberId };
 
         var (response, output) = await _fixture.ApiClient
             .Post<ProblemDetails>("/videos", input);

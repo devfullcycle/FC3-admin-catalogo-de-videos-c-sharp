@@ -12,9 +12,9 @@ public class UpdateVideoApiInput
     public bool Published { get; set; }
     public int Duration { get; set; }
     public string? Rating { get; set; }
-    public List<Guid>? CategoriesIds { get; set; }
-    public List<Guid>? GenresIds { get; set; }
-    public List<Guid>? CastMembersIds { get; set; }
+    public List<Guid>? CategoriesId { get; set; }
+    public List<Guid>? GenresId { get; set; }
+    public List<Guid>? CastMembersId { get; set; }
 
     public UpdateVideoInput ToInput(Guid id)
         => new UpdateVideoInput(
@@ -26,7 +26,7 @@ public class UpdateVideoApiInput
             Published,
             Duration,
             Rating.ToRating(),
-            GenresIds,
-            CategoriesIds,
-            CastMembersIds);
+            GenresId,
+            CategoriesId,
+            CastMembersId);
 }

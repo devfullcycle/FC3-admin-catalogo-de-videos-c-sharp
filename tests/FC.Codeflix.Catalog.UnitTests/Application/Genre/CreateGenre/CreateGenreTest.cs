@@ -69,7 +69,7 @@ public class CreateGenreTest
             x => x.GetIdsListByIds(
                 It.IsAny<List<Guid>>(), It.IsAny<CancellationToken>()
             ))
-            .ReturnsAsync((IReadOnlyList<Guid>) input.CategoriesIds!);
+            .ReturnsAsync((IReadOnlyList<Guid>) input.CategoriesId!);
         var useCase = new UseCase.CreateGenre(
             genreRepositoryMock.Object,
             unitOfWorkMock.Object,
@@ -91,8 +91,8 @@ public class CreateGenreTest
         output.Id.Should().NotBeEmpty();
         output.Name.Should().Be(input.Name);
         output.IsActive.Should().Be(input.IsActive);
-        output.Categories.Should().HaveCount(input.CategoriesIds?.Count ?? 0);
-        input.CategoriesIds?.ForEach(id =>
+        output.Categories.Should().HaveCount(input.CategoriesId?.Count ?? 0);
+        input.CategoriesId?.ForEach(id =>
             output.Categories.Should().Contain(relation => relation.Id == id)
         );
         output.CreatedAt.Should().NotBeSameDateAs(default);
@@ -103,7 +103,7 @@ public class CreateGenreTest
     public async Task CreateThrowWhenRelatedCategoryNotFound()
     {
         var input = _fixture.GetExampleInputWithCategories();
-        var exampleGuid = input.CategoriesIds![^1];
+        var exampleGuid = input.CategoriesId![^1];
         var genreRepositoryMock = _fixture.GetGenreRepositoryMock();
         var categoryRepositoryMock = _fixture.GetCategoryRepositoryMock();
         var unitOfWorkMock = _fixture.GetUnitOfWorkMock();
@@ -113,7 +113,7 @@ public class CreateGenreTest
                 It.IsAny<CancellationToken>()
             )
         ).ReturnsAsync(
-            (IReadOnlyList<Guid>) input.CategoriesIds
+            (IReadOnlyList<Guid>) input.CategoriesId
                 .FindAll(x => x != exampleGuid)
         );
         var useCase = new UseCase.CreateGenre(

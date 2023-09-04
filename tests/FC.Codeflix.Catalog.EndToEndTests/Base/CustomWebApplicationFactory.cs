@@ -26,7 +26,9 @@ public class CustomWebApplicationFactory<TStartup>
         IWebHostBuilder builder
     )
     {
-        builder.UseEnvironment("EndToEndTest");
+        var environment = "EndToEndTest";
+        Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", environment);
+        builder.UseEnvironment(environment);
         builder.ConfigureServices(services => {
             var descriptor = services.First(s =>
                 s.ServiceType == typeof(StorageClient));

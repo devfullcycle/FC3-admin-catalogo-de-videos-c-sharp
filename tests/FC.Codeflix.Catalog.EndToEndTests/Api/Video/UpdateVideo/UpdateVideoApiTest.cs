@@ -120,9 +120,9 @@ public class UpdateVideoApiTest : IDisposable
             Published = _fixture.GetRandomBoolean(),
             Rating = _fixture.GetRandomRating().ToStringSignal(),
             YearLaunched = _fixture.GetValidYearLaunched(),
-            CategoriesIds = targetCategories.Select(x => x.Id).ToList(),
-            GenresIds = targetGenres.Select(x => x.Id).ToList(),
-            CastMembersIds = targetCastMembers.Select(x => x.Id).ToList()
+            CategoriesId = targetCategories.Select(x => x.Id).ToList(),
+            GenresId = targetGenres.Select(x => x.Id).ToList(),
+            CastMembersId = targetCastMembers.Select(x => x.Id).ToList()
         };
 
         var (response, output) = await _fixture.ApiClient
@@ -163,15 +163,15 @@ public class UpdateVideoApiTest : IDisposable
         var categoriesFromDb = await _fixture.VideoPersistence
             .GetVideosCategories(targetVideoId);
         var categoriesIdsFromDb = categoriesFromDb.Select(x => x.CategoryId);
-        input.CategoriesIds.Should().BeEquivalentTo(categoriesIdsFromDb);
+        input.CategoriesId.Should().BeEquivalentTo(categoriesIdsFromDb);
         var genresFromDb = await _fixture.VideoPersistence
             .GetVideosGenres(targetVideoId);
         var genresIdsFromDb = genresFromDb.Select(x => x.GenreId);
-        input.GenresIds.Should().BeEquivalentTo(genresIdsFromDb);
+        input.GenresId.Should().BeEquivalentTo(genresIdsFromDb);
         var castMembersFromDb = await _fixture.VideoPersistence
             .GetVideosCastMembers(targetVideoId);
         var castMembersIdsFromDb = castMembersFromDb.Select(x => x.CastMemberId);
-        input.CastMembersIds.Should().BeEquivalentTo(castMembersIdsFromDb);
+        input.CastMembersId.Should().BeEquivalentTo(castMembersIdsFromDb);
     }
 
     [Fact(DisplayName = nameof(Error404WhenVideoIdNotFound))]
@@ -221,7 +221,7 @@ public class UpdateVideoApiTest : IDisposable
             Published = _fixture.GetRandomBoolean(),
             Rating = _fixture.GetRandomRating().ToStringSignal(),
             YearLaunched = _fixture.GetValidYearLaunched(),
-            CategoriesIds = new List<Guid> { categoryId }
+            CategoriesId = new List<Guid> { categoryId }
         };
 
         var (response, output) = await _fixture.ApiClient

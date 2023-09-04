@@ -99,9 +99,11 @@ public class GetGenreApiTest : IDisposable
         output!.Data.Id.Should().Be(targetGenre.Id);
         output.Data.Name.Should().Be(targetGenre.Name);
         output.Data.IsActive.Should().Be(targetGenre.IsActive);
-        List<Guid> relatedCategoriesIds =
-            output.Data.Categories.Select(relation => relation.Id).ToList();
-        relatedCategoriesIds.Should().BeEquivalentTo(targetGenre.Categories);
+        foreach (var category in output.Data.Categories)
+        {
+            var expectedCategory = exampleCategories.Find(x => x.Id == category.Id);
+            category.Name.Should().Be(expectedCategory!.Name);
+        }
     }
 
     public void Dispose() => _fixture.CleanPersistence();

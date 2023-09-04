@@ -12,9 +12,9 @@ public class CreateVideoApiInput
     public bool Published { get; set; }
     public int Duration { get; set; }
     public string? Rating { get; set; }
-    public List<Guid>? CategoriesIds { get; set; }
-    public List<Guid>? GenresIds { get; set; }
-    public List<Guid>? CastMembersIds { get; set; }
+    public List<Guid>? CategoriesId { get; set; }
+    public List<Guid>? GenresId { get; set; }
+    public List<Guid>? CastMembersId { get; set; }
 
     public CreateVideoInput ToCreateVideoInput()
         => new(
@@ -25,7 +25,7 @@ public class CreateVideoApiInput
             Published,
             Duration,
             Rating.ToRating(),
-            CategoriesIds?.AsReadOnly(),
-            GenresIds?.AsReadOnly(),
-            CastMembersIds?.AsReadOnly());
+            CategoriesId?.AsReadOnly(),
+            GenresId?.AsReadOnly(),
+            CastMembersId?.AsReadOnly());
 }

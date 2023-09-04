@@ -364,3 +364,8 @@ FodyWeavers.xsd
 
 # GCP credentials 
 gcp_credentials.json
+
+# docker volumes
+elastic/.docker/es*
+.docker/filebeat/registry/*
+.docker/filebeat/meta.json
