@@ -33,7 +33,7 @@
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
       "publishAllPorts": true,
       "useSSL": true,
-      "DockerfileRunArguments": "--network service_catalog",
+      "DockerfileRunArguments": "--network service_catalog -p 4040:80 -p 5050:443",
       "environmentVariables": {
         "GOOGLE_APPLICATION_CREDENTIALS": "gcp_credentials.json"
       }

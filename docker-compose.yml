@@ -64,9 +64,9 @@ services:
       - KC_DB_USERNAME=root
       - KC_DB_PASSWORD=C0D3fl1X.@
     ports:
-      - 8443:8080
+      - 8080:8080
     command:
-      - start-dev --import-realm
+      - start-dev --import-realm --hostname-url=http://keycloak:8080
     depends_on:
       - fc.codeflix.catalog.fb
 

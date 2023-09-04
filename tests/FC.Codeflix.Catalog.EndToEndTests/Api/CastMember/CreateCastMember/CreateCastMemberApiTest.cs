@@ -28,7 +28,7 @@ public class CreateCastMemberApiTest : IDisposable
 
         var (response, output) =
             await _fixture.ApiClient.Post<TestApiResponse<CastMemberModelOutput>>(
-                "/castmembers",
+                "/cast_members",
                 new CreateCastMemberInput(example.Name, example.Type)
             );
 
@@ -52,7 +52,7 @@ public class CreateCastMemberApiTest : IDisposable
 
         var (response, output) =
             await _fixture.ApiClient.Post<ProblemDetails>(
-                "/castmembers",
+                "/cast_members",
                 new CreateCastMemberInput("", example.Type)
             );
 

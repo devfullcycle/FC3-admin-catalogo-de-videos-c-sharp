@@ -34,7 +34,7 @@ public class ListCastMembersApiTest : IDisposable
 
         var (response, output) =
             await _fixture.ApiClient.Get<TestApiResponseList<CastMemberModelOutput>>(
-                "castmembers"
+                "cast_members"
             );
 
         response.Should().NotBeNull();
@@ -73,7 +73,7 @@ public class ListCastMembersApiTest : IDisposable
 
         var (response, output) =
             await _fixture.ApiClient.Get<TestApiResponseList<CastMemberModelOutput>>(
-                "castmembers", new ListCastMembersInput() { Page = page, PerPage = perPage }
+                "cast_members", new ListCastMembersInput() { Page = page, PerPage = perPage }
             );
 
         response.Should().NotBeNull();
@@ -131,7 +131,7 @@ public class ListCastMembersApiTest : IDisposable
 
         var (response, output) =
             await _fixture.ApiClient.Get<TestApiResponseList<CastMemberModelOutput>>(
-                "castmembers", 
+                "cast_members", 
                 new ListCastMembersInput()
                 {
                     Page = page, 
@@ -179,7 +179,7 @@ public class ListCastMembersApiTest : IDisposable
 
         var (response, output) =
             await _fixture.ApiClient.Get<TestApiResponseList<CastMemberModelOutput>>(
-                "castmembers", 
+                "cast_members", 
                 new {
                     Sort = orderBy,
                     Dir = order
@@ -218,7 +218,7 @@ public class ListCastMembersApiTest : IDisposable
     {
         var (response, output) =
             await _fixture.ApiClient.Get<TestApiResponseList<CastMemberModelOutput>>(
-                "castmembers"
+                "cast_members"
             );
 
         response.Should().NotBeNull();
