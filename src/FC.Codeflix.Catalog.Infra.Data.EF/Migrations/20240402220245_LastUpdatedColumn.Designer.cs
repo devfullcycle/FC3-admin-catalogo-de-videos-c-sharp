@@ -3,6 +3,7 @@ using System;
 using FC.Codeflix.Catalog.Infra.Data.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FC.Codeflix.Catalog.Infra.Data.EF.Migrations
 {
     [DbContext(typeof(CodeflixCatalogDbContext))]
-    partial class CodeflixCatalogDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240402220245_LastUpdatedColumn")]
+    partial class LastUpdatedColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -125,7 +127,7 @@ namespace FC.Codeflix.Catalog.Infra.Data.EF.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime>("LastUpdated")
-                        .ValueGeneratedOnAdd()
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("datetime(6)");
 
                     b.Property<Guid?>("MediaId")
