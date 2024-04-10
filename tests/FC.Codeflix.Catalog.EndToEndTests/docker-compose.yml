@@ -49,4 +49,3 @@ services:
 networks:
   default:
     name: service_catalog
-    external: true
