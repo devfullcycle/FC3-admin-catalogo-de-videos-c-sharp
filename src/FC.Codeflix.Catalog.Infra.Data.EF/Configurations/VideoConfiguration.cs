@@ -38,6 +38,10 @@ internal class VideoConfiguration
         builder.HasOne(video => video.Trailer)
             .WithOne()
             .HasForeignKey<Video>("TrailerId");
+
+        builder.Property<DateTime>("LastUpdated")
+            .ValueGeneratedOnAdd();
+        
         builder.Ignore(video => video.Events);
     }
 }

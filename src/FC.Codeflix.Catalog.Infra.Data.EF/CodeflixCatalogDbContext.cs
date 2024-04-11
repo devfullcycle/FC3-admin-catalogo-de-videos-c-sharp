@@ -4,6 +4,7 @@ using FC.Codeflix.Catalog.Infra.Data.EF.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace FC.Codeflix.Catalog.Infra.Data.EF;
+
 public class CodeflixCatalogDbContext
     : DbContext
 {
@@ -12,18 +13,23 @@ public class CodeflixCatalogDbContext
     public DbSet<Genre> Genres => Set<Genre>();
     public DbSet<Video> Videos => Set<Video>();
 
-    public DbSet<GenresCategories> GenresCategories 
+    public DbSet<GenresCategories> GenresCategories
         => Set<GenresCategories>();
-    public DbSet<VideosCategories> VideosCategories 
+
+    public DbSet<VideosCategories> VideosCategories
         => Set<VideosCategories>();
+
     public DbSet<VideosGenres> VideosGenres
         => Set<VideosGenres>();
+
     public DbSet<VideosCastMembers> VideosCastMembers
-            => Set<VideosCastMembers>();
+        => Set<VideosCastMembers>();
 
     public CodeflixCatalogDbContext(
         DbContextOptions<CodeflixCatalogDbContext> options
-    ) : base(options) {}
+    ) : base(options)
+    {
+    }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -37,5 +43,19 @@ public class CodeflixCatalogDbContext
         builder.ApplyConfiguration(new VideosCategoriesConfiguration());
         builder.ApplyConfiguration(new VideosGenresConfiguration());
         builder.ApplyConfiguration(new VideosCastMembersConfiguration());
+    }
+    
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
+    {
+        var entries = ChangeTracker
+            .Entries<Video>()
+            .Where(e => e.State == EntityState.Modified);
+
+        foreach (var entry in entries)
+        {
+            entry.Property("LastUpdated").CurrentValue = DateTime.Now;
+        }
+
+        return base.SaveChangesAsync(cancellationToken);
     }
 }

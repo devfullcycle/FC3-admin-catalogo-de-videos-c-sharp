@@ -30,7 +30,9 @@ public class GetVideoTest
             It.Is<Guid>(id => id == exampleVideo.Id),
             It.IsAny<CancellationToken>())
         ).ReturnsAsync(exampleVideo);
-        var useCase = new UseCase.GetVideo(repositoryMock.Object);
+        var useCase = new UseCase.GetVideo(repositoryMock.Object,
+            Mock.Of<ICategoryRepository>(),
+            Mock.Of<IGenreRepository>());
         var input = new UseCase.GetVideoInput(exampleVideo.Id);
 
         var output = await useCase.Handle(input, CancellationToken.None);
@@ -58,7 +60,9 @@ public class GetVideoTest
             It.Is<Guid>(id => id == exampleVideo.Id),
             It.IsAny<CancellationToken>())
         ).ReturnsAsync(exampleVideo);
-        var useCase = new UseCase.GetVideo(repositoryMock.Object);
+        var useCase = new UseCase.GetVideo(repositoryMock.Object,
+            Mock.Of<ICategoryRepository>(),
+            Mock.Of<IGenreRepository>());
         var input = new UseCase.GetVideoInput(exampleVideo.Id);
 
         var output = await useCase.Handle(input, CancellationToken.None);
@@ -98,7 +102,9 @@ public class GetVideoTest
             It.IsAny<Guid>(),
             It.IsAny<CancellationToken>())
         ).ThrowsAsync(new NotFoundException("Video not found"));
-        var useCase = new UseCase.GetVideo(repositoryMock.Object);
+        var useCase = new UseCase.GetVideo(repositoryMock.Object,
+            Mock.Of<ICategoryRepository>(),
+            Mock.Of<IGenreRepository>());
         var input = new UseCase.GetVideoInput(Guid.NewGuid());
 
         var action = () => useCase.Handle(input, CancellationToken.None);

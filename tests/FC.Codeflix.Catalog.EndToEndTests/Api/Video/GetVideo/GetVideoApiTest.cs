@@ -62,11 +62,11 @@ public class GetVideoApiTest : IDisposable
         output.Data.Rating.Should().Be(exampleItem!.Rating.ToStringSignal());
         var expectedCategories = exampleCategories
             .Select(category => new VideoModelOutputRelatedAggregate(
-                category.Id, null));
+                category.Id, category.Name));
         output.Data.Categories.Should().BeEquivalentTo(expectedCategories);
         var expectedGenres = exampleGenres
             .Select(genre => new VideoModelOutputRelatedAggregate(
-                genre.Id, null));
+                genre.Id, genre.Name));
         output.Data.Genres.Should().BeEquivalentTo(expectedGenres);
         var expectedCastMembers = exampleCastMembers
             .Select(castMember => new VideoModelOutputRelatedAggregate(
